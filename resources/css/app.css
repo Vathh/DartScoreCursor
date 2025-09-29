@@ -13,6 +13,7 @@
     --color-light-green: #7CFC00;
     --color-light-orange: #FFA500;
     --color-light-white: #e0e0e0;
+    --color-light-red: #dc2626;
 }
 
 @layer components {
@@ -26,5 +27,17 @@
 
     .btn-secondary {
         @apply bg-light-green hover:bg-light-green/80 hover:shadow-lg text-dark-bg;
+    }
+
+    .input-orange {
+        @apply bg-transparent text-light-orange p-4 rounded border-[0.2px] border-light-orange;
+    }
+}
+
+@layer utilities {
+    input:-webkit-autofill {
+        -webkit-text-fill-color: #FFA500;
+        -webkit-background-clip: text;
+        transition: background-color 5000s ease-in-out 0s;
     }
 }
