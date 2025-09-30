@@ -9,7 +9,7 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
     --color-dark-bg: #1a1a1a;
-    --color-lighter-bg: #202020;
+    --color-lighter-bg: #212121;
     --color-light-green: #7CFC00;
     --color-light-orange: #FFA500;
     --color-light-white: #e0e0e0;
@@ -31,6 +31,10 @@
 
     .input-orange {
         @apply bg-transparent text-light-orange p-4 rounded border-[0.2px] border-light-orange;
+    }
+
+    .nav-btn {
+        @apply px-3 text-light-green hover:text-light-orange transition duration-300;
     }
 }
 

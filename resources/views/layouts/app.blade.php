@@ -5,36 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'DartScore')</title>
     @vite('resources/css/app.css')
+    @vite('resources/js/app.js')
 </head>
 <body class="bg-dark-bg flex flex-col min-h-screen text-light-text">
 
-    <header class="bg-dark-bg text-light-white py-6 border-b-1 border-light-green">
-        <div class="container mx-auto flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-light-green">DartScore</h1>
-            <nav class="flex ">
-                <a href="/" class="px-3 text-light-green hover:text-light-orange transition duration-300">Strona główna</a>
-
-                @guest
-                    <a href="/login" class="px-3 text-light-green hover:text-light-orange transition duration-300">Zaloguj się</a>
-                @endguest
-
-                @auth
-                    <form action="{{ route('logout') }}" method="POST" class="m-0">
-                        @csrf
-                        <button class="px-3 text-light-green hover:text-light-orange hover:cursor-pointer transition duration-300">Wyloguj się</button>
-                    </form>
-                @endauth
-            </nav>
-        </div>
-    </header>
+    @include('layouts.header')
 
     <main class="container mx-auto py-8 flex-grow flex items-center justify-center">
         @yield('content')
     </main>
 
-    <footer class="bg-dark-bg text-light-white py-4 mt-12 text-center border-t border-gray-700">
-        &copy; {{ date('Y') }} SunnyVale
-    </footer>
+    @include('layouts.footer')
 
 </body>
 </html>
