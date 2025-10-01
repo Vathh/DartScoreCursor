@@ -1,5 +1,5 @@
 import './bootstrap';
-import alpine from "alpinejs/src/alpine.js";
+import alpine from "alpinejs";
 
-window.Alpine = Alpine;
+window.Alpine = alpine;
 alpine.start();
