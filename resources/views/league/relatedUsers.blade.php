@@ -6,10 +6,10 @@
     <div class="container mx-auto py-8">
 
         <h1 class="text-2xl font-bold text-light-green mb-6">
-            Użytkownicy ligi: {{ $league->name }}
+            Użytkownicy ligi: {{ $leagueDomain->name }}
         </h1>
 
-        <form action="{{ route('leagues.relatedUsers', $league) }}" method="GET" class="mb-6 flex items-center space-x-4">
+        <form action="{{ route('leagues.relatedUsers', $leagueDomain->id) }}" method="GET" class="mb-6 flex items-center space-x-4">
             <input type="text" name="search" placeholder="Szukaj użytkownika..."
                    value="{{ request('search') }}" class="input-orange flex-1">
             <button type="submit" class="btn btn-primary">Szukaj</button>
@@ -40,7 +40,7 @@
         @if($allUsers->isNotEmpty())
             <div class="bg-lighter-bg p-6 rounded-lg shadow">
                 <h2 class="text-xl font-semibold text-light-orange mb-4">Dodaj użytkownika do ligi</h2>
-                <form action="{{ route('leagues.relatedUsers.add', $leagueDomain) }}" method="POST">
+                <form action="{{ route('leagues.relatedUsers.add', $leagueDomain->id) }}" method="POST">
                     @csrf
                     <div class="flex space-x-4 items-center">
                         <select name="user_id" class="input-orange flex-1" required>

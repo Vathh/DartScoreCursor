@@ -38,7 +38,7 @@ class LeagueRepository
 
     public function getRelatedUsers(int $leagueId): Collection
     {
-        return League::findOrFail($$leagueId)->relatedUsers->get();
+        return League::findOrFail($leagueId)->relatedUsers;
     }
 
     public function addRelatedUser(int $leagueId, int $userId): void
