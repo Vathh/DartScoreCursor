@@ -28,13 +28,7 @@
 
                         <button class="btn btn-primary mt-3" type="submit" name="loginBtn">Zaloguj</button>
 
-                        @if($errors->any())
-                            <ul class="px-4 py-2 border-2 rounded border-light-red text-light-red mt-8">
-                                @foreach($errors->all() as $error)
-                                    <li class="my-2 text-light-red">{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        @endif
+                        <x-errors/>
                     </div>
                 </form>
                 <p class="text-light-orange mt-7">Nie masz jeszcze konta? <a href="{{ route('pages.registerPanel') }}" class="font-bold">Zarejestruj się</a></p>

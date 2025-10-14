@@ -14,6 +14,7 @@
     --color-light-orange: #FFA500;
     --color-light-white: #e0e0e0;
     --color-light-red: #dc2626;
+    --color-medium-green: rgba(124, 252, 0, 0.85);
 }
 
 @layer components {
@@ -27,6 +28,19 @@
 
     .btn-secondary {
         @apply bg-light-green hover:bg-light-green/80 hover:shadow-lg text-dark-bg;
+    }
+
+    .btn-mini {
+        @apply text-sm font-semibold px-3 py-1.5 rounded transition-all
+        duration-300 transform hover:cursor-pointer bg-light-green text-dark-bg hover:bg-medium-green hover:shadow-[0_0_6px_var(--color-light-green)];
+    }
+
+    .btn__title{
+        @apply text-xl font-semibold mb-2 text-light-orange;
+    }
+
+    .btn__description {
+        @apply mb-2 text-light-orange;
     }
 
     .input-orange {

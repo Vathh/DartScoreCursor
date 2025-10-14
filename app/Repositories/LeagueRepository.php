@@ -43,13 +43,13 @@ class LeagueRepository
 
     public function addRelatedUser(int $leagueId, int $userId): void
     {
-        $league = League::findOrFail($$leagueId);
+        $league = League::findOrFail($leagueId);
         $league->relatedUsers()->attach($userId);
     }
 
     public function removeRelatedUser(int $leagueId, int $userId): void
     {
-        $league = League::findOrFail($$leagueId);
+        $league = League::findOrFail($leagueId);
         $league->relatedUsers()->detach($userId);
     }
 }

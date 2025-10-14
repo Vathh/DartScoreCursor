@@ -6,42 +6,53 @@
     <div class="container mx-auto py-8">
 
         <h1 class="text-2xl font-bold text-light-green mb-6">
-            Użytkownicy ligi: {{ $leagueDomain->name }}
+            Użytkownicy ligi: {{ $league->name }}
         </h1>
 
-        <form action="{{ route('leagues.relatedUsers', $leagueDomain->id) }}" method="GET" class="mb-6 flex items-center space-x-4">
+        <div class="mb-8 bg-lighter-bg p-6 rounded-lg shadow">
+            <h2 class="text-xl font-semibold text-light-orange mb-4">Aktualnie powiązani użytkownicy</h2>
+            @if(empty($relatedUsers))
+                <p class="text-light-white">Brak użytkowników powiązanych z tą ligą.</p>
+            @else
+                <div class="flex flex-wrap gap-3">
+                    @foreach($relatedUsers as $user)
+                        <div class="flex items-center justify-center flex-col bg-dark-bg shadow rounded-lg p-6 hover:shadow-xl">
+                            <span class="btn__title mb-4 text-wrap">{{ $user['name'] }}</span>
+                            <form action="{{ route('leagues.relatedUsers.remove', $league->id) }}" method="POST">
+                                @csrf
+                                @method('DELETE')
+                                <input type="hidden" name="user_id" value="{{ $user['id'] }}">
+                                <button type="submit" class="btn-mini">Usuń</button>
+                            </form>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+        </div>
+
+        <form action="{{ route('leagues.relatedUsers', $league->id) }}" method="GET" class="mb-6 flex items-center space-x-4">
             <input type="text" name="search" placeholder="Szukaj użytkownika..."
                    value="{{ request('search') }}" class="input-orange flex-1">
             <button type="submit" class="btn btn-primary">Szukaj</button>
         </form>
 
-        @if(!empty($users))
-            @foreach($users as $user)
-                <li class="flex justify-between items-center text-light-white">
-                    <span>{{ $user->name }} ({{ $user->email }})</span>
-                </li>
-            @endforeach
+        <x-errors/>
+
+        @if(request('search') && $users->isEmpty())
+            <p class="text-light-white">Brak wyników wyszukiwania.</p>
+        @else
+            <div class="flex flex-wrap gap-3">
+                @foreach($users as $user)
+                    <div class="flex items-center justify-center flex-col bg-lighter-bg shadow rounded-lg p-6 hover:shadow-xl">
+                        <span class="btn__title mb-4 text-wrap">{{ $user->player->name }}</span>
+                        <form action="{{ route('leagues.relatedUsers.add', $league->id) }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="user_id" value="{{ $user->id }}">
+                            <button type="submit" class="btn-mini">Dodaj</button>
+                        </form>
+                    </div>
+                @endforeach
+            </div>
         @endif
-
-
-        <div class="mb-8 bg-lighter-bg p-6 rounded-lg shadow">
-            <h2 class="text-xl font-semibold text-light-orange mb-4">Aktualnie powiązani użytkownicy</h2>
-            @if(!empty($relatedUsers))
-                <p class="text-light-white">Brak użytkowników powiązanych z tą ligą.</p>
-            @else
-                <ul class="list-disc pl-6 space-y-1 text-light-white">
-                    @foreach($relatedUsers as $user)
-                        <li class="flex justify-between items-center">
-                            <span>{{ $user->name }} ({{ $user->email }})</span>
-{{--                            <form action="{{ route('leagues.relatedUsers.remove', [$leagueDomain, $user]) }}" method="POST">--}}
-{{--                                @csrf--}}
-{{--                                @method('DELETE')--}}
-{{--                                <button class="text-light-red hover:underline">Usuń</button>--}}
-{{--                            </form>--}}
-                        </li>
-                    @endforeach
-                </ul>
-            @endif
-        </div>
     </div>
 @endsection

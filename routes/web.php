@@ -21,7 +21,7 @@ Route::prefix('leagues/{league}')->group(function () {
 
     Route::post('/relatedUsers/add', [LeagueController::class, 'addRelatedUser'])->name('leagues.relatedUsers.add');
 
-    Route::delete('/relatedUsers/{user}/remove', [LeagueController::class, 'removeRelatedUser'])->name('leagues.relatedUsers.remove');
+    Route::delete('/relatedUsers/remove', [LeagueController::class, 'removeRelatedUser'])->name('leagues.relatedUsers.remove');
 });
 
 Route::resource('seasons', SeasonController::class);

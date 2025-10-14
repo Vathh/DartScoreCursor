@@ -11,8 +11,8 @@
             @foreach($leagues as $league)
                 <a href="{{ route('leagues.show', ['league' => $league->id]) }}">
                     <div class="bg-lighter-bg shadow rounded-lg p-6 hover:shadow-xl hover:cursor-pointer hover:bg-[#333333] transition">
-                        <h3 class="text-xl font-semibold mb-2 text-light-orange">{{ $league->name }}</h3>
-                        <p class="mb-2 text-light-orange">Ostatnia aktywność : {{ $league->updatedAt }}</p>
+                        <h3 class="btn__title">{{ $league->name }}</h3>
+                        <p class="btn__description">Ostatnia aktywność : {{ $league->updatedAt }}</p>
                     </div>
                 </a>
             @endforeach
