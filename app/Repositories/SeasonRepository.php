@@ -1,33 +1,44 @@
 <?php
+
 namespace App\Repositories;
 
 use App\Domain\SeasonDomain;
 use App\Models\Season;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class SeasonRepository
 {
-    public function create(int $leagueId,
-                           string $name,
-                           array $adminsIds = [],
+    public function create(int     $leagueId,
+                           string  $name,
+                           array   $adminsIds = [],
                            ?string $startDate = null,
                            ?string $endDate = null): SeasonDomain
     {
         return DB::transaction(function () use ($leagueId, $name, $adminsIds, $startDate, $endDate) {
 
             $season = Season::create([
-               'league_id' => $leagueId,
-               'name' => $name,
-               'start_date' => $startDate,
-               'end_date' => $endDate
+                'league_id' => $leagueId,
+                'name' => $name,
+                'start_date' => $startDate,
+                'end_date' => $endDate
             ]);
 
-            if(!empty($adminsIds)) {
+            if (!empty($adminsIds)) {
                 $season->admins()->attach($adminsIds);
             }
 
             return SeasonDomain::fromEloquentWithAdmins($season);
         });
+    }
+
+    public function getRelatedUsers(int $seasonId): Collection
+    {
+        $season = Season::findOrFail($seasonId);
+        $seasonRelatedUsers = $season->relatedUsers;
+        $leagueRelatedUsers = $season->league->relatedUsers;
+
+
     }
 
     public function addAdmin(int $seasonId, int $userId): void

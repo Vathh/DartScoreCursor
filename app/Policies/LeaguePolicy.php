@@ -37,11 +37,7 @@ class LeaguePolicy
      */
     public function update(User $user, League $league): bool
     {
-//        $admins = $league->admins;
-//        $test = $user->id;
-//        $test2 = $league->admins->contains('id', $test);;
-//        return $league->admins->contains('id', $user->id);
-        return true;
+        return $league->admins->contains('id', $user->id);
     }
 
     /**

@@ -25,8 +25,20 @@ class SeasonService
         return $this->seasonRepository->create($leagueId, $name, $allAdminsIds, $startDate, $endDate);
     }
 
+    public function addRelatedUser(int $seasonId, int $userId): void
+    {
+        $this->seasonRepository->addRelatedUser($seasonId, $userId);
+    }
+
+    public function removeRelatedUser(int $seasonId, int $userId): void
+    {
+        $this->seasonRepository->removeRelatedUser($seasonId, $userId);
+    }
+
     public function addAdmin(int $seasonId, int $userId): void
     {
         $this->seasonRepository->addAdmin($seasonId, $userId);
     }
+
+
 }

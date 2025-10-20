@@ -37,7 +37,7 @@ class SeasonDomain
     public static function fromEloquentWithAdmins(Season $season): self
     {
         return new self(
-          id: $season->id,
+            id: $season->id,
             leagueId: $season->league_id,
             name: $season->name,
             startDate: $season->start_date,
@@ -48,5 +48,20 @@ class SeasonDomain
                 ])->toArray(),
             updatedAt: $season->updated_at
         );
+    }
+
+    public function getStartDate(): ?string
+    {
+        return $this->startDate?->format('Y-m-d');
+    }
+
+    public function getEndDate(): ?string
+    {
+        return $this->endDate?->format('Y-m-d');
+    }
+
+    public function updatedAtDate(): string
+    {
+        return $this->updatedAt->format('Y-m-d');
     }
 }

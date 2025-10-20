@@ -27,5 +27,14 @@ Route::prefix('leagues/{league}')->group(function () {
 });
 
 Route::resource('seasons', SeasonController::class);
+Route::prefix('seasons/{season}')->group(function () {
+    Route::get('/relatedUsers', [SeasonController::class, 'relatedUsers'])->name('seasons.relatedUsers');
+    Route::post('/relatedUsers/add', [SeasonController::class, 'addRelatedUser'])->name('seasons.relatedUsers.add');
+    Route::delete('/relatedUsers/remove', [SeasonController::class, 'removeRelatedUser'])->name('seasons.relatedUsers.remove');
+
+    Route::get('/admins', [SeasonController::class, 'admins'])->name('seasons.admins');
+    Route::post('/admins/add', [SeasonController::class, 'addAdmin'])->name('seasons.admins.add');
+    Route::delete('/admins/remove', [SeasonController::class, 'removeAdmin'])->name('seasons.admins.remove');
+});
 
 Route::get('/tournaments', [PagesController::class, 'showTournamentsPage'])->name('tournament.tournaments');

@@ -71,4 +71,29 @@ class SeasonController extends Controller
     {
         //
     }
+
+    public function relatedUsers(Request $request, int $seasonId): Factory|View
+    {
+        $season = $this->loadAndAuthorize($seasonId);
+
+        $search = $request->input('search');
+
+        $users = $this->seasonService->searchUsers($league, $search);
+
+        $relatedUsers = $this->seasonService->getRelatedUsersSortedByName($league);
+
+        return view('seasons.relatedUsers', [
+            'league' => $league,
+            'relatedUsers' => $relatedUsers,
+            'users' => $users
+        ]);
+    }
+
+    public function loadAndAuthorize(int $seasonId): SeasonDomain
+    {
+        $season = Season::with('admins')->findOrFail($seasonId);
+        $this->authorize('update', $season);
+
+        return SeasonDomain::fromEloquentWithAdmins($season);
+    }
 }

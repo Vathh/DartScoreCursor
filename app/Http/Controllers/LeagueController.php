@@ -47,8 +47,15 @@ class LeagueController extends Controller
     public function show(League $league): Factory|View
     {
         $leagueDomain = LeagueDomain::fromEloquentWithAdmins($league);
+        $seasons = collect($leagueDomain->seasons)
+                        ->sortBy('updatedAt', SORT_DESC)
+                        ->values()
+                        ->all();
 
-        return view('leagues.show', ['league' => $leagueDomain]);
+        return view('leagues.show', [
+            'league' => $leagueDomain,
+            'seasons' => $seasons
+        ]);
     }
 
     public function edit(League $league): Factory|View

@@ -55,9 +55,10 @@
 
                 <h2 class="text-2xl font-bold text-light-green mt-10 mb-4">Sezony</h2>
                 <div class="space-y-3">
-                    @foreach($league->seasons as $season)
-                        <div
-                            class="bg-white/5 p-4 rounded-lg border border-white/10 hover:bg-white/10 transition">{{ $season->name }}</div>
+                    @foreach($seasons as $season)
+                        <a href="{{ route('seasons.show', ['season' => $season->id]) }}">
+                            <div class="bg-white/5 p-4 rounded-lg border border-white/10 hover:bg-white/10 transition">{{ $season->name }}</div>
+                        </a>
                     @endforeach
                 </div>
 
