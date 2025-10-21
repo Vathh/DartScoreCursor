@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\DB;
 
 class SeasonRepository
 {
+    /**
+     * @throws \Throwable
+     */
     public function create(int     $leagueId,
                            string  $name,
                            array   $adminsIds = [],
@@ -34,16 +37,37 @@ class SeasonRepository
 
     public function getRelatedUsers(int $seasonId): Collection
     {
-        $season = Season::findOrFail($seasonId);
+        $season = Season::with('league.relatedUsers')->findOrFail($seasonId);
         $seasonRelatedUsers = $season->relatedUsers;
         $leagueRelatedUsers = $season->league->relatedUsers;
 
+        return $seasonRelatedUsers
+                    ->merge($leagueRelatedUsers)
+                    ->unique('id')
+                    ->values();
+    }
 
+    public function addRelatedUser(int $seasonId, int $userId): void
+    {
+        $season = Season::findOrFail($seasonId);
+        $season->relatedUsers()->attach($userId);
+    }
+
+    public function removeRelatedUser(int $seasonId, int $userId): void
+    {
+        $season = Season::findOrFail($seasonId);
+        $season->relatedUsers()->detach($userId);
     }
 
     public function addAdmin(int $seasonId, int $userId): void
     {
         $season = Season::findOrFail($seasonId);
         $season->admins()->attach($userId);
+    }
+
+    public function removeAdmin(int $seasonId, int $userId): void
+    {
+        $season = Season::findOrFail($seasonId);
+        $season->admins()->detach($userId);
     }
 }

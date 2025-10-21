@@ -41,4 +41,9 @@ class Season extends Model
     {
         return $this->belongsToMany(User::class, 'season_user_admin', 'season_id', 'user_id');
     }
+
+    public function relatedUsers(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'season_user');
+    }
 }

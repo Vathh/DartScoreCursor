@@ -1,14 +1,14 @@
 @extends('layouts.app')
 
 @section('title')
-    Edycja ligi {{ $league->name }}
+    Edycja sezonu {{ $season->name }}
 @endsection
 
 @section('content')
 
     <div class="flex justify-center items-center min-h-[70vh]">
         <form class="bg-lighter-bg rounded-2xl p-20"
-              action="{{ route('leagues.update', $league->id) }}"
+              action="{{ route('seasons.update', $season->id) }}"
               method="POST">
             @csrf
             @method('PUT')
@@ -21,26 +21,27 @@
                     class="mb-5 input-orange"
                     type="text"
                     name="leagueName"
-                    value="{{ old('leagueName', $league->name) }}"
+                    value="{{ old('leagueName', $season->name) }}"
                     required
                 >
 
-                <label class="mb-3 text-xl text-light-orange" for="description"><b>Opis ligi</b></label>
-                <textarea
-                    class="input-orange mb-2 h-32 resize-none"
-                    id="description"
-                    name="description"
-                    maxlength="500"
-                    oninput="updateCounter()"
-                >{{ old('description', $league->description) }}</textarea>
+                <label class="mb-3 text-xl text-light-orange" for="login"><b>Data rozpoczęcia</b></label>
+                <input class="mb-5 input-orange"
+                       type="date"
+                       name="startDate"
+                       value="{{ old('startDate', $season->startDate) }}"
+                       required>
 
-                <div class="text-light-green text-sm text-right w-full">
-                    <span id="charCount">0</span>/500
-                </div>
+                <label class="mb-3 text-xl text-light-orange" for="login"><b>Data zakończenia</b></label>
+                <input class="mb-5 input-orange"
+                       type="date"
+                       name="endDate"
+                       value="{{ old('endDate', $season->endDate) }}"
+                       required>
 
                 <button class="btn btn-primary mt-8" type="submit">Zapisz zmiany</button>
 
-                <a href="{{ route('leagues.show', $league->id) }}"
+                <a href="{{ route('seasons.show', $season->id) }}"
                    class="btn btn-primary mt-5">Powrót</a>
 
                 <x-errors/>

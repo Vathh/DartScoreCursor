@@ -7,6 +7,7 @@ use App\Domain\SeasonDomain;
 use App\Models\League;
 use App\Models\Season;
 use App\Services\SeasonService;
+use App\Services\UserService;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
@@ -14,7 +15,10 @@ use Illuminate\Support\Facades\Auth;
 
 class SeasonController extends Controller
 {
-    public function __construct(private SeasonService $seasonService)
+    public function __construct(
+        private SeasonService $seasonService,
+        private UserService $userService
+    )
     {
     }
 
@@ -78,15 +82,88 @@ class SeasonController extends Controller
 
         $search = $request->input('search');
 
-        $users = $this->seasonService->searchUsers($league, $search);
+        $users = $this->userService->search($season->relatedUsers, $search);
 
-        $relatedUsers = $this->seasonService->getRelatedUsersSortedByName($league);
+        $relatedUsers = $this->userService->sortByName($season->relatedUsers);
 
         return view('seasons.relatedUsers', [
-            'league' => $league,
+            'season' => $season,
             'relatedUsers' => $relatedUsers,
             'users' => $users
         ]);
+    }
+
+    public function addRelatedUser(Request $request, int $seasonId)
+    {
+        $this->loadAndAuthorize($seasonId);
+
+        $validated = $request->validate([
+            'user_id' => ['required', 'exists:users,id'],
+        ]);
+
+        $this->seasonService->addRelatedUser($seasonId, $validated['user_id']);
+
+        return redirect()
+            ->route('seasons.relatedUsers', $seasonId)
+            ->with('success', 'Użytkownik dodany do sezonu');
+    }
+
+    public function removeRelatedUser(Request $request, int $seasonId)
+    {
+        $this->loadAndAuthorize($seasonId);
+
+        $validated = $request->validate([
+            'user_id' => ['required', 'exists:users,id'],
+        ]);
+
+        $this->seasonService->removeRelatedUser($seasonId, $validated['user_id']);
+
+        return redirect()
+            ->route('seasons.relatedUsers', $seasonId)
+            ->with('success', 'Użytkownik usunięty z sezonu');
+    }
+
+    public function admins(int $seasonId): Factory|View
+    {
+        $season = $this->loadAndAuthorize($seasonId);
+        $admins = $season->admins;
+        $relatedUsers = $this->userService->sortByNameAndRejectAdmins($season->relatedUsers, $season->admins);
+
+        return view('leagues.admins', [
+            'season' => $season,
+            'admins' => $admins,
+            'relatedUsers' => $relatedUsers
+        ]);
+    }
+
+    public function addAdmin(Request $request, int $seasonId)
+    {
+        $this->loadAndAuthorize($seasonId);
+
+        $validated = $request->validate([
+            'user_id' => ['required', 'exists:users,id'],
+        ]);
+
+        $this->seasonService->addAdmin($seasonId, $validated['user_id']);
+
+        return redirect()
+            ->route('seasons.admins', $seasonId)
+            ->with('success', 'Uprawnienie administratora nadano pomyślnie');
+    }
+
+    public function removeAdmin(Request $request, int $seasonId)
+    {
+        $this->loadAndAuthorize($seasonId);
+
+        $validated = $request->validate([
+            'user_id' => ['required', 'exists:users,id'],
+        ]);
+
+        $this->seasonService->removeAdmin($seasonId, $validated['user_id']);
+
+        return redirect()
+            ->route('seasons.admins', $seasonId)
+            ->with('success', 'Uprawnienie administratora usunięto pomyślnie');
     }
 
     public function loadAndAuthorize(int $seasonId): SeasonDomain

@@ -18,7 +18,7 @@ class LeagueRepository
 
     public function findByIdWithAdmins(int $id): ?LeagueDomain
     {
-        $league = League::with('admins')->find($id);
+        $league = League::with('admins')->findOrFail($id);
         return $league ? LeagueDomain::fromEloquentWithAdmins($league) : null;
     }
 

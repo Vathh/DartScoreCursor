@@ -3,15 +3,14 @@
 namespace App\Services;
 
 use App\Domain\LeagueDomain;
-use App\Models\League;
-use App\Models\User;
 use App\Repositories\LeagueRepository;
 use Illuminate\Support\Collection;
-use Illuminate\Validation\ValidationException;
 
 class LeagueService
 {
-    public function __construct(private LeagueRepository $leagueRepository)
+    public function __construct(
+        private LeagueRepository $leagueRepository
+    )
     {
     }
 
@@ -59,57 +58,5 @@ class LeagueService
     public function update(int $leagueId, string $name, string $description): void
     {
         $this->leagueRepository->update($leagueId, $name, $description);
-    }
-
-    public function searchUsers(LeagueDomain $league, ?string $search): Collection
-    {
-        if($search === null || trim($search) === '') {
-            return collect();
-        }
-
-        if (strlen($search) < 5) {
-            throw ValidationException::withMessages([
-                'search' => 'Wpisz co najmniej 5 znaków, aby wyszukać użytkowników.'
-            ]);
-        }
-
-        $relatedUsersIds = collect($league->relatedUsers)->pluck('id');
-
-        return User::whereHas('player', function ($query) use ($search) {
-                                        $query->where('name', 'LIKE', "%$search%");
-                                        })
-                    ->with('player')
-                    ->get()
-                    ->sortBy('player.name')
-                    ->reject(fn ($user) => $relatedUsersIds->contains($user->id));
-    }
-
-    public function getRelatedUsersSortedByName(LeagueDomain $league): array
-    {
-        $relatedUsers = $league->relatedUsers;
-
-        if(count($relatedUsers) > 0){
-            usort($relatedUsers, function ($a, $b) {
-                return strcmp($a['name'], $b['name']);
-            });
-        }
-
-        return $relatedUsers;
-    }
-
-    public function getRelatedUsersSortedByNameAndRejectAdmins(LeagueDomain $league): Collection
-    {
-        $relatedUsers = $league->relatedUsers;
-        $admins = $league->admins;
-        $adminsIds = collect($admins)->pluck('id');
-
-        if(count($relatedUsers) > 0){
-            $relatedUsers = collect($relatedUsers)
-                ->sortBy('name')
-                ->reject(fn ($user) => $adminsIds->contains($user['id']))
-                ->map(fn($user) => (object) $user);
-        }
-
-        return $relatedUsers;
     }
 }

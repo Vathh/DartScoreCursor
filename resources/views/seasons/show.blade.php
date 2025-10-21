@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', $season ? 'Szczegóły' : $season->name)
+@section('title', $season ? $season->name : 'Szczegóły')
 
 @section('content')
 
@@ -19,7 +19,7 @@
                    class="flex items-center gap-3 bg-white/10 hover:bg-white/15 px-4 py-3 rounded-lg transition">
                     ‍💼 Administratorzy
                 </a>
-                <a href="{{ route('seasons.edit', ['league' => $season->id]) }}"
+                <a href="{{ route('seasons.edit', ['season' => $season->id]) }}"
                    class="flex items-center gap-3 bg-white/10 hover:bg-white/15 px-4 py-3 rounded-lg transition">
                     ✏️ Edytuj ligę
                 </a>

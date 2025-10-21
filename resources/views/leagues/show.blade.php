@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', $league ? 'Szczegóły' : $league->name)
+@section('title', $league ? $league->name : 'Szczegóły')
 
 @section('content')
 
@@ -57,7 +57,7 @@
                 <div class="space-y-3">
                     @foreach($seasons as $season)
                         <a href="{{ route('seasons.show', ['season' => $season->id]) }}">
-                            <div class="bg-white/5 p-4 rounded-lg border border-white/10 hover:bg-white/10 transition">{{ $season->name }}</div>
+                            <div class="mb-5 bg-white/5 p-4 rounded-lg border border-white/10 hover:bg-white/10 transition">{{ $season->name }}</div>
                         </a>
                     @endforeach
                 </div>

@@ -6,6 +6,7 @@ use App\Domain\LeagueDomain;
 use App\Models\League;
 use App\Models\User;
 use App\Services\LeagueService;
+use App\Services\UserService;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
@@ -14,7 +15,10 @@ use Illuminate\Validation\ValidationException;
 
 class LeagueController extends Controller
 {
-    public function __construct(private LeagueService $leagueService){
+    public function __construct(
+        private LeagueService $leagueService,
+        private UserService $userService
+    ){
         $this->authorizeResource(League::class, 'league');
     }
 
@@ -48,9 +52,8 @@ class LeagueController extends Controller
     {
         $leagueDomain = LeagueDomain::fromEloquentWithAdmins($league);
         $seasons = collect($leagueDomain->seasons)
-                        ->sortBy('updatedAt', SORT_DESC)
-                        ->values()
-                        ->all();
+            ->sortByDesc(fn($season) => $season->updatedAt)
+            ->values();
 
         return view('leagues.show', [
             'league' => $leagueDomain,
@@ -89,9 +92,9 @@ class LeagueController extends Controller
 
         $search = $request->input('search');
 
-        $users = $this->leagueService->searchUsers($league, $search);
+        $users = $this->userService->search($league->relatedUsers, $search);
 
-        $relatedUsers = $this->leagueService->getRelatedUsersSortedByName($league);
+        $relatedUsers = $this->userService->sortByName($league->relatedUsers);
 
         return view('leagues.relatedUsers', [
             'league' => $league,
@@ -134,7 +137,7 @@ class LeagueController extends Controller
     {
         $league = $this->loadAndAuthorize($leagueId);
         $admins = $league->admins;
-        $relatedUsers = $this->leagueService->getRelatedUsersSortedByNameAndRejectAdmins($league);
+        $relatedUsers = $this->userService->sortByNameAndRejectAdmins($league->relatedUsers, $league->admins);
 
         return view('leagues.admins', [
             'league' => $league,

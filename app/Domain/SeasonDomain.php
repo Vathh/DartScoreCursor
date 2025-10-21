@@ -16,7 +16,8 @@ class SeasonDomain
         public readonly ?Carbon $startDate,
         public readonly ?Carbon $endDate,
         public readonly array $admins,
-        public readonly Carbon $updatedAt
+        public readonly Carbon $updatedAt,
+        public readonly array $relatedUsers
     )
     {
     }
@@ -30,7 +31,11 @@ class SeasonDomain
             startDate: $season->start_date,
             endDate: $season->end_date,
             admins: [],
-            updatedAt: $season->updated_at
+            updatedAt: $season->updated_at,
+            relatedUsers: $season->relatedUsers->map(fn($user) => [
+                'id' => $user->id,
+                'name' => $user->name,
+            ])->toArray(),
         );
     }
 
@@ -46,7 +51,11 @@ class SeasonDomain
                     'id' => $admin->id,
                     'name' => $admin->name
                 ])->toArray(),
-            updatedAt: $season->updated_at
+            updatedAt: $season->updated_at,
+            relatedUsers: $season->relatedUsers->map(fn($user) => [
+                'id' => $user->id,
+                'name' => $user->player->name,
+            ])->toArray(),
         );
     }
 
