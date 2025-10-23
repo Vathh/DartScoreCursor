@@ -24,6 +24,8 @@ class SeasonDomain
 
     public static function fromEloquent(Season $season, array $with = []): self
     {
+        $test = $with;
+        $test2 = [];
         $season->loadMissing(array_intersect($with, ['league', 'admins', 'relatedUsers']));
 
         return new self(
@@ -35,48 +37,18 @@ class SeasonDomain
             admins: in_array('admins', $with)
                 ? $season->admins->map(fn($user) => [
                     'id' => $user->id,
-                    'name' => $user->name
+                    'name' => $user->player->name
                 ])->toArray()
                 : [],
             league: in_array('league', $with)
-                ? LeagueDomain::fromEloquent($season->league ?? new League(), [])
+                ? LeagueDomain::fromEloquent($season->league)
                 : null,
             relatedUsers: in_array('relatedUsers', $with)
                 ? $season->relatedUsers->map(fn($user) => [
                     'id' => $user->id,
-                    'name' => $user->name
-                ])->toArray()
-                : [],
-        );
-    }
-
-    public static function fromEloquentWithAdmins(Season $season, bool $withRelations = true): self
-    {
-        $season->loadMissing('admins.player');
-
-        if($withRelations) {
-            $season->loadMissing('league', 'relatedUsers.player');
-        }
-
-        return new self(
-            id: $season->id,
-            league: $withRelations
-                ? LeagueDomain::fromEloquent($season->league, false)
-                : null,
-            name: $season->name,
-            startDate: $season->start_date,
-            endDate: $season->end_date,
-            admins: $season->admins->map(fn($admin) => [
-                    'id' => $admin->id,
-                    'name' => $admin->player->name
-                ])->toArray(),
-            updatedAt: $season->updated_at,
-            relatedUsers: $withRelations
-                ? $season->relatedUsers->map(fn($user) => [
-                    'id' => $user->id,
                     'name' => $user->player->name
                 ])->toArray()
-                : []
+                : [],
         );
     }
 

@@ -50,7 +50,7 @@ class LeagueController extends Controller
 
     public function show(League $league): Factory|View
     {
-        $leagueDomain = LeagueDomain::fromEloquentWithAdmins($league);
+        $leagueDomain = LeagueDomain::fromEloquent($league, ['admins', 'seasons']);
         $seasons = collect($leagueDomain->seasons)
             ->sortByDesc(fn($season) => $season->updatedAt)
             ->values();
@@ -63,7 +63,7 @@ class LeagueController extends Controller
 
     public function edit(League $league): Factory|View
     {
-        $leagueDomain = LeagueDomain::fromEloquentWithAdmins($league);
+        $leagueDomain = LeagueDomain::fromEloquent($league, ['admins']);
 
         return view('leagues.edit', ['league' => $leagueDomain]);
     }
@@ -88,7 +88,7 @@ class LeagueController extends Controller
 
     public function relatedUsers(Request $request, int $leagueId): Factory|View
     {
-        $league = $this->loadAndAuthorize($leagueId);
+        $league = $this->loadAndAuthorize($leagueId, ['relatedUsers']);
 
         $search = $request->input('search');
 
@@ -135,7 +135,7 @@ class LeagueController extends Controller
 
     public function admins(int $leagueId): Factory|View
     {
-        $league = $this->loadAndAuthorize($leagueId);
+        $league = $this->loadAndAuthorize($leagueId, ['relatedUsers']);
         $admins = $league->admins;
         $relatedUsers = $this->userService->sortByNameAndRejectAdmins($league->relatedUsers, $league->admins);
 
@@ -176,11 +176,12 @@ class LeagueController extends Controller
                     ->with('success', 'Uprawnienie administratora usunięto pomyślnie');
     }
 
-    public function loadAndAuthorize(int $leagueId): LeagueDomain
+    public function loadAndAuthorize(int $leagueId, array $additionalRelations = []): LeagueDomain
     {
-        $league = League::with('admins')->findOrFail($leagueId);
+        $allRelations = array_merge($additionalRelations, ['admins']);
+        $league = League::with($allRelations)->findOrFail($leagueId);
         $this->authorize('update', $league);
 
-        return LeagueDomain::fromEloquentWithAdmins($league);
+        return LeagueDomain::fromEloquent($league, $allRelations);
     }
 }

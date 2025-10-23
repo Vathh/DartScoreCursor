@@ -29,47 +29,23 @@ class LeagueDomain
             description: $league->description,
             createdAt: $league->created_at,
             updatedAt: $league->updated_at,
-            admins: [],
+            admins: in_array('admins', $with)
+                ? $league->admins->map(fn($user) => [
+                    'id' => $user->id,
+                    'name' => $user->player->name
+                ])->toArray()
+                : [],
             seasons: in_array('seasons', $with)
                 ? $league->seasons->map(fn($season) => SeasonDomain::fromEloquent($season))->toArray()
                 : [],
             relatedUsers: in_array('relatedUsers', $with)
                 ? $league->relatedUsers->map(fn($user) => [
                     'id' => $user->id,
-                    'name' => $user->name,
-                ])->toArray()
-                : [],
-        );
-    }
-
-    public static function fromEloquentWithAdmins(League $league, bool $withRelations = true): self
-    {
-        $league->loadMissing('admins.player');
-
-        if($withRelations) {
-            $league->loadMissing('seasons', 'relatedUsers.player');
-        }
-
-        return new self(
-            id: $league->id,
-            name: $league->name,
-            description: $league->description,
-            createdAt: $league->created_at,
-            updatedAt: $league->updated_at,
-            admins: $league->admins()->get()->map(fn($admin) => [
-                'id' => $admin->id,
-                'name' => $admin->player->name
-            ])->toArray(),
-            seasons: $withRelations
-                ? $league->seasons->map(fn($season) => SeasonDomain::fromEloquent($season, false))->toArray()
-                : [],
-            relatedUsers: $withRelations
-                ? $league->relatedUsers->map(fn($user) => [
-                    'id' => $user->id,
                     'name' => $user->player->name,
                 ])->toArray()
                 : [],
         );
+
     }
 
     public function updatedAtDate(): string

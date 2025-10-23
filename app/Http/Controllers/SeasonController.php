@@ -47,7 +47,7 @@ class SeasonController extends Controller
 
         $leagueId = $request->query('leagueId');
 
-        $season = $this->seasonService->create( $leagueId, $validated['seasonName'], (array)Auth::id(), $validated['startDate'], $validated['endDate']);
+        $this->seasonService->create( $leagueId, $validated['seasonName'], (array)Auth::id(), $validated['startDate'], $validated['endDate']);
 
         return redirect()
             ->route('leagues.show', ['league' => $leagueId])
@@ -56,7 +56,7 @@ class SeasonController extends Controller
 
     public function show(Season $season)
     {
-        $seasonDomain = SeasonDomain::fromEloquentWithAdmins($season);
+        $seasonDomain = SeasonDomain::fromEloquent($season, ['admins', 'league']);
 
         return view('seasons.show', ['season' => $seasonDomain]);
     }
@@ -78,7 +78,7 @@ class SeasonController extends Controller
 
     public function relatedUsers(Request $request, int $seasonId): Factory|View
     {
-        $season = $this->loadAndAuthorize($seasonId);
+        $season = $this->loadAndAuthorize($seasonId, ['relatedUsers']);
 
         $search = $request->input('search');
 
@@ -125,7 +125,7 @@ class SeasonController extends Controller
 
     public function admins(int $seasonId): Factory|View
     {
-        $season = $this->loadAndAuthorize($seasonId);
+        $season = $this->loadAndAuthorize($seasonId, ['relatedUsers']);
         $admins = $season->admins;
         $relatedUsers = $this->userService->sortByNameAndRejectAdmins($season->relatedUsers, $season->admins);
 
@@ -166,11 +166,12 @@ class SeasonController extends Controller
             ->with('success', 'Uprawnienie administratora usunięto pomyślnie');
     }
 
-    public function loadAndAuthorize(int $seasonId): SeasonDomain
+    public function loadAndAuthorize(int $seasonId, array $additionalRelations = []): SeasonDomain
     {
-        $season = Season::with('admins')->findOrFail($seasonId);
+        $allRelations = array_merge($additionalRelations, ['admins']);
+        $season = Season::with($allRelations)->findOrFail($seasonId);
         $this->authorize('update', $season);
 
-        return SeasonDomain::fromEloquentWithAdmins($season);
+        return SeasonDomain::fromEloquent($season, $allRelations);
     }
 }

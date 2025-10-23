@@ -16,9 +16,9 @@ class SeasonRepository
                            string  $name,
                            array   $adminsIds = [],
                            ?string $startDate = null,
-                           ?string $endDate = null): SeasonDomain
+                           ?string $endDate = null): void
     {
-        return DB::transaction(function () use ($leagueId, $name, $adminsIds, $startDate, $endDate) {
+        DB::transaction(function () use ($leagueId, $name, $adminsIds, $startDate, $endDate) {
 
             $season = Season::create([
                 'league_id' => $leagueId,
@@ -30,8 +30,6 @@ class SeasonRepository
             if (!empty($adminsIds)) {
                 $season->admins()->attach($adminsIds);
             }
-
-            return SeasonDomain::fromEloquentWithAdmins($season);
         });
     }
 

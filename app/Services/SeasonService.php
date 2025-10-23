@@ -19,13 +19,13 @@ class SeasonService
                            string  $name,
                            array   $adminsIds = [],
                            ?string $startDate = null,
-                           ?string $endDate = null): SeasonDomain
+                           ?string $endDate = null): void
     {
-        $league = LeagueDomain::fromEloquentWithAdmins(League::findOrFail($leagueId));
+        $league = LeagueDomain::fromEloquent(League::findOrFail($leagueId), ['admins']);
         $leagueAdminsIds = $league->getAdminsIds();
         $allAdminsIds = array_unique(array_merge($leagueAdminsIds, $adminsIds));
         try {
-            return $this->seasonRepository->create($leagueId, $name, $allAdminsIds, $startDate, $endDate);
+            $this->seasonRepository->create($leagueId, $name, $allAdminsIds, $startDate, $endDate);
         } catch (Throwable $e) {
             throw ValidationException::withMessages([
                 'general' => 'Nie udało się dodać sezonu. Spróbuj ponownie.'
