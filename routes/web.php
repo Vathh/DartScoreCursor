@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\LeagueController;
 use App\Http\Controllers\PagesController;
 use App\Http\Controllers\SeasonController;
+use App\Http\Controllers\TournamentController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [PagesController::class, 'showHomePage'])->name('pages.home');
@@ -37,4 +38,4 @@ Route::prefix('seasons/{season}')->group(function () {
     Route::delete('/admins/remove', [SeasonController::class, 'removeAdmin'])->name('seasons.admins.remove');
 });
 
-Route::get('/tournaments', [PagesController::class, 'showTournamentsPage'])->name('tournament.tournaments');
+Route::resource('tournaments', TournamentController::class);

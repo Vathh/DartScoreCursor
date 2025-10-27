@@ -5,6 +5,7 @@ use App\Domain\LeagueDomain;
 use App\Domain\SeasonDomain;
 use App\Models\League;
 use App\Repositories\SeasonRepository;
+use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
 use Throwable;
 
@@ -15,7 +16,7 @@ class SeasonService
     {
     }
 
-        public function create(int     $leagueId,
+    public function create(int     $leagueId,
                            string  $name,
                            array   $adminsIds = [],
                            ?string $startDate = null,
@@ -31,6 +32,10 @@ class SeasonService
                 'general' => 'Nie udało się dodać sezonu. Spróbuj ponownie.'
             ]);
         }
+    }
+    public function getRelatedUsers(int $seasonId): Collection
+    {
+        return $this->seasonRepository->getRelatedUsers($seasonId);
     }
 
     public function addRelatedUser(int $seasonId, int $userId): void
@@ -52,4 +57,5 @@ class SeasonService
     {
         $this->seasonRepository->removeAdmin($seasonId, $userId);
     }
+
 }

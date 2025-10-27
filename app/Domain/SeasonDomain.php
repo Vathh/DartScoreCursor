@@ -5,6 +5,7 @@ use App\Models\League;
 use App\Models\Player;
 use App\Models\Season;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 
 class SeasonDomain
 {
@@ -17,16 +18,15 @@ class SeasonDomain
         public readonly Carbon $updatedAt,
         public readonly array $admins,
         public readonly ?LeagueDomain $league,
-        public readonly array $relatedUsers
+        public readonly array $relatedUsers,
+        public readonly Collection $tournaments
     )
     {
     }
 
     public static function fromEloquent(Season $season, array $with = []): self
     {
-        $test = $with;
-        $test2 = [];
-        $season->loadMissing(array_intersect($with, ['league', 'admins', 'relatedUsers']));
+        $season->loadMissing(array_intersect($with, ['league', 'admins', 'relatedUsers', 'tournaments']));
 
         return new self(
             id: $season->id,
@@ -49,6 +49,9 @@ class SeasonDomain
                     'name' => $user->player->name
                 ])->toArray()
                 : [],
+            tournaments: in_array('tournaments', $with)
+                ? $season->tournaments->map(fn($tournament) => TournamentDomain::fromEloquent($tournament))->values()
+                : collect()
         );
     }
 

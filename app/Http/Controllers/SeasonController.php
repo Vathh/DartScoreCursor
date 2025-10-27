@@ -63,7 +63,9 @@ class SeasonController extends Controller
 
     public function edit(Season $season)
     {
-        //
+        $season = SeasonDomain::fromEloquent($season);
+
+        return view('seasons.edit', ['season' => $season]);
     }
 
     public function update(Request $request, Season $season)
@@ -84,7 +86,7 @@ class SeasonController extends Controller
 
         $users = $this->userService->search($season->relatedUsers, $search);
 
-        $relatedUsers = $this->userService->sortByName($season->relatedUsers);
+        $relatedUsers = $this->seasonService->getRelatedUsers($seasonId);
 
         return view('seasons.relatedUsers', [
             'season' => $season,
@@ -127,12 +129,17 @@ class SeasonController extends Controller
     {
         $season = $this->loadAndAuthorize($seasonId, ['relatedUsers']);
         $admins = $season->admins;
-        $relatedUsers = $this->userService->sortByNameAndRejectAdmins($season->relatedUsers, $season->admins);
+        $relatedUsers = $this->seasonService->getRelatedUsers($seasonId)
+                                            ->map(fn($user) => [
+                                                    'id' => $user->id,
+                                                    'name' => $user->player->name])
+                                            ->toArray();
+        $filteredRelatedUsers = $this->userService->sortByNameAndRejectAdmins($relatedUsers, $season->admins);
 
         return view('seasons.admins', [
             'season' => $season,
             'admins' => $admins,
-            'relatedUsers' => $relatedUsers
+            'relatedUsers' => $filteredRelatedUsers
         ]);
     }
 

@@ -29,14 +29,14 @@
                 <input class="mb-5 input-orange"
                        type="date"
                        name="startDate"
-                       value="{{ old('startDate', $season->startDate) }}"
+                       value="{{ old('startDate', $season->startDate->format('Y-m-d')) }}"
                        required>
 
                 <label class="mb-3 text-xl text-light-orange" for="login"><b>Data zakończenia</b></label>
                 <input class="mb-5 input-orange"
                        type="date"
                        name="endDate"
-                       value="{{ old('endDate', $season->endDate) }}"
+                       value="{{ old('endDate', $season->endDate->format('Y-m-d')) }}"
                        required>
 
                 <button class="btn btn-primary mt-8" type="submit">Zapisz zmiany</button>

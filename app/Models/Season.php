@@ -5,11 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Season extends Model
 {
 
-    protected static function booted()
+    protected static function booted(): void
     {
         static::created(function ($season) {
             $season->league?->touch();
@@ -45,5 +46,10 @@ class Season extends Model
     public function relatedUsers(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'season_user');
+    }
+
+    public function tournaments(): HasMany
+    {
+        return $this->hasMany(Tournament::class);
     }
 }

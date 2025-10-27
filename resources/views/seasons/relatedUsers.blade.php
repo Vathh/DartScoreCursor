@@ -17,11 +17,11 @@
                 <div class="flex flex-wrap gap-3">
                     @foreach($relatedUsers as $user)
                         <div class="flex items-center justify-center flex-col bg-dark-bg shadow rounded-lg p-6 hover:shadow-xl">
-                            <span class="btn__title mb-4 text-wrap">{{ $user['name'] }}</span>
+                            <span class="btn__title mb-4 text-wrap">{{ $user->player->name }}</span>
                             <form action="{{ route('leagues.relatedUsers.remove', $season->id) }}" method="POST">
                                 @csrf
                                 @method('DELETE')
-                                <input type="hidden" name="user_id" value="{{ $user['id'] }}">
+                                <input type="hidden" name="user_id" value="{{ $user->id }}">
                                 <button type="submit" class="btn-mini">Usuń</button>
                             </form>
                         </div>

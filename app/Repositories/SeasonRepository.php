@@ -35,7 +35,7 @@ class SeasonRepository
 
     public function getRelatedUsers(int $seasonId): Collection
     {
-        $season = Season::with('league.relatedUsers')->findOrFail($seasonId);
+        $season = Season::with(['league.relatedUsers.player', 'relatedUsers.player'])->findOrFail($seasonId);
         $seasonRelatedUsers = $season->relatedUsers;
         $leagueRelatedUsers = $season->league->relatedUsers;
 
