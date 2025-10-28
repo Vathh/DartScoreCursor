@@ -2,66 +2,78 @@
 
 namespace App\Http\Controllers;
 
+use App\Domain\SeasonDomain;
+use App\Models\Season;
 use App\Models\Tournament;
+use App\Services\TournamentService;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 
 class TournamentController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+
+    public function __construct(
+        private TournamentService $tournamentService
+    )
+    {
+    }
+
     public function index()
     {
         //
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function create(Request $request): Factory|View
     {
+        $seasonId = $request->query('seasonId');
+        $this->loadAndAuthorize($seasonId);
 
+        return view('tournaments.create', ['seasonId' => $seasonId]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'tournamentName' => 'required|string|max:25',
+            'date' => 'required|date'
+        ]);
+
+        $seasonId = $request->query('seasonId');
+
+        $this->tournamentService->create($seasonId, $validated['tournamentName'], $validated['date']);
+
+        return redirect()
+            ->route('seasons.show', ['season' => $seasonId])
+            ->with('success', 'Pomyślnie stworzono turniej!');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Tournament $tournament)
     {
         //
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Tournament $tournament)
     {
         //
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Tournament $tournament)
     {
         //
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Tournament $tournament)
     {
         //
     }
 
+    public function loadAndAuthorize(int $seasonId, array $additionalRelations = []): SeasonDomain
+    {
+        $allRelations = array_merge($additionalRelations, ['admins']);
+        $season = Season::with($allRelations)->findOrFail($seasonId);
+        $this->authorize('update', $season);
 
+        return SeasonDomain::fromEloquent($season, $allRelations);
+    }
 }

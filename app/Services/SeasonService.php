@@ -16,11 +16,13 @@ class SeasonService
     {
     }
 
-    public function create(int     $leagueId,
-                           string  $name,
-                           array   $adminsIds = [],
-                           ?string $startDate = null,
-                           ?string $endDate = null): void
+    public function create(
+        int     $leagueId,
+        string  $name,
+        array   $adminsIds = [],
+        ?string $startDate = null,
+        ?string $endDate = null
+    ): void
     {
         $league = LeagueDomain::fromEloquent(League::findOrFail($leagueId), ['admins']);
         $leagueAdminsIds = $league->getAdminsIds();

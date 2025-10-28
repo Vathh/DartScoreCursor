@@ -34,7 +34,7 @@
 
                 <button class="btn btn-primary mt-8" type="submit" name="loginBtn">Stwórz sezon</button>
 
-                <a href="{{ route('leagues.show', ['league' => $leagueId]) }}" class="btn btn-primary mt-5" type="submit" name="loginBtn">Powrót</a>
+                <a href="{{ route('leagues.show', ['league' => $leagueId]) }}" class="btn btn-primary mt-5" type="submit">Powrót</a>
 
                 <x-errors/>
             </div>

@@ -12,7 +12,7 @@
 
             <a href='{{ route('leagues.index') }}' class="nav-btn {{ request()->routeIs('leagues.*') ? 'active' : '' }}">Ligi</a>
             <a href='{{ route('seasons.index') }}' class="nav-btn {{ request()->routeIs('seasons.*') ? 'active' : '' }}">Sezony</a>
-            <a href='{{ route('tournament.tournaments') }}' class="nav-btn {{ request()->routeIs('tournaments.*') ? 'active' : '' }}">Turnieje</a>
+            <a href='{{ route('tournaments.index') }}' class="nav-btn {{ request()->routeIs('tournaments.*') ? 'active' : '' }}">Turnieje</a>
 
             @guest
                 <a href='{{ route('pages.loginPanel') }}' class="nav-btn">Zaloguj się</a>

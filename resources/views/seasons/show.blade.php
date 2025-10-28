@@ -58,13 +58,13 @@
                     </p>
                 </div>
 
-{{--                <h2 class="text-2xl font-bold text-light-green mt-10 mb-4">Rozgrywki</h2>--}}
-{{--                <div class="space-y-3">--}}
-{{--                    @foreach($season->seasons as $season)--}}
-{{--                        <div--}}
-{{--                            class="bg-white/5 p-4 rounded-lg border border-white/10 hover:bg-white/10 transition">{{ $season->name }}</div>--}}
-{{--                    @endforeach--}}
-{{--                </div>--}}
+                <h2 class="text-2xl font-bold text-light-green mt-10 mb-4">Turnieje</h2>
+                <div class="space-y-3">
+                    @foreach($season->tournaments as $tournament)
+                        <div
+                            class="bg-white/5 p-4 rounded-lg border border-white/10 hover:bg-white/10 transition">{{ $tournament->name }}</div>
+                    @endforeach
+                </div>
 
             </div>
         </div>

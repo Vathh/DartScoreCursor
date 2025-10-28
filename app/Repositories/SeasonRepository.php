@@ -12,11 +12,13 @@ class SeasonRepository
     /**
      * @throws \Throwable
      */
-    public function create(int     $leagueId,
-                           string  $name,
-                           array   $adminsIds = [],
-                           ?string $startDate = null,
-                           ?string $endDate = null): void
+    public function create(
+        int     $leagueId,
+        string  $name,
+        array   $adminsIds = [],
+        ?string $startDate = null,
+        ?string $endDate = null)
+    : void
     {
         DB::transaction(function () use ($leagueId, $name, $adminsIds, $startDate, $endDate) {
 

@@ -56,7 +56,7 @@ class SeasonController extends Controller
 
     public function show(Season $season)
     {
-        $seasonDomain = SeasonDomain::fromEloquent($season, ['admins', 'league']);
+        $seasonDomain = SeasonDomain::fromEloquent($season, ['admins', 'league', 'tournaments']);
 
         return view('seasons.show', ['season' => $seasonDomain]);
     }

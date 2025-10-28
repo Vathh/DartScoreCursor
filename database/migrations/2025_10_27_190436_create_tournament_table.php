@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('tournament', function (Blueprint $table) {
+        Schema::create('tournaments', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('season_id')->nullable();
             $table->foreign('season_id')
                 ->references('id')
-                ->on('season')
+                ->on('seasons')
                 ->onDelete('set null');
             $table->string('name');
             $table->date('date');
