@@ -30,7 +30,7 @@
             @endif
         </div>
 
-        <h2 class="text-2xl text-light-green text-center mb-7">Dodawanie użytkowników</h2>
+        <h2 class="text-2xl text-light-green text-center mb-7">Wyszukiwanie użytkowników</h2>
 
         <form action="{{ route('leagues.relatedUsers', $league->id) }}" method="GET" class="mb-6 flex items-center space-x-4">
             <input type="text" name="search" placeholder="Szukaj użytkownika..."

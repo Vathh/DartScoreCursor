@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Domain\SeasonDomain;
+use App\Domain\TournamentDomain;
 use App\Models\Season;
 use App\Models\Tournament;
 use App\Services\TournamentService;
@@ -50,7 +51,13 @@ class TournamentController extends Controller
 
     public function show(Tournament $tournament)
     {
-        //
+        $season = SeasonDomain::fromEloquent($tournament->season, ['admins']);
+        $tournament = TournamentDomain::fromEloquent($tournament, ['season']);
+
+        return view('tournaments.show', [
+            'tournament' => $tournament,
+            'season' => $season
+        ]);
     }
 
     public function edit(Tournament $tournament)
@@ -68,12 +75,12 @@ class TournamentController extends Controller
         //
     }
 
-    public function loadAndAuthorize(int $seasonId, array $additionalRelations = []): SeasonDomain
+    public function loadAndAuthorize(int $tournamentId, array $additionalRelations = []): TournamentDomain
     {
-        $allRelations = array_merge($additionalRelations, ['admins']);
-        $season = Season::with($allRelations)->findOrFail($seasonId);
-        $this->authorize('update', $season);
+        $allRelations = array_merge($additionalRelations, ['season']);
+        $tournament = Tournament::with($allRelations)->findOrFail($tournamentId);
+        $this->authorize('update', $tournament->season);
 
-        return SeasonDomain::fromEloquent($season, $allRelations);
+        return TournamentDomain::fromEloquent($tournament, $allRelations);
     }
 }

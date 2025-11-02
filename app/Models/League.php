@@ -25,4 +25,9 @@ class League extends Model
     {
         return $this->belongsToMany(User::class, 'league_user');
     }
+
+    public function guests(): HasMany
+    {
+        return $this->hasMany(Player::class);
+    }
 }

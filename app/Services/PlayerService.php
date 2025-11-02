@@ -2,6 +2,7 @@
 namespace App\Services;
 
 use App\Domain\PlayerDomain;
+use App\Enums\AssignableEntityType;
 use App\Repositories\PlayerRepository;
 
 class PlayerService
@@ -9,8 +10,21 @@ class PlayerService
     public function __construct(private PlayerRepository $playerRepository)
     {}
 
-    public function create(string $name, int $userId): PlayerDomain
+    public function create(string $name, int $userId): void
     {
-        return $this->playerRepository->create($name, $userId);
+        $this->playerRepository->create($name, $userId);
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    public function createGuest(string $name, int $targetId, AssignableEntityType $targetType): void
+    {
+        $this->playerRepository->createGuest($name, $targetId, $targetType);
+    }
+
+    public function removeGuest(int $playerId): void
+    {
+        $this->playerRepository->removeGuest($playerId);
     }
 }

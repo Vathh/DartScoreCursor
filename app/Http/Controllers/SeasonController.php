@@ -4,20 +4,26 @@ namespace App\Http\Controllers;
 
 use App\Domain\LeagueDomain;
 use App\Domain\SeasonDomain;
+use App\Enums\AssignableEntityType;
 use App\Models\League;
 use App\Models\Season;
+use App\Rules\UniquePlayerInSeasonAndLeague;
+use App\Services\PlayerService;
 use App\Services\SeasonService;
 use App\Services\UserService;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
+use Throwable;
 
 class SeasonController extends Controller
 {
     public function __construct(
         private SeasonService $seasonService,
-        private UserService $userService
+        private UserService $userService,
+        private PlayerService $playerService,
     )
     {
     }
@@ -100,7 +106,7 @@ class SeasonController extends Controller
         $this->loadAndAuthorize($seasonId);
 
         $validated = $request->validate([
-            'user_id' => ['required', 'exists:users,id'],
+            'user_id' => 'required|exists:users,id',
         ]);
 
         $this->seasonService->addRelatedUser($seasonId, $validated['user_id']);
@@ -115,7 +121,7 @@ class SeasonController extends Controller
         $this->loadAndAuthorize($seasonId);
 
         $validated = $request->validate([
-            'user_id' => ['required', 'exists:users,id'],
+            'user_id' => 'required|exists:users,id',
         ]);
 
         $this->seasonService->removeRelatedUser($seasonId, $validated['user_id']);
@@ -148,7 +154,7 @@ class SeasonController extends Controller
         $this->loadAndAuthorize($seasonId);
 
         $validated = $request->validate([
-            'user_id' => ['required', 'exists:users,id'],
+            'user_id' => 'required|exists:users,id',
         ]);
 
         $this->seasonService->addAdmin($seasonId, $validated['user_id']);
@@ -163,7 +169,7 @@ class SeasonController extends Controller
         $this->loadAndAuthorize($seasonId);
 
         $validated = $request->validate([
-            'user_id' => ['required', 'exists:users,id'],
+            'user_id' => 'required|exists:users,id',
         ]);
 
         $this->seasonService->removeAdmin($seasonId, $validated['user_id']);
@@ -171,6 +177,56 @@ class SeasonController extends Controller
         return redirect()
             ->route('seasons.admins', $seasonId)
             ->with('success', 'Uprawnienie administratora usunięto pomyślnie');
+    }
+
+    public function guests(int $seasonId): Factory|View
+    {
+        $season = $this->loadAndAuthorize($seasonId, ['guests']);
+
+        $guests = $this->userService->sortByName($season->guests);
+
+        return view('seasons.guests', [
+            'season' => $season,
+            'guests' => $guests
+        ]);
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public function addGuest(Request $request, int $seasonId)
+    {
+        $season = $this->loadAndAuthorize($seasonId, ['league']);
+
+        $validated = $request->validate([
+            'name' => [
+                'required',
+                'string',
+                'max:20',
+                new UniquePlayerInSeasonAndLeague($seasonId, $season->league->id),
+            ],
+        ]);
+
+        $this->playerService->createGuest($validated['name'], $seasonId, AssignableEntityType::SEASON);
+
+        return redirect()
+            ->route('seasons.guests', $seasonId)
+            ->with('success', 'Pomyślnie dodano gościa');
+    }
+
+    public function removeGuest(Request $request, int $seasonId)
+    {
+        $this->loadAndAuthorize($seasonId);
+
+        $validated = $request->validate([
+            'player_id' => 'required|exists:players,id',
+        ]);
+
+        $this->playerService->removeGuest($validated['player_id']);
+
+        return redirect()
+            ->route('seasons.guests', $seasonId)
+            ->with('success', 'Pomyślnie usunięto gościa');
     }
 
     public function loadAndAuthorize(int $seasonId, array $additionalRelations = []): SeasonDomain

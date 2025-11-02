@@ -30,4 +30,9 @@ class TournamentDomain
                 : null
         );
     }
+
+    public function getDate(): ?string
+    {
+        return $this->date?->format('Y-m-d');
+    }
 }

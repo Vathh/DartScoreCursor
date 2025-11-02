@@ -25,7 +25,11 @@
                     </a>
                     <a href="{{ route('leagues.relatedUsers', $league->id) }}"
                        class="flex items-center gap-3 bg-white/10 hover:bg-white/15 px-4 py-3 rounded-lg transition">
-                        👨‍👨‍👦 Edytuj powiązanych użytkowników
+                        👨‍👨‍👦 Powiązani użytkownicy
+                    </a>
+                    <a href="{{ route('leagues.guests', $league->id) }}"
+                       class="flex items-center gap-3 bg-white/10 hover:bg-white/15 px-4 py-3 rounded-lg transition">
+                        👨‍👨‍👦 Goście
                     </a>
                     {{--                    <a href="#" class="flex items-center gap-3 bg-light-red/20 hover:bg-light-red/30 px-4 py-3 rounded-lg transition">--}}
                     {{--                        🗑️ Usuń ligę--}}
@@ -46,7 +50,7 @@
                             class="text-light-green font-semibold">Data utworzenia:</span> {{ $league->createdAtDate() }}
                     </p>
                     <p class="mb-2"><span
-                            class="text-light-green font-semibold">Liczba sezonów:</span> {{ count($league->seasons) }}
+                            class="text-light-green font-semibold">Ilość sezonów:</span> {{ count($league->seasons) }}
                     </p>
                     <p><span
                             class="text-light-green font-semibold">Ostatnia aktywność:</span> {{ $league->updatedAtDate() }}

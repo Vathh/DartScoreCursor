@@ -1,8 +1,6 @@
 <?php
 namespace App\Domain;
 
-use App\Models\League;
-use App\Models\Player;
 use App\Models\Season;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -19,7 +17,8 @@ class SeasonDomain
         public readonly array $admins,
         public readonly ?LeagueDomain $league,
         public readonly array $relatedUsers,
-        public readonly Collection $tournaments
+        public readonly Collection $tournaments,
+        public readonly array $guests
     )
     {
     }
@@ -51,7 +50,13 @@ class SeasonDomain
                 : [],
             tournaments: in_array('tournaments', $with)
                 ? $season->tournaments->map(fn($tournament) => TournamentDomain::fromEloquent($tournament))->values()
-                : collect()
+                : collect(),
+            guests: in_array('guests', $with)
+                ? $season->guests->map(fn($guest) => [
+                    'id' => $guest->id,
+                    'name' => $guest->name
+                ])->toArray()
+                : []
         );
     }
 

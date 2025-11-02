@@ -3,7 +3,11 @@
 namespace App\Repositories;
 
 use App\Domain\PlayerDomain;
+use App\Enums\AssignableEntityType;
+use App\Models\League;
 use App\Models\Player;
+use App\Models\Season;
+use Illuminate\Support\Facades\DB;
 
 class PlayerRepository
 {
@@ -15,5 +19,37 @@ class PlayerRepository
         ]);
 
         return PlayerDomain::fromEloquent($player);
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    public function createGuest(string $name, int $targetId, AssignableEntityType $targetType): void
+    {
+        match ($targetType) {
+            AssignableEntityType::LEAGUE => $this->addToLeague($name, $targetId),
+            AssignableEntityType::SEASON => $this->addToSeason($name, $targetId)
+        };
+    }
+
+    public function removeGuest(int $playerId): void
+    {
+        Player::destroy($playerId);
+    }
+
+    private function addToLeague(string $name, int $leagueId): void
+    {
+        $league = League::findOrFail($leagueId);
+        $league->guests()->create([
+            'name' => $name
+        ]);
+    }
+
+    private function addToSeason(string $name, int $seasonId): void
+    {
+        $season = Season::findOrFail($seasonId);
+        $season->guests()->create([
+            'name' => $name
+        ]);
     }
 }

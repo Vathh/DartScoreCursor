@@ -52,4 +52,9 @@ class Season extends Model
     {
         return $this->hasMany(Tournament::class);
     }
+
+    public function guests(): HasMany
+    {
+        return $this->hasMany(Player::class);
+    }
 }

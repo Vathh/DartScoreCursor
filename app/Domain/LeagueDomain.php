@@ -16,12 +16,13 @@ class LeagueDomain
         public readonly array $admins,
         public readonly array $seasons,
         public readonly array $relatedUsers,
+        public readonly array $guests
     )
     {}
 
     public static function fromEloquent(League $league, array $with = []): self
     {
-        $league->loadMissing(array_intersect($with, ['seasons', 'admins', 'relatedUsers']));
+        $league->loadMissing(array_intersect($with, ['seasons', 'admins', 'relatedUsers', 'guests']));
 
         return new self(
             id: $league->id,
@@ -44,6 +45,12 @@ class LeagueDomain
                     'name' => $user->player->name,
                 ])->toArray()
                 : [],
+            guests: in_array('guests', $with)
+                ? $league->guests->map(fn($guest) => [
+                    'id' => $guest->id,
+                    'name' => $guest->name
+                ])->toArray()
+                : []
         );
 
     }

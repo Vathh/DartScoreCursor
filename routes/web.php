@@ -25,6 +25,10 @@ Route::prefix('leagues/{league}')->group(function () {
     Route::get('/admins', [LeagueController::class, 'admins'])->name('leagues.admins');
     Route::post('/admins/add', [LeagueController::class, 'addAdmin'])->name('leagues.admins.add');
     Route::delete('/admins/remove', [LeagueController::class, 'removeAdmin'])->name('leagues.admins.remove');
+
+    Route::get('/guests', [LeagueController::class, 'guests'])->name('leagues.guests');
+    Route::post('/guests/add', [LeagueController::class, 'addGuest'])->name('leagues.guests.add');
+    Route::delete('/guests/remove', [LeagueController::class, 'removeGuest'])->name('leagues.guests.remove');
 });
 
 Route::resource('seasons', SeasonController::class);
@@ -36,6 +40,10 @@ Route::prefix('seasons/{season}')->group(function () {
     Route::get('/admins', [SeasonController::class, 'admins'])->name('seasons.admins');
     Route::post('/admins/add', [SeasonController::class, 'addAdmin'])->name('seasons.admins.add');
     Route::delete('/admins/remove', [SeasonController::class, 'removeAdmin'])->name('seasons.admins.remove');
+
+    Route::get('/guests', [SeasonController::class, 'guests'])->name('seasons.guests');
+    Route::post('/guests/add', [SeasonController::class, 'addGuest'])->name('seasons.guests.add');
+    Route::delete('/guests/remove', [SeasonController::class, 'removeGuest'])->name('seasons.guests.remove');
 });
 
 Route::resource('tournaments', TournamentController::class);

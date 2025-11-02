@@ -25,7 +25,11 @@
                 </a>
                 <a href="{{ route('seasons.relatedUsers', $season->id) }}"
                    class="flex items-center gap-3 bg-white/10 hover:bg-white/15 px-4 py-3 rounded-lg transition">
-                    👨‍👨‍👦 Edytuj powiązanych użytkowników
+                    👨‍👨‍👦 Powiązani użytkownicy
+                </a>
+                <a href="{{ route('seasons.guests', $season->id) }}"
+                   class="flex items-center gap-3 bg-white/10 hover:bg-white/15 px-4 py-3 rounded-lg transition">
+                    👨‍👨‍👦 Goście
                 </a>
                 {{--                    <a href="#" class="flex items-center gap-3 bg-light-red/20 hover:bg-light-red/30 px-4 py-3 rounded-lg transition">--}}
                 {{--                        🗑️ Usuń ligę--}}
@@ -61,8 +65,9 @@
                 <h2 class="text-2xl font-bold text-light-green mt-10 mb-4">Turnieje</h2>
                 <div class="space-y-3">
                     @foreach($season->tournaments as $tournament)
-                        <div
-                            class="bg-white/5 p-4 rounded-lg border border-white/10 hover:bg-white/10 transition">{{ $tournament->name }}</div>
+                        <a href="{{ route('tournaments.show', ['tournament' => $tournament->id]) }}">
+                            <div class="bg-white/5 p-4 rounded-lg border border-white/10 hover:bg-white/10 transition">{{ $tournament->name }}</div>
+                        </a>
                     @endforeach
                 </div>
 

@@ -3,21 +3,25 @@
 namespace App\Http\Controllers;
 
 use App\Domain\LeagueDomain;
+use App\Enums\AssignableEntityType;
 use App\Models\League;
 use App\Models\User;
 use App\Services\LeagueService;
+use App\Services\PlayerService;
 use App\Services\UserService;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class LeagueController extends Controller
 {
     public function __construct(
         private LeagueService $leagueService,
-        private UserService $userService
+        private UserService $userService,
+        private PlayerService $playerService
     ){
         $this->authorizeResource(League::class, 'league');
     }
@@ -108,7 +112,7 @@ class LeagueController extends Controller
         $this->loadAndAuthorize($leagueId);
 
         $validated = $request->validate([
-            'user_id' => ['required', 'exists:users,id'],
+            'user_id' => 'required|exists:users,id',
         ]);
 
         $this->leagueService->addRelatedUser($leagueId, $validated['user_id']);
@@ -123,7 +127,7 @@ class LeagueController extends Controller
         $this->loadAndAuthorize($leagueId);
 
         $validated = $request->validate([
-            'user_id' => ['required', 'exists:users,id'],
+            'user_id' => 'required|exists:users,id',
         ]);
 
         $this->leagueService->removeRelatedUser($leagueId, $validated['user_id']);
@@ -151,7 +155,7 @@ class LeagueController extends Controller
         $this->loadAndAuthorize($leagueId);
 
         $validated = $request->validate([
-            'user_id' => ['required', 'exists:users,id'],
+            'user_id' => 'required|exists:users,id',
         ]);
 
         $this->leagueService->addAdmin($leagueId, $validated['user_id']);
@@ -166,7 +170,7 @@ class LeagueController extends Controller
         $this->loadAndAuthorize($leagueId);
 
         $validated = $request->validate([
-            'user_id' => ['required', 'exists:users,id'],
+            'user_id' => 'required|exists:users,id',
         ]);
 
         $this->leagueService->removeAdmin($leagueId, $validated['user_id']);
@@ -174,6 +178,54 @@ class LeagueController extends Controller
         return redirect()
                     ->route('leagues.admins', $leagueId)
                     ->with('success', 'Uprawnienie administratora usunięto pomyślnie');
+    }
+
+    public function guests(int $leagueId): Factory|View
+    {
+        $league = $this->loadAndAuthorize($leagueId, ['guests']);
+
+        $guests = $this->userService->sortByName($league->guests);
+
+        return view('leagues.guests', [
+            'league' => $league,
+            'guests' => $guests
+        ]);
+    }
+
+    public function addGuest(Request $request, int $leagueId)
+    {
+        $this->loadAndAuthorize($leagueId);
+
+        $validated = $request->validate([
+            'name' => [
+                'required',
+                'string',
+                'max:20',
+                Rule::unique('players', 'name')
+                    ->where('league_id', $leagueId),
+            ],
+        ]);
+
+        $this->playerService->createGuest($validated['name'], $leagueId, AssignableEntityType::LEAGUE);
+
+        return redirect()
+                    ->route('leagues.guests', $leagueId)
+                    ->with('success', 'Pomyślnie dodano gościa');
+    }
+
+    public function removeGuest(Request $request, int $leagueId)
+    {
+        $this->loadAndAuthorize($leagueId);
+
+        $validated = $request->validate([
+            'player_id' => 'required|exists:players,id',
+        ]);
+
+        $this->playerService->removeGuest($validated['player_id']);
+
+        return redirect()
+            ->route('leagues.guests', $leagueId)
+            ->with('success', 'Pomyślnie usunięto gościa');
     }
 
     public function loadAndAuthorize(int $leagueId, array $additionalRelations = []): LeagueDomain
