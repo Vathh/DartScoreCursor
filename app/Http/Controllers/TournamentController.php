@@ -6,6 +6,7 @@ use App\Domain\SeasonDomain;
 use App\Domain\TournamentDomain;
 use App\Models\Season;
 use App\Models\Tournament;
+use App\Services\PlayerService;
 use App\Services\TournamentService;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -15,7 +16,8 @@ class TournamentController extends Controller
 {
 
     public function __construct(
-        private TournamentService $tournamentService
+        private TournamentService $tournamentService,
+        private PlayerService $playerService,
     )
     {
     }
@@ -51,7 +53,7 @@ class TournamentController extends Controller
 
     public function show(Tournament $tournament)
     {
-        $season = SeasonDomain::fromEloquent($tournament->season, ['admins']);
+        $season = SeasonDomain::fromEloquent($tournament->season, ['league', 'admins']);
         $tournament = TournamentDomain::fromEloquent($tournament, ['season']);
 
         return view('tournaments.show', [
@@ -73,6 +75,16 @@ class TournamentController extends Controller
     public function destroy(Tournament $tournament)
     {
         //
+    }
+
+    public function start(Request $request, Tournament $tournament)
+    {
+        $tournament = $this->loadAndAuthorize($tournament->id);
+        $players = $this->playerService->getRelatedPlayers($tournament->season->id);
+        return view('tournaments.start', [
+            'tournament' => $tournament,
+            'players' => $players
+        ]);
     }
 
     public function loadAndAuthorize(int $tournamentId, array $additionalRelations = []): TournamentDomain

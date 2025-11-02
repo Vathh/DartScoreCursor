@@ -7,6 +7,7 @@ use App\Enums\AssignableEntityType;
 use App\Models\League;
 use App\Models\Player;
 use App\Models\Season;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class PlayerRepository
@@ -35,6 +36,30 @@ class PlayerRepository
     public function removeGuest(int $playerId): void
     {
         Player::destroy($playerId);
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    public function getRelatedPlayers(int $seasonId): Collection
+    {
+        $allPlayers = DB::transaction(function () use ($seasonId) {
+               $season = Season::findOrFail($seasonId);
+               $seasonRelatedUsersPlayers = $season->relatedUsers->map(fn($user) => $user->player)->values();
+               $seasonGuests = $season->guests;
+               $leagueRelatedUsersPlayers = $season->league->relatedUsers->map(fn($user) => $user->player)->values();
+               $leagueGuests = $season->league->guests;
+
+                return collect()
+                        ->merge($seasonRelatedUsersPlayers)
+                        ->merge($seasonGuests)
+                        ->merge($leagueRelatedUsersPlayers)
+                        ->merge($leagueGuests)
+                        ->unique('id')
+                        ->values();
+            });
+
+        return $allPlayers;
     }
 
     private function addToLeague(string $name, int $leagueId): void

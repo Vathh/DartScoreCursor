@@ -47,3 +47,6 @@ Route::prefix('seasons/{season}')->group(function () {
 });
 
 Route::resource('tournaments', TournamentController::class);
+Route::prefix('tournaments/{tournament}')->group(function () {
+   Route::get('/start', [TournamentController::class, 'start'])->name('tournaments.start');
+});
