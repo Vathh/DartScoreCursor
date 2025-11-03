@@ -26,11 +26,11 @@
                     @foreach($players as $player)
                         <div
                             x-on:click="selected.includes({{ $player->id }})
-                        ? selected = selected.filter(id => id !== {{ $player->id }})
-                        : selected.push({{ $player->id }})"
+                                ? selected = selected.filter(id => id !== {{ $player->id }})
+                                : selected.push({{ $player->id }})"
                             x-bind:class="selected.includes({{ $player->id }})
-                        ? 'bg-light-green text-dark-bg'
-                        : 'bg-dark-bg text-light-white'"
+                                ? 'bg-light-green text-dark-bg'
+                                : 'bg-dark-bg text-light-white'"
                             class="cursor-pointer px-4 py-2 rounded-lg transition duration-200 shadow hover:shadow-lg select-none"
                         >
                             {{ $player->name }}
@@ -38,9 +38,11 @@
                     @endforeach
                 </div>
 
-                {{-- Formularz do wysłania zaznaczonych --}}
-                <form action="{{ route('tournaments.start', $tournament->id) }}" method="POST" class="mt-6">
+                <form action="{{ route('tournaments.start', $tournament->id) }}" method="POST" class="mt-6 flex flex-col items-center">
                     @csrf
+                    <span class="text-light-orange mb-2 font-semibold">
+                        Zaznaczono: <span x-text="selected.length"></span>
+                    </span>
                     <input type="hidden" name="selected_players" x-bind:value="JSON.stringify(selected)">
                     <button
                         type="submit"
@@ -55,13 +57,13 @@
 
         <div>
             <h2 class="text-2xl text-light-green text-center mb-7">Dodawanie użytkowników</h2>
-            <div>
-                <p><a>Edycja powiązanych użytkowników</a></p>
-                <p><a>Edycja graczy niezarejestrowanych</a></p>
+            <div class="flex justify-around">
+                <p class="btn btn-primary text-wrap"><a href="{{ route('seasons.relatedUsers', $tournament->season->id) }}">Edycja powiązanych użytkowników</a></p>
+                <p class="btn btn-primary text-wrap"><a href="{{ route('seasons.guests', $tournament->season->id) }}">Edycja graczy niezarejestrowanych</a></p>
             </div>
         </div>
 
-        <div class="flex justify-center mt-5">
+        <div class="flex justify-center mt-10">
             <a href="{{ route('tournaments.show', ['tournament' => $tournament->id]) }}" class="btn btn-primary">
                 Powrót
             </a>

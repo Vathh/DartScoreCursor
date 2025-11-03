@@ -11,7 +11,7 @@
             <h2 class="text-light-green font-bold text-lg mb-6 tracking-wide">⚙️ Zarządzanie turniejem</h2>
 
             <nav class="flex flex-col space-y-3">
-                <a href="{{ route('tournaments.start', ['tournament' => $tournament->id]) }}"
+                <a href="{{ route('tournaments.start', $tournament->id) }}"
                    class="flex items-center gap-3 bg-white/10 hover:bg-white/15 px-4 py-3 rounded-lg transition">
                     ➕ Rozpocznij turniej
                 </a>

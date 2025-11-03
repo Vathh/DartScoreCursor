@@ -77,14 +77,22 @@ class TournamentController extends Controller
         //
     }
 
-    public function start(Request $request, Tournament $tournament)
+    public function start(int $tournamentId)
     {
-        $tournament = $this->loadAndAuthorize($tournament->id);
-        $players = $this->playerService->getRelatedPlayers($tournament->season->id);
+        $tournament = $this->loadAndAuthorize($tournamentId);
+        $players = $this->playerService
+                        ->getRelatedPlayers($tournament->season->id)
+                        ->sortBy('name');
+
         return view('tournaments.start', [
             'tournament' => $tournament,
             'players' => $players
         ]);
+    }
+
+    public function runTournament(Request $request, int $tournamentId)
+    {
+        $tournament = $this->loadAndAuthorize($tournamentId);
     }
 
     public function loadAndAuthorize(int $tournamentId, array $additionalRelations = []): TournamentDomain

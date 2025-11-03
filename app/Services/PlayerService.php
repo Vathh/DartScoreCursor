@@ -5,7 +5,10 @@ namespace App\Services;
 use App\Domain\PlayerDomain;
 use App\Enums\AssignableEntityType;
 use App\Repositories\PlayerRepository;
+use http\Exception\RuntimeException;
 use Illuminate\Support\Collection;
+use Throwable;
+use function Laravel\Prompts\error;
 
 class PlayerService
 {
@@ -18,12 +21,13 @@ class PlayerService
         $this->playerRepository->create($name, $userId);
     }
 
-    /**
-     * @throws \Throwable
-     */
     public function createGuest(string $name, int $targetId, AssignableEntityType $targetType): void
     {
-        $this->playerRepository->createGuest($name, $targetId, $targetType);
+        try {
+            $this->playerRepository->createGuest($name, $targetId, $targetType);
+        } catch (Throwable $e) {
+            throw new RuntimeException('Nie udało się dodać gracza', 0, $e);
+        }
     }
 
     public function removeGuest(int $playerId): void
@@ -32,7 +36,7 @@ class PlayerService
     }
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function getRelatedPlayers(int $seasonId): Collection
     {
