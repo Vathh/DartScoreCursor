@@ -106,7 +106,7 @@ class TournamentController extends Controller
             return back()->with('error', 'Wybrano zbyt mało graczy');
         }
 
-        if(!$this->tournamentService->tryCreateGames($tournamentId, $selectedPlayersIds, $groupsCount)) {
+        if(!$this->tournamentService->tryCreateGroupGames($tournamentId, $selectedPlayersIds, $groupsCount)) {
             return back()->with('error', 'Turniej już wystartował');
         }
 

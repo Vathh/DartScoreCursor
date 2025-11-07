@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\GameStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -11,13 +12,17 @@ class GroupStanding extends Model
         'tournament_id',
         'group_number',
         'player_id',
-        'matchesPlayed',
+        'matches_played',
         'matches_won',
         'matches_lost',
         'legs_won',
         'legs_lost',
         'points',
         'legs_difference'
+    ];
+
+    protected $casts = [
+        'status' => GameStatus::class
     ];
 
     public function tournament(): BelongsTo

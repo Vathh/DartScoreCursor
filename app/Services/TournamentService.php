@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\GameStatus;
 use App\Enums\TournamentStatus;
 use App\Repositories\GameRepository;
+use App\Repositories\GroupStandingRepository;
 use App\Repositories\TournamentRepository;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
@@ -15,7 +16,8 @@ class TournamentService
 
     public function __construct(
         private TournamentRepository $tournamentRepository,
-        private GameRepository $gameRepository
+        private GameRepository $gameRepository,
+        private GroupStandingRepository $groupStandingRepository,
     )
     {
     }
@@ -29,7 +31,7 @@ class TournamentService
         $this->tournamentRepository->create($seasonId, $name, $date);
     }
 
-    public function tryCreateGames(int $tournamentId, array $playerIds, int $groupsCount): bool
+    public function tryCreateGroupGames(int $tournamentId, array $playerIds, int $groupsCount): bool
     {
         $groups = $this->createGroups($playerIds, $groupsCount);
 
@@ -50,9 +52,10 @@ class TournamentService
         }
 
         try {
-            return DB::transaction(function () use ($tournamentId, $gamesToInsert) {
+            return DB::transaction(function () use ($tournamentId, $gamesToInsert, $groups) {
                 if($this->tournamentRepository->checkIfTournamentCanBeStarted($tournamentId))
                 {
+                    $this->groupStandingRepository->createEmptyStandings($tournamentId, $groups);
                     $this->gameRepository->createGames($gamesToInsert);
                     $this->tournamentRepository->changeStatus($tournamentId, TournamentStatus::STARTED);
                     return true;
