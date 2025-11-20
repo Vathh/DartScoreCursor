@@ -9,11 +9,17 @@ use Illuminate\Support\Facades\DB;
 
 class SeasonRepository
 {
+
+    public function getAll(): Collection
+    {
+        return Season::all()->map(fn($season) => SeasonDomain::fromEloquent($season));
+    }
+
     /**
      * @throws \Throwable
      */
     public function create(
-        int     $leagueId,
+        ?int     $leagueId,
         string  $name,
         array   $adminsIds = [],
         ?string $startDate = null,

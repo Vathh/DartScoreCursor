@@ -16,8 +16,15 @@ class SeasonService
     {
     }
 
+    public function getAll(): Collection
+    {
+        return $this->seasonRepository->getAll()
+                                        ->sortByDesc(fn(SeasonDomain $season) => $season->updatedAt)
+                                        ->values();
+    }
+
     public function create(
-        int     $leagueId,
+        ?int     $leagueId,
         string  $name,
         array   $adminsIds = [],
         ?string $startDate = null,

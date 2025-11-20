@@ -22,8 +22,6 @@ class GroupStandingService
     {
         $finishedGames = $this->gameRepository->getFinishedGroupGames($tournamentId, $groupNumber);
         $groupStandings = $this->groupStandingRepository->getStandingsByGroupNumberAndTournamentId($tournamentId, $groupNumber);
-
-
     }
 
 

@@ -16,7 +16,7 @@ class GameRepository
         DB::table('games')->insert($games);
     }
 
-    public function updateGame(int $gameId, int $player1Score, int $player2Score, int $winnerId): void
+    public function update(int $gameId, int $player1Score, int $player2Score, int $winnerId): void
     {
         DB::table('games')
             ->where('id', $gameId)

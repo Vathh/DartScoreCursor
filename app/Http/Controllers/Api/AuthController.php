@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Models\LoginCode;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class AuthController
 {
@@ -14,27 +14,16 @@ class AuthController
 
     public function login(Request $request)
     {
-        $creedentials = $request->validate([
-           'password' => ['required|max:6'],
+        $validated = $request->validate([
+           'code' => ['required|max:6'],
         ]);
 
-        $user = Auth::user();
+        $loginCode = LoginCode::where('code', $validated['code'])->first();
 
-        $user->tokens()->delete();
-
-        $token = $user->createToken('counter-app-token')->plainTextToken;
+        $token = $loginCode->createToken('counter')->plainTextToken;
 
         return response()->json([
             'token' => $token,
-        ]);
-    }
-
-    public function logout(Request $request)
-    {
-        $request->user()->tokens()->delete();
-
-        return response()->json([
-            'message' => 'Logged out'
         ]);
     }
 }

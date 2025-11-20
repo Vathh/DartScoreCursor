@@ -28,7 +28,9 @@ class SeasonController extends Controller
 
     public function index(): Factory|View
     {
-        return view('seasons.index');
+        $seasons = $this->seasonService->getAll();
+
+        return view('seasons.index', ['seasons' => $seasons]);
     }
 
     public function create(Request $request): Factory|View
