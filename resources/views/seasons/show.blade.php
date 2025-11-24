@@ -49,16 +49,16 @@
 
                 <div class="bg-white/5 border border-white/10 p-6 rounded-xl shadow-lg backdrop-blur">
                     <p class="mb-2"><span
-                            class="text-light-green font-semibold">Data rozpoczęcia:</span> {{ $season->getStartDate() }}
+                                class="text-light-green font-semibold">Data rozpoczęcia:</span> {{ $season->getStartDate() }}
                     </p>
                     <p class="mb-2"><span
-                            class="text-light-green font-semibold">Data zakończenia:</span> {{ $season->getEndDate() }}
+                                class="text-light-green font-semibold">Data zakończenia:</span> {{ $season->getEndDate() }}
                     </p>
-{{--                    <p class="mb-2"><span--}}
-{{--                            class="text-light-green font-semibold">Liczba rozegranych turniejów:</span> {{ count($season->tournaments) }}--}}
-{{--                    </p>--}}
+                    {{--                    <p class="mb-2"><span--}}
+                    {{--                            class="text-light-green font-semibold">Liczba rozegranych turniejów:</span> {{ count($season->tournaments) }}--}}
+                    {{--                    </p>--}}
                     <p><span
-                            class="text-light-green font-semibold">Ostatnia aktywność:</span> {{ $season->updatedAtDate() }}
+                                class="text-light-green font-semibold">Ostatnia aktywność:</span> {{ $season->getUpdatedAtDate() }}
                     </p>
                 </div>
 

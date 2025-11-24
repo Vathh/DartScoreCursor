@@ -2,13 +2,21 @@
 
 namespace App\Repositories;
 
+use App\Domain\TournamentDomain;
 use App\Enums\TournamentStatus;
 use App\Models\Tournament;
+use Illuminate\Support\Collection;
+use Throwable;
 
 class TournamentRepository
 {
+    public function getAll(): Collection
+    {
+        return Tournament::all()->map(fn($tournament) => TournamentDomain::fromEloquent($tournament));
+    }
+
     public function create(
-        int $seasonId,
+        int     $seasonId,
         string  $name,
         ?string $date
     ): void
@@ -21,7 +29,7 @@ class TournamentRepository
     }
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function changeStatus(int $tournamentId, TournamentStatus $status): void
     {

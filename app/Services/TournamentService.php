@@ -2,11 +2,13 @@
 
 namespace App\Services;
 
+use App\Domain\TournamentDomain;
 use App\Enums\GameStatus;
 use App\Enums\TournamentStatus;
 use App\Repositories\GameRepository;
 use App\Repositories\GroupStandingRepository;
 use App\Repositories\TournamentRepository;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 use Throwable;
@@ -15,15 +17,22 @@ class TournamentService
 {
 
     public function __construct(
-        private TournamentRepository $tournamentRepository,
-        private GameRepository $gameRepository,
+        private TournamentRepository    $tournamentRepository,
+        private GameRepository          $gameRepository,
         private GroupStandingRepository $groupStandingRepository,
     )
     {
     }
 
+    public function getAll(): Collection
+    {
+        return $this->tournamentRepository->getAll()
+                                            ->sortByDesc(fn($tournament) => $tournament->updatedAt)
+                                            ->values();
+    }
+
     public function create(
-        int $seasonId,
+        int     $seasonId,
         string  $name,
         ?string $date = null
     ): void
@@ -37,7 +46,7 @@ class TournamentService
 
         $gamesToInsert = [];
 
-        foreach($groups as $groupIndex => $group) {
+        foreach ($groups as $groupIndex => $group) {
             foreach ($this->generateGamesForGroup($group) as $game) {
                 $gamesToInsert[] = [
                     'tournament_id' => $tournamentId,
@@ -53,8 +62,7 @@ class TournamentService
 
         try {
             return DB::transaction(function () use ($tournamentId, $gamesToInsert, $groups) {
-                if($this->tournamentRepository->checkIfTournamentCanBeStarted($tournamentId))
-                {
+                if ($this->tournamentRepository->checkIfTournamentCanBeStarted($tournamentId)) {
                     $this->groupStandingRepository->createEmptyStandings($tournamentId, $groups);
                     $this->gameRepository->createGames($gamesToInsert);
                     $this->tournamentRepository->changeStatus($tournamentId, TournamentStatus::STARTED);
@@ -71,8 +79,8 @@ class TournamentService
     {
         $games = [];
 
-        for($i = 0; $i < count($group); $i++) {
-            for($j = $i + 1; $j < count($group); $j++) {
+        for ($i = 0; $i < count($group); $i++) {
+            for ($j = $i + 1; $j < count($group); $j++) {
                 $games[] = ['player1_id' => $group[$i], 'player2_id' => $group[$j]];
             }
         }
@@ -86,8 +94,8 @@ class TournamentService
 
         $result = array_fill(0, $groupsCount, []);
 
-        foreach($playerIds as $index => $playerId) {
-            $groupNumber = $index%$groupsCount;
+        foreach ($playerIds as $index => $playerId) {
+            $groupNumber = $index % $groupsCount;
 
             $result[$groupNumber][] = $playerId;
         }

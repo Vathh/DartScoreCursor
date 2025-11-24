@@ -70,7 +70,7 @@ class SeasonDomain
         return $this->endDate?->format('Y-m-d');
     }
 
-    public function updatedAtDate(): string
+    public function getUpdatedAtDate(): string
     {
         return $this->updatedAt->format('Y-m-d');
     }

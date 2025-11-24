@@ -12,7 +12,8 @@ class TournamentDomain
         public readonly int $id,
         public readonly string $name,
         public readonly ?Carbon $date,
-        public readonly ?SeasonDomain $season
+        public readonly ?SeasonDomain $season,
+        public readonly ?Carbon $updatedAt,
     )
     {
     }
@@ -27,12 +28,18 @@ class TournamentDomain
             date: $tournament->date,
             season: in_array('season', $with)
                 ? SeasonDomain::fromEloquent($tournament->season)
-                : null
+                : null,
+            updatedAt: $tournament->updated_at
         );
     }
 
     public function getDate(): ?string
     {
         return $this->date?->format('Y-m-d');
+    }
+
+    public function getUpdatedAtDate(): string
+    {
+        return $this->updatedAt?->format('Y-m-d');
     }
 }

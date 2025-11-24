@@ -19,7 +19,7 @@ class SeasonService
     public function getAll(): Collection
     {
         return $this->seasonRepository->getAll()
-                                        ->sortByDesc(fn(SeasonDomain $season) => $season->updatedAt)
+                                        ->sortByDesc(fn($season) => $season->updatedAt)
                                         ->values();
     }
 

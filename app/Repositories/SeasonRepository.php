@@ -6,6 +6,7 @@ use App\Domain\SeasonDomain;
 use App\Models\Season;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Throwable;
 
 class SeasonRepository
 {
@@ -16,7 +17,7 @@ class SeasonRepository
     }
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function create(
         ?int     $leagueId,

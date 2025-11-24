@@ -12,7 +12,7 @@
                 <a href="{{ route('seasons.show', ['season' => $season->id]) }}">
                     <div class="bg-lighter-bg shadow rounded-lg p-6 hover:shadow-xl hover:cursor-pointer hover:bg-[#333333] transition">
                         <h3 class="btn__title">{{ $season->name }}</h3>
-                        <p class="btn__description">Ostatnia aktywność : {{ $season->updatedAt }}</p>
+                        <p class="btn__description">Ostatnia aktywność : {{ $season->getUpdatedAtDate() }}</p>
                     </div>
                 </a>
             @endforeach

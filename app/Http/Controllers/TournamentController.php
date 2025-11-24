@@ -24,7 +24,9 @@ class TournamentController extends Controller
 
     public function index()
     {
-        //
+        $tournaments = $this->tournamentService->getAll();
+
+        return view('tournaments.index', ['tournaments' => $tournaments]);
     }
 
     public function create(Request $request): Factory|View
