@@ -14,13 +14,14 @@ class TournamentDomain
         public readonly ?Carbon $date,
         public readonly ?SeasonDomain $season,
         public readonly ?Carbon $updatedAt,
+        public readonly ?array $achievements,
     )
     {
     }
 
     public static function fromEloquent(Tournament $tournament, array $with = []): self
     {
-        $tournament->loadMissing(array_intersect($with, ['season']));
+        $tournament->loadMissing(array_intersect($with, ['season', 'achievements']));
 
         return new self(
             id: $tournament->id,
@@ -29,7 +30,10 @@ class TournamentDomain
             season: in_array('season', $with)
                 ? SeasonDomain::fromEloquent($tournament->season)
                 : null,
-            updatedAt: $tournament->updated_at
+            updatedAt: $tournament->updated_at,
+            achievements: in_array('achievements', $with)
+                ? $tournament->achievements->map(fn($achievement) => AchievementDomain::fromEloquent($achievement))->values()
+                : collect(),
         );
     }
 

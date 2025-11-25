@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\TournamentStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Tournament extends Model
 {
@@ -22,5 +23,10 @@ class Tournament extends Model
     public function season(): BelongsTo
     {
         return $this->belongsTo(Season::class);
+    }
+
+    public function achievements(): HasMany
+    {
+        return $this->hasMany(Achievement::class);
     }
 }

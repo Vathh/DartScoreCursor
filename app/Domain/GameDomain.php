@@ -10,12 +10,12 @@ class GameDomain
 
     public function __construct(
         public readonly int $id,
-        public readonly TournamentDomain $tournament,
-        public readonly PlayerDomain $player1,
-        public readonly PlayerDomain $player2,
+        public readonly ?TournamentDomain $tournament,
+        public readonly ?PlayerDomain $player1,
+        public readonly ?PlayerDomain $player2,
         public readonly int $player1Score,
         public readonly int $player2Score,
-        public readonly PlayerDomain $winner,
+        public readonly ?PlayerDomain $winner,
         public readonly int $groupNumber,
         public readonly GameStatus $status
     )
