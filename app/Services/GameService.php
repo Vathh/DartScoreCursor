@@ -21,12 +21,12 @@ class GameService
         $this->gameRepository->setStatusInProgress($gameId);
     }
 
-    public function update(int $gameId, int $tournamentId, int $player1Score, int $player2Score, int $winnerId, int $groupNumber): bool
+    public function update(array $game, array $achievements): bool
     {
         try{
-            DB::transaction(function () use ($gameId, $tournamentId, $player1Score, $player2Score, $winnerId, $groupNumber) {
-                $this->gameRepository->update($gameId, $player1Score, $player2Score, $winnerId);
-                $this->groupStandingService->updateGroupStandings($tournamentId, $groupNumber);
+            DB::transaction(function () use ($game) {
+                $this->gameRepository->update($game['id'], $game['player1Score'], $game['player2Score'], $game['winnerId']);
+                $this->groupStandingService->updateGroupStandings($game['tournamentId'], $game['groupNumber']);
             });
 
             return true;
