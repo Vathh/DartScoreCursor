@@ -2,10 +2,12 @@
 
 namespace App\Repositories;
 
+use App\Models\Achievement;
+
 class AchievementsRepository
 {
-    public function create(array $achievements)
+    public function createMany(array $achievements): void
     {
-
+        Achievement::createMany($achievements);
     }
 }

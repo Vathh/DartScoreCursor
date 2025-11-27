@@ -32,4 +32,6 @@ class GameController
 
         return response()->json($success);
     }
+
+    public function
 }

@@ -11,7 +11,8 @@ class GameService
 
     public function __construct(
         private GameRepository $gameRepository,
-        private GroupStandingService $groupStandingService
+        private GroupStandingService $groupStandingService,
+        private AchievementsService $achievementsService
     )
     {
     }
@@ -24,8 +25,9 @@ class GameService
     public function update(array $game, array $achievements): bool
     {
         try{
-            DB::transaction(function () use ($game) {
+            DB::transaction(function () use ($game, $achievements) {
                 $this->gameRepository->update($game['id'], $game['player1Score'], $game['player2Score'], $game['winnerId']);
+                $this->achievementsService->createMany($achievements);
                 $this->groupStandingService->updateGroupStandings($game['tournamentId'], $game['groupNumber']);
             });
 

@@ -35,11 +35,12 @@ class PlayerService
         $this->playerRepository->removeGuest($playerId);
     }
 
-    /**
-     * @throws Throwable
-     */
     public function getRelatedPlayers(int $seasonId): Collection
     {
-        return $this->playerRepository->getRelatedPlayers($seasonId);
+        try {
+            return $this->playerRepository->getRelatedPlayers($seasonId);
+        } catch (Throwable $e) {
+            return collect();
+        }
     }
 }
