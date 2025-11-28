@@ -7,6 +7,7 @@ use App\Enums\GameStatus;
 use App\Enums\TournamentStatus;
 use App\Repositories\GameRepository;
 use App\Repositories\GroupStandingRepository;
+use App\Repositories\LoginCodeRepository;
 use App\Repositories\TournamentRepository;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -20,6 +21,7 @@ class TournamentService
         private TournamentRepository    $tournamentRepository,
         private GameRepository          $gameRepository,
         private GroupStandingRepository $groupStandingRepository,
+        private LoginCodeService        $loginCodeService,
     )
     {
     }
@@ -65,6 +67,7 @@ class TournamentService
                 if ($this->tournamentRepository->checkIfTournamentCanBeStarted($tournamentId)) {
                     $this->groupStandingRepository->createEmptyStandings($tournamentId, $groups);
                     $this->gameRepository->createGames($gamesToInsert);
+                    $this->loginCodeService->generateCodes(count($groups), $tournamentId);
                     $this->tournamentRepository->changeStatus($tournamentId, TournamentStatus::STARTED);
                     return true;
                 }

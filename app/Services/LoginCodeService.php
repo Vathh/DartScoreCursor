@@ -3,16 +3,19 @@
 namespace App\Services;
 
 use App\Models\LoginCode;
+use App\Repositories\LoginCodeRepository;
 use Illuminate\Support\Collection;
 
 class LoginCodeService
 {
 
-    public function __construct()
+    public function __construct(
+        private LoginCodeRepository $loginCodeRepository
+    )
     {
     }
 
-    public function generateCodes(int $amount, int $tournamentId): Collection
+    public function generateCodes(int $amount, int $tournamentId): void
     {
         $result = collect();
 
@@ -20,6 +23,6 @@ class LoginCodeService
             $result->push(LoginCode::generate());
         }
 
-
+        $this->loginCodeRepository->save($result, $tournamentId);
     }
 }

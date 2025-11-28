@@ -15,7 +15,7 @@ class AuthController
     public function login(Request $request)
     {
         $validated = $request->validate([
-           'code' => ['required|max:6'],
+           'code' => ['required|string'],
         ]);
 
         $loginCode = LoginCode::where('code', $validated['code'])->first();
@@ -24,6 +24,7 @@ class AuthController
 
         return response()->json([
             'token' => $token,
+            'tournamentId' => $loginCode->tournament_id,
         ]);
     }
 }

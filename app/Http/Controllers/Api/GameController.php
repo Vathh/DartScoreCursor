@@ -18,10 +18,10 @@ class GameController
     public function setStatusInProgress(Request $request): void
     {
         $validated = $request->validate([
-            'game_id' => 'required',
+            'gameId' => 'required',
         ]);
 
-        $this->gameService->setStatusInProgress($validated['game_id']);
+        $this->gameService->setStatusInProgress($validated['gameId']);
     }
 
     public function update(GameResultRequest $request): JsonResponse
@@ -33,5 +33,14 @@ class GameController
         return response()->json($success);
     }
 
-    public function
+    public function getActiveGames(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+           'tournamentId' => 'required|integer'
+        ]);
+
+        $games = $this->gameService->getActiveGames($validated['tournamentId']);
+
+        return response()->json($games);
+    }
 }

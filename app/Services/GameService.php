@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Repositories\GameRepository;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
@@ -10,9 +11,9 @@ class GameService
 {
 
     public function __construct(
-        private GameRepository $gameRepository,
+        private GameRepository       $gameRepository,
         private GroupStandingService $groupStandingService,
-        private AchievementsService $achievementsService
+        private AchievementsService  $achievementsService
     )
     {
     }
@@ -24,7 +25,7 @@ class GameService
 
     public function update(array $game, array $achievements): bool
     {
-        try{
+        try {
             DB::transaction(function () use ($game, $achievements) {
                 $this->gameRepository->update($game['id'], $game['player1Score'], $game['player2Score'], $game['winnerId']);
                 $this->achievementsService->createMany($achievements);
@@ -35,5 +36,10 @@ class GameService
         } catch (Throwable $e) {
             return false;
         }
+    }
+
+    public function getActiveGames(int $tournamentId): Collection
+    {
+        return $this->gameRepository->getActiveGames($tournamentId);
     }
 }

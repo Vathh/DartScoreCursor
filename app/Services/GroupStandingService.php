@@ -22,6 +22,10 @@ class GroupStandingService
     {
         $finishedGames = $this->gameRepository->getFinishedGroupGames($tournamentId, $groupNumber);
         $groupStandings = $this->groupStandingRepository->getStandingsByGroupNumberAndTournamentId($tournamentId, $groupNumber);
+
+        $sortedStandings = $this->sortStandings($groupStandings, $finishedGames);
+
+        $this->groupStandingRepository->updateStandings($sortedStandings);
     }
 
 
@@ -33,12 +37,12 @@ class GroupStandingService
     public function sortStandings(Collection $groupStandings, Collection $finishedGames): Collection
     {
         $sortedStandings = $groupStandings->sortByDesc(function ($standing) {
-                                                return [$standing->points, $standing->legs_difference];
+                                                return [$standing->points, $standing->legsDifference];
                                             })->values()
                                             ->map(fn ($standing, $index) => $standing->withPlace($index + 1));
 
         $sortedStandingsGroupedByPointsAndLegsDifference = $sortedStandings->groupBy(function ($standing) {
-            return $standing->points . '-' . $standing->legs_difference;
+            return $standing->points . '-' . $standing->legsDifference;
         });
 
         $result = collect();
@@ -60,9 +64,8 @@ class GroupStandingService
             }
         }
 
-        return $result
-                    ->values()
-                    ->map(fn($standing, $i) => $standing->withPlace($i + 1));
+        return $result->values()
+                      ->map(fn($standing, $i) => $standing->withPlace($i + 1));
     }
 
 
