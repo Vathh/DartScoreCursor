@@ -35,11 +35,9 @@ class GameController
 
     public function getActiveGames(Request $request): JsonResponse
     {
-        $validated = $request->validate([
-           'tournamentId' => 'required|integer'
-        ]);
+        $tournamentId = $request->query('tournamentId');
 
-        $games = $this->gameService->getActiveGames($validated['tournamentId']);
+        $games = $this->gameService->getActiveGames($tournamentId);
 
         return response()->json($games);
     }

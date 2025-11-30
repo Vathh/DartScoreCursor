@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Domain\GameDomain;
 use App\Enums\GameStatus;
+use App\Models\Game;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -40,22 +41,18 @@ class GameRepository
 
     public function getFinishedGroupGames(int $tournamentId, int $groupNumber): Collection
     {
-        return DB::table('games')
-            ->where('tournament_id', $tournamentId)
-            ->where('group_number', $groupNumber)
-            ->where('status', GameStatus::FINISHED)
-            ->get()
-            ->map(fn($game) => GameDomain::fromEloquent($game))
-            ->values();
+        return Game::where('tournament_id', $tournamentId)
+                    ->where('group_number', $groupNumber)
+                    ->where('status', GameStatus::FINISHED)
+                    ->get()
+                    ->map(fn($game) => GameDomain::fromEloquent($game));
     }
 
     public function getActiveGames(int $tournamentId): Collection
     {
-        return DB::table('games')
-            ->where('tournament_id', $tournamentId)
-            ->where('status', GameStatus::SCHEDULED)
-            ->get()
-            ->map(fn($game) => GameDomain::fromEloquent($game))
-            ->values();
+        return Game::where('tournament_id', $tournamentId)
+                    ->where('status', GameStatus::SCHEDULED)
+                    ->get()
+                    ->map(fn($game) => GameDomain::fromEloquent($game, ['tournament', 'player1', 'player2']));
     }
 }

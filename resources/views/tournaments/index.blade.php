@@ -9,7 +9,7 @@
             <p>Brak.</p>
         @else
             @foreach($tournaments as $tournament)
-                <a href="{{ route('seasons.show', ['season' => $tournament->id]) }}">
+                <a href="{{ route('tournaments.show', ['tournament' => $tournament->id]) }}">
                     <div class="bg-lighter-bg shadow rounded-lg p-6 hover:shadow-xl hover:cursor-pointer hover:bg-[#333333] transition">
                         <h3 class="btn__title">{{ $tournament->getDate() }}</h3>
                         <p class="btn__description">Ostatnia aktywność : {{ $tournament->getUpdatedAtDate() }}</p>

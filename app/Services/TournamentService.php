@@ -54,6 +54,8 @@ class TournamentService
                     'tournament_id' => $tournamentId,
                     'player1_id' => $game['player1_id'],
                     'player2_id' => $game['player2_id'],
+                    'player1_score' => 0,
+                    'player2_score' => 0,
                     'group_number' => $groupIndex + 1,
                     'status' => GameStatus::SCHEDULED,
                     'created_at' => now(),

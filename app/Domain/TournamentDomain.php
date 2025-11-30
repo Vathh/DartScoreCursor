@@ -4,17 +4,18 @@ namespace App\Domain;
 
 use App\Models\Tournament;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 
 class TournamentDomain
 {
 
     public function __construct(
-        public readonly int $id,
-        public readonly string $name,
-        public readonly ?Carbon $date,
+        public readonly int           $id,
+        public readonly string        $name,
+        public readonly ?Carbon       $date,
         public readonly ?SeasonDomain $season,
-        public readonly ?Carbon $updatedAt,
-        public readonly ?array $achievements,
+        public readonly ?Carbon       $updatedAt,
+        public readonly ?Collection   $achievements,
     )
     {
     }

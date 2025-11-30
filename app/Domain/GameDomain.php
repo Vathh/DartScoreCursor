@@ -37,12 +37,12 @@ class GameDomain
             player2: in_array('player2', $with)
                 ? PlayerDomain::fromEloquent($game->player2)
                 : null,
-            player1Score: $game->player1Score,
-            player2Score: $game->player2Score,
+            player1Score: $game->player1_score,
+            player2Score: $game->player2_score,
             winner: in_array('winner', $with)
                 ? PlayerDomain::fromEloquent($game->winner)
                 : null,
-            groupNumber: $game->groupNumber,
+            groupNumber: $game->group_number,
             status: $game->status
         );
     }

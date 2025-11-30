@@ -15,7 +15,7 @@ class AuthController
     public function login(Request $request)
     {
         $validated = $request->validate([
-           'code' => ['required|string'],
+           'code' => 'required|string',
         ]);
 
         $loginCode = LoginCode::where('code', $validated['code'])->first();
