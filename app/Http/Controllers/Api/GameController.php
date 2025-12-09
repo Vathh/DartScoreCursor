@@ -26,9 +26,9 @@ class GameController
 
     public function update(GameResultRequest $request): JsonResponse
     {
-        $validated = $request->validated();
+        $dto = $request->toDTO();
 
-        $success = $this->gameService->update($validated['game'], $validated['achievements']);
+        $success = $this->gameService->update($dto);
 
         return response()->json($success);
     }

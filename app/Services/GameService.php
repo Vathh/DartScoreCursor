@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\DTO\GameResultDTO;
+use App\DTO\UpdateGameDTO;
 use App\Repositories\GameRepository;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -23,13 +25,13 @@ class GameService
         $this->gameRepository->setStatusInProgress($gameId);
     }
 
-    public function update(array $game, array $achievements): bool
+    public function update(UpdateGameDTO $dto): bool
     {
         try {
-            DB::transaction(function () use ($game, $achievements) {
-                $this->gameRepository->update($game['id'], $game['player1Score'], $game['player2Score'], $game['winnerId']);
-                $this->achievementsService->createMany($achievements);
-                $this->groupStandingService->updateGroupStandings($game['tournamentId'], $game['groupNumber']);
+            DB::transaction(function () use ($dto) {
+                $this->gameRepository->update($dto->gameResultDTO);
+                $this->achievementsService->createMany($dto->achievementsDTOs);
+                $this->groupStandingService->updateGroupStandings($dto->gameResultDTO->tournamentId, $dto->gameResultDTO->groupNumber);
             });
 
             return true;

@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use App\DTO\GameResultDTO;
+use App\DTO\UpdateGameDTO;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -32,7 +34,13 @@ class GameResultRequest extends FormRequest
 
             'achievements' => 'array',
             'achievements.*.playerId' => 'required|integer|exists:players,id',
+            'achievements.*.tournamentId' => 'required|integer|exists:tournaments,id',
             'achievements.*.type' => 'required|string'
         ];
+    }
+
+    public function toDTO(): UpdateGameDTO
+    {
+        return UpdateGameDTO::fromArray($this->validated());
     }
 }

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Domain\GameDomain;
 use App\Domain\GroupStandingDomain;
+use App\DTO\GameResultDTO;
 use App\Repositories\GameRepository;
 use App\Repositories\GroupStandingRepository;
 use Illuminate\Support\Collection;
@@ -25,9 +26,14 @@ class GroupStandingService
 
         $sortedStandings = $this->sortStandings($groupStandings, $finishedGames);
 
-        $this->groupStandingRepository->updateStandings($sortedStandings);
+        $this->groupStandingRepository->updatePlaces($sortedStandings);
     }
 
+
+    public function updateStandingsDetails(GameResultDTO $dto): void
+    {
+
+    }
 
     /**
      * @param Collection<int, GroupStandingDomain> $groupStandings
@@ -83,6 +89,12 @@ class GroupStandingService
                 && in_array($game->player2->id, $playerIds);
         })->values();
 
+        if($directGames->count() === 0) {
+            return $standingsToCompare
+                    ->shuffle()
+                    ->values();
+        }
+
         $playerWinsMap = $standingsToCompare->mapWithKeys(function ($standing) use ($directGames) {
             $playerId = $standing->player->id;
 
@@ -96,18 +108,18 @@ class GroupStandingService
         if ($playerWinsMap->unique()->count() === 1) {
 
             return $standingsToCompare
-                ->shuffle()
-                ->values();
+                    ->shuffle()
+                    ->values();
         }
 
-        $groups = $playerWinsMap->groupBy(fn ($v) => $v)->sortKeysDesc();
+        $groups = $playerWinsMap->mapToGroups(fn($wins, $playerId) => [$wins => $playerId])->sortKeysDesc();
 
         $result = collect();
 
         foreach ($groups as $winCount => $playersWithSameWins) {
 
             $subset = $standingsToCompare->filter(
-                fn($standing) => $playersWithSameWins->keys()->contains($standing->player->id)
+                fn($standing) => $playersWithSameWins->contains($standing->player->id)
             );
 
             if ($playersWithSameWins->count() === 1) {

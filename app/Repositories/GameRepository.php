@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Domain\GameDomain;
+use App\DTO\GameResultDTO;
 use App\Enums\GameStatus;
 use App\Models\Game;
 use Illuminate\Support\Collection;
@@ -18,14 +19,14 @@ class GameRepository
         DB::table('games')->insert($games);
     }
 
-    public function update(int $gameId, int $player1Score, int $player2Score, int $winnerId): void
+    public function update(GameResultDTO $dto): void
     {
         DB::table('games')
-            ->where('id', $gameId)
+            ->where('id', $dto->gameId)
             ->update([
-                'player1_score' => $player1Score,
-                'player2_score' => $player2Score,
-                'winner_id' => $winnerId,
+                'player1_score' => $dto->player1Score,
+                'player2_score' => $dto->player2Score,
+                'winner_id' => $dto->winnerId,
                 'status' => GameStatus::FINISHED
             ]);
     }
@@ -45,7 +46,7 @@ class GameRepository
                     ->where('group_number', $groupNumber)
                     ->where('status', GameStatus::FINISHED)
                     ->get()
-                    ->map(fn($game) => GameDomain::fromEloquent($game));
+                    ->map(fn($game) => GameDomain::fromEloquent($game, ['player1', 'player2', 'winner']));
     }
 
     public function getActiveGames(int $tournamentId): Collection

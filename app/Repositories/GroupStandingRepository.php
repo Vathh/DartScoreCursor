@@ -36,12 +36,6 @@ class GroupStandingRepository
 
     public function getStandingsByGroupNumberAndTournamentId(int $groupNumber, int $tournamentId): Collection
     {
-        $test = GroupStanding::with(['tournament', 'player'])
-            ->where('tournament_id', $tournamentId)
-            ->where('group_number', $groupNumber)
-            ->get();
-
-        $test2 = $test->map(fn($standing) => GroupStandingDomain::fromEloquent($standing, ['tournament', 'player']));
 
         return GroupStanding::with(['tournament', 'player'])
             ->where('tournament_id', $tournamentId)
@@ -51,7 +45,7 @@ class GroupStandingRepository
             ->values();
     }
 
-    public function updateStandings(Collection $standings): void
+    public function updatePlaces(Collection $standings): void
     {
         foreach ($standings as $standing) {
             GroupStanding::where('id', $standing->id)
