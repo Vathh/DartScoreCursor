@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\DTO\GameAchievementDTO;
 use App\Repositories\AchievementsRepository;
 
 class AchievementsService
@@ -13,6 +14,10 @@ class AchievementsService
     {
     }
 
+    /**
+     * @param GameAchievementDTO[] $achievements array
+     * @return void
+     */
     public function createMany(array $achievements): void
     {
         $this->achievementsRepository->createMany($achievements);

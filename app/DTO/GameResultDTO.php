@@ -21,14 +21,14 @@ class GameResultDTO
     public static function fromArray(array $data): GameResultDTO
     {
         return new self(
-            gameId: $data['game_id'],
-            player1Id: $data['player1_id'],
-            player2Id: $data['player2_id'],
-            player1Score: $data['player1_score'],
-            player2Score: $data['player2_score'],
-            winnerId: $data['winner_id'],
-            tournamentId: $data['tournament_id'],
-            groupNumber: $data['group_number']
+            gameId: $data['id'],
+            player1Id: $data['player1Id'],
+            player2Id: $data['player2Id'],
+            player1Score: $data['player1Score'],
+            player2Score: $data['player2Score'],
+            winnerId: $data['winnerId'],
+            tournamentId: $data['tournamentId'],
+            groupNumber: $data['groupNumber']
         );
     }
 }

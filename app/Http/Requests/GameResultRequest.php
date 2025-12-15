@@ -26,15 +26,18 @@ class GameResultRequest extends FormRequest
     {
         return [
             'game.id' => 'required|integer|exists:games,id',
-            'game.tournamentId' => 'required|integer|exists:tournaments,id',
+            'game.player1Id' => 'required|integer|exists:players,id',
+            'game.player2Id' => 'required|integer|exists:players,id',
             'game.player1Score' => 'required|integer',
             'game.player2Score' => 'required|integer',
             'game.winnerId' => 'required|integer|exists:players,id',
+            'game.tournamentId' => 'required|integer|exists:tournaments,id',
             'game.groupNumber' => 'required|integer',
 
             'achievements' => 'array',
             'achievements.*.playerId' => 'required|integer|exists:players,id',
             'achievements.*.tournamentId' => 'required|integer|exists:tournaments,id',
+            'achievements.*.value' => 'nullable|integer',
             'achievements.*.type' => 'required|string'
         ];
     }
