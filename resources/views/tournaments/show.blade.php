@@ -38,6 +38,51 @@
                     </p>
                 </div>
 
+                @if($tournament->groupStandings->count() > 0)
+                        <div class="overflow-x-auto rounded-lg p-4  bg-darker-bg border-border mt-10">
+                            <p class="text-center mb-3">Grupa 1</p>
+                            <table class="border-collapse text-sm text-text-primary min-w-full">
+                                <thead>
+                                <tr class="bg-dark-bg text-text-muted hover:bg-thead-hover transition">
+                                    <th class="px-3 py-2 text-left">Zawodnik</th>
+{{--                                    @foreach($tournament->groupStandings as $standing)--}}
+{{--                                        <th class="px-2 py-2 text-center">{{ $standing-> }}</th>--}}
+{{--                                    @endforeach--}}
+                                    <th class="px-2 py-2 text-center">P1</th>
+                                    <th class="px-2 py-2 text-center">P2</th>
+                                    <th class="px-2 py-2 text-center">P3</th>
+                                    <th class="px-2 py-2 text-center">P4</th>
+                                    <th class="px-2 py-2 text-center">W</th>
+                                    <th class="px-2 py-2 text-center">L</th>
+                                    <th class="px-2 py-2 text-center">Legi</th>
+                                    <th class="px-2 py-2 text-center">Pkt</th>
+                                    <th class="px-2 py-2 text-center">Miejsce</th>
+                                </tr>
+                                </thead>
+
+                                <tbody class="divide-y divide-border">
+                                <tr class="hover:bg-row-hover transition">
+                                    <td class="px-3 py-2 font-medium text-text-primary whitespace-nowrap">
+                                        Player 1
+                                    </td>
+
+                                    <td class="px-2 py-2 text-center bg-dark-bg text-text-muted">
+                                        X
+                                    </td>
+                                    <td class="px-2 py-2 text-center">2:1</td>
+                                    <td class="px-2 py-2 text-center">1:2</td>
+                                    <td class="px-2 py-2 text-center">2:0</td>
+
+                                    <td class="px-2 py-2 text-center">2</td>
+                                    <td class="px-2 py-2 text-center">1</td>
+                                    <td class="px-2 py-2 text-center">5:3</td>
+                                    <td class="px-2 py-2 text-center">4</td>
+                                    <td class="px-2 py-2 text-center font-semibold text-light-green">1</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                @endif
             </div>
         </div>
 

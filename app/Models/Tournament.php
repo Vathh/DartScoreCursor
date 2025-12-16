@@ -29,4 +29,14 @@ class Tournament extends Model
     {
         return $this->hasMany(Achievement::class);
     }
+
+    public function games(): HasMany
+    {
+        return $this->hasMany(Game::class);
+    }
+
+    public function groupStandings(): HasMany
+    {
+        return $this->hasMany(GroupStanding::class);
+    }
 }

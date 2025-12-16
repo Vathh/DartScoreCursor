@@ -56,7 +56,7 @@ class TournamentController extends Controller
     public function show(Tournament $tournament)
     {
         $season = SeasonDomain::fromEloquent($tournament->season, ['league', 'admins']);
-        $tournament = TournamentDomain::fromEloquent($tournament, ['season']);
+        $tournament = TournamentDomain::fromEloquent($tournament, ['season', 'groupStandings']);
 
         return view('tournaments.show', [
             'tournament' => $tournament,
