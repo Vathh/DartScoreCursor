@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Domain\SeasonDomain;
 use App\Domain\TournamentDomain;
 use App\Models\Tournament;
+use App\Queries\GetTournamentGroupResults;
 use App\Services\PlayerService;
 use App\Services\TournamentService;
 use Illuminate\Contracts\View\Factory;
@@ -18,6 +19,7 @@ class TournamentController extends Controller
     public function __construct(
         private TournamentService $tournamentService,
         private PlayerService $playerService,
+        private GetTournamentGroupResults $getTournamentGroupResults,
     )
     {
     }
@@ -55,12 +57,12 @@ class TournamentController extends Controller
 
     public function show(Tournament $tournament)
     {
-        $season = SeasonDomain::fromEloquent($tournament->season, ['league', 'admins']);
-        $tournament = TournamentDomain::fromEloquent($tournament, ['season', 'groupStandings']);
+        $viewModel = $this->getTournamentGroupResults->get($tournament->id);
 
         return view('tournaments.show', [
-            'tournament' => $tournament,
-            'season' => $season
+            'tournament' => $viewModel->tournament(),
+            'season' => $viewModel->season(),
+            'groupStandings' => $viewModel->groupStandings()
         ]);
     }
 

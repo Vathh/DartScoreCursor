@@ -46,4 +46,9 @@ class GameDomain
             status: $game->status
         );
     }
+
+    public function playerIds(): array
+    {
+        return [$this->player1->id, $this->player2->id];
+    }
 }
