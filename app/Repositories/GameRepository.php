@@ -58,7 +58,7 @@ class GameRepository
      * @param int $tournamentId
      * @return Collection<int, GameDomain>
      */
-    public function getActiveGames(int $tournamentId): Collection
+    public function getActive(int $tournamentId): Collection
     {
         return Game::where('tournament_id', $tournamentId)
                     ->where('status', GameStatus::SCHEDULED)

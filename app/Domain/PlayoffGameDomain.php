@@ -4,6 +4,8 @@ namespace App\Domain;
 
 use App\Enums\GameStatus;
 use App\Enums\PlayoffRound;
+use App\Enums\PlayoffSlot;
+use App\Enums\WinnerDestinationSlot;
 use App\Models\PlayoffGame;
 
 class PlayoffGameDomain
@@ -14,7 +16,7 @@ class PlayoffGameDomain
         public readonly ?int $tournamentId,
         public readonly ?TournamentDomain $tournament,
         public readonly PlayoffRound $round,
-        public readonly string $slot,
+        public readonly PlayoffSlot $slot,
         public readonly ?int $player1Id,
         public readonly ?int $player2Id,
         public readonly ?PlayerDomain $player1,
@@ -23,7 +25,7 @@ class PlayoffGameDomain
         public readonly ?int $player2Score,
         public readonly ?int $winnerId,
         public readonly ?PlayerDomain $winner,
-        public readonly ?string $winnerDestinationSlot,
+        public readonly ?WinnerDestinationSlot $winnerDestinationSlot,
         public readonly ?GameStatus $status
     )
     {
@@ -57,6 +59,27 @@ class PlayoffGameDomain
                 : null,
             winnerDestinationSlot: $game->winnerDestinationSlot,
             status: $game->status
+        );
+    }
+
+    public function withPlayerIds(int $player1Id, int $player2Id): PlayoffGameDomain
+    {
+        return new self(
+            id: $this->id,
+            tournamentId: $this->tournamentId,
+            tournament: $this->tournament,
+            round: $this->round,
+            slot: $this->slot,
+            player1Id: $player1Id,
+            player2Id: $player2Id,
+            player1: $this->player1,
+            player2: $this->player2,
+            player1Score: $this->player1Score,
+            player2Score: $this->player2Score,
+            winnerId: $this->winnerId,
+            winner: $this->winner,
+            winnerDestinationSlot: $this->winnerDestinationSlot,
+            status: $this->status
         );
     }
 }

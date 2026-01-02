@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Enums\GameStatus;
 use App\Enums\PlayoffRound;
+use App\Enums\PlayoffSlot;
+use App\Enums\WinnerDestinationSlot;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -25,6 +27,8 @@ class PlayoffGame extends Model
     protected $casts = [
         'status' => GameStatus::class,
         'round' => PlayoffRound::class,
+        'slot' => PlayoffSlot::class,
+        'winner_destination_slot' => WinnerDestinationSlot::class
     ];
 
     public function tournament(): BelongsTo
