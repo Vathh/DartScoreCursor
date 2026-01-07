@@ -16,6 +16,9 @@ class GetTournamentGroupResults
             'games.player1',
             'games.player2',
             'games.winner',
+            'playoffGames.player1',
+            'playoffGames.player2',
+            'playoffGames.winner',
             'achievements.player'
         ])->findOrFail($tournamentId);
 

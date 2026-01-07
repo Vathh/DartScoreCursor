@@ -39,6 +39,12 @@
                 </div>
 
                 @if($tournament->isStarted())
+                    @include('tournaments.partials.bracket', [
+                        'playoffGames' => $playoffGames
+                    ])
+                    <h2 class="text-center text-2xl font-bold text-light-green mb-8 tracking-wide">
+                        Grupy
+                    </h2>
                     @foreach($groupNumbers as $number)
                         <div class="overflow-x-auto rounded-lg p-4  bg-darker-bg border-border mt-10">
                             <p class="text-center mb-3">Grupa {{ $number }}</p>

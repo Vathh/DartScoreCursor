@@ -9,6 +9,8 @@ use App\Enums\PlayoffRound;
 use App\Enums\PlayoffSlot;
 use App\Enums\WinnerDestinationSlot;
 use App\Models\PlayoffGame;
+use Dflydev\DotAccessData\Exception\DataException;
+use DomainException;
 
 class PlayoffGameDomain
 {
@@ -119,5 +121,26 @@ class PlayoffGameDomain
             winnerDestinationSlot: $this->winnerDestinationSlot,
             status: $this->status
         );
+    }
+
+    public function checkUpdateDataAccuracy(int $player1Id,
+                                            int $player2Id,
+                                            int $winnerId): void
+    {
+        if( $player1Id !== $this->player1Id ||
+            $player2Id !== $this->player2Id)
+        {
+            throw new DomainException('Nieprawidłowe id graczy.');
+        }
+
+        if( !in_array($winnerId, [$this->player1Id, $this->player2Id]) )
+        {
+            throw new DomainException('Id zwycięzcy nieprawidłowe');
+        }
+
+        if($this->status === GameStatus::FINISHED)
+        {
+            throw new DomainException('Mecz został już ukończony.');
+        }
     }
 }

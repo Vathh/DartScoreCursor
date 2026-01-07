@@ -58,11 +58,6 @@ class PlayoffGameRepository
 
     public function find(int $id): ?PlayoffGameDomain
     {
-        $test1 = PlayoffGame::findOrFail($id);
-
-        $test = PlayoffGameDomain::fromEloquent($test1);
-
-
         return PlayoffGameDomain::fromEloquent(PlayoffGame::where('id', $id)->firstOrFail());
     }
 

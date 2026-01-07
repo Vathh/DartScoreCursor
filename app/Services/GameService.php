@@ -39,6 +39,8 @@ class GameService
                     $this->playoffService->update($dto->gameResultDTO);
                     $this->achievementsService->createMany($dto->achievementsDTOs);
                 });
+
+                return true;
             } catch (Throwable $e) {
                 return false;
             }

@@ -40,6 +40,8 @@ class PlayoffService
     {
         $gameToUpdate = $this->gameRepository->find($dto->gameId);
 
+        $gameToUpdate->checkUpdateDataAccuracy($dto->player1Id, $dto->player2Id, $dto->winnerId);
+
         $this->gameRepository->finish($dto);
 
         if($gameToUpdate->slot !== PlayoffSlot::THIRD

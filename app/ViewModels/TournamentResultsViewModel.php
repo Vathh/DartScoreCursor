@@ -4,11 +4,13 @@ namespace App\ViewModels;
 
 use App\Domain\AchievementDomain;
 use App\Domain\Game\GameDomain;
+use App\Domain\Game\PlayoffGameDomain;
 use App\Domain\GroupStandingDomain;
 use App\Domain\PlayerDomain;
 use App\Domain\SeasonDomain;
 use App\Domain\TournamentDomain;
 use App\Enums\AchievementType;
+use App\Enums\PlayoffRound;
 use App\Models\Tournament;
 use Illuminate\Support\Collection;
 
@@ -55,10 +57,20 @@ class TournamentResultsViewModel
         }
 
         foreach ($gameDomains as $game) {
-//            if($result[$game->groupNumber][$game->player2->id][$game->player1->id] !== $game) {
-//                $result[]
-//            }
             $result[$game->groupNumber][$game->player2->id][$game->player1->id] = $game;
+        }
+
+        return $result;
+    }
+
+    public function playoffGames(): array
+    {
+        $result = [];
+
+        $playoffGameDomains = $this->tournament->playoffGames->map(fn($game) => PlayoffGameDomain::fromEloquent($game, ['player1', 'player2', 'winner']));
+
+        foreach ($playoffGameDomains as $game) {
+            $result[$game->round->value][] = $game;
         }
 
         return $result;

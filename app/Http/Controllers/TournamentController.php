@@ -65,6 +65,7 @@ class TournamentController extends Controller
             'groupStandings' => $viewModel->groupStandings(),
             'players' => $viewModel->players(),
             'games' => $viewModel->games(),
+            'playoffGames' => $viewModel->playoffGames(),
             'groupNumbers' => $viewModel->groupNumbers(),
             'achievements' => $viewModel->achievements(),
         ]);
