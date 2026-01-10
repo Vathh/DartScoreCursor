@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Domain\Game\PlayoffGameDomain;
 use App\DTO\GameResultDTO;
 use App\Enums\PlayerSlot;
 use App\Enums\PlayoffSlot;
@@ -36,12 +37,8 @@ class PlayoffService
         $this->gameRepository->createMany($playoffGames);
     }
 
-    public function update(GameResultDTO $dto): void
+    public function update(GameResultDTO $dto, PlayoffGameDomain $gameToUpdate): void
     {
-        $gameToUpdate = $this->gameRepository->find($dto->gameId);
-
-        $gameToUpdate->checkUpdateDataAccuracy($dto->player1Id, $dto->player2Id, $dto->winnerId);
-
         $this->gameRepository->finish($dto);
 
         if($gameToUpdate->slot !== PlayoffSlot::THIRD

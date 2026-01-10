@@ -8,9 +8,8 @@ use App\Domain\Game\PlayoffGameDomain;
 use App\Domain\GroupStandingDomain;
 use App\Domain\PlayerDomain;
 use App\Domain\SeasonDomain;
-use App\Domain\TournamentDomain;
+use App\Domain\Tournament\TournamentDomain;
 use App\Enums\AchievementType;
-use App\Enums\PlayoffRound;
 use App\Models\Tournament;
 use Illuminate\Support\Collection;
 
@@ -102,7 +101,7 @@ class TournamentResultsViewModel
     }
 
     /**
-     * @return TournamentDomain
+     * @return \App\Domain\Tournament\TournamentDomain
      */
     public function tournament(): TournamentDomain
     {

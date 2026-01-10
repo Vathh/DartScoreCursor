@@ -2,6 +2,7 @@
 
 namespace App\Domain;
 
+use App\Domain\Tournament\TournamentDomain;
 use App\Models\GroupStanding;
 
 class GroupStandingDomain

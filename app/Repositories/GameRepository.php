@@ -74,4 +74,11 @@ class GameRepository
                     ->get()
                     ->count() === 0;
     }
+
+    public function find(int $id): ?GameDomain
+    {
+        $game = Game::with('player1', 'player2', 'winner')->where('id', $id)->firstOrFail();
+
+        return GameDomain::fromEloquent($game, ['player1', 'player2', 'winner']);
+    }
 }

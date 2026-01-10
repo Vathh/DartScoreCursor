@@ -2,8 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Domain\SeasonDomain;
-use App\Domain\TournamentDomain;
+use App\Domain\Tournament\TournamentDomain;
 use App\Models\Tournament;
 use App\Queries\GetTournamentGroupResults;
 use App\Services\PlayerService;

@@ -3,13 +3,12 @@
 namespace App\Domain\Game;
 
 use App\Domain\PlayerDomain;
-use App\Domain\TournamentDomain;
+use App\Domain\Tournament\TournamentDomain;
 use App\Enums\GameStatus;
 use App\Enums\PlayoffRound;
 use App\Enums\PlayoffSlot;
 use App\Enums\WinnerDestinationSlot;
 use App\Models\PlayoffGame;
-use Dflydev\DotAccessData\Exception\DataException;
 use DomainException;
 
 class PlayoffGameDomain

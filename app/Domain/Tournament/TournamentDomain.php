@@ -1,8 +1,11 @@
 <?php
 
-namespace App\Domain;
+namespace App\Domain\Tournament;
 
+use App\Domain\AchievementDomain;
 use App\Domain\Game\GameDomain;
+use App\Domain\GroupStandingDomain;
+use App\Domain\SeasonDomain;
 use App\Enums\TournamentStatus;
 use App\Models\Tournament;
 use Carbon\Carbon;

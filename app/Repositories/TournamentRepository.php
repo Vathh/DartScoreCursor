@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\Domain\TournamentDomain;
+use App\Domain\Tournament\TournamentDomain;
 use App\Enums\TournamentStatus;
 use App\Models\Tournament;
 use Illuminate\Support\Collection;

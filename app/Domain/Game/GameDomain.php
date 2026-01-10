@@ -3,9 +3,10 @@
 namespace App\Domain\Game;
 
 use App\Domain\PlayerDomain;
-use App\Domain\TournamentDomain;
+use App\Domain\Tournament\TournamentDomain;
 use App\Enums\GameStatus;
 use App\Models\Game;
+use DomainException;
 
 class GameDomain
 {
@@ -65,5 +66,26 @@ class GameDomain
     public function isFinished(): bool
     {
         return $this->status === GameStatus::FINISHED;
+    }
+
+    public function checkUpdateDataAccuracy(int $player1Id,
+                                            int $player2Id,
+                                            int $winnerId): void
+    {
+        if( $player1Id !== $this->player1->id ||
+            $player2Id !== $this->player2->id)
+        {
+            throw new DomainException('Nieprawidłowe id graczy.');
+        }
+
+        if( !in_array($winnerId, [$this->player1->id, $this->player2->id]) )
+        {
+            throw new DomainException('Id zwycięzcy nieprawidłowe');
+        }
+
+        if($this->status === GameStatus::FINISHED)
+        {
+            throw new DomainException('Mecz został już ukończony.');
+        }
     }
 }

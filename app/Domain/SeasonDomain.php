@@ -1,6 +1,7 @@
 <?php
 namespace App\Domain;
 
+use App\Domain\Tournament\TournamentDomain;
 use App\Models\Season;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
