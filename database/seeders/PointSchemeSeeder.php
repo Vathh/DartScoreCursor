@@ -18,17 +18,17 @@ class PointSchemeSeeder extends Seeder
         ]);
 
         PointSchemeRule::insert([
-           ['scheme_id' => $scheme25to32->id, 'elimination_stage' => EliminationStage::GROUP->value, 'place' => 4, 'points' => 2],
-           ['scheme_id' => $scheme25to32->id, 'elimination_stage' => EliminationStage::GROUP->value, 'place' => 3, 'points' => 4],
-           ['scheme_id' => $scheme25to32->id, 'elimination_stage' => EliminationStage::EIGHT->value, 'place' => null, 'points' => 7],
+           ['point_scheme_id' => $scheme25to32->id, 'elimination_stage' => EliminationStage::GROUP->value, 'place' => 4, 'points' => 2],
+           ['point_scheme_id' => $scheme25to32->id, 'elimination_stage' => EliminationStage::GROUP->value, 'place' => 3, 'points' => 4],
+           ['point_scheme_id' => $scheme25to32->id, 'elimination_stage' => EliminationStage::EIGHT->value, 'place' => null, 'points' => 7],
 
-           ['scheme_id' => $scheme25to32->id, 'elimination_stage' => EliminationStage::QUARTER->value, 'place' => null, 'points' => 10],
+           ['point_scheme_id' => $scheme25to32->id, 'elimination_stage' => EliminationStage::QUARTER->value, 'place' => null, 'points' => 10],
 
-           ['scheme_id' => $scheme25to32->id, 'elimination_stage' => EliminationStage::THIRD->value, 'place' => 4, 'points' => 14],
-           ['scheme_id' => $scheme25to32->id, 'elimination_stage' => EliminationStage::THIRD->value, 'place' => 3, 'points' => 18],
+           ['point_scheme_id' => $scheme25to32->id, 'elimination_stage' => EliminationStage::THIRD->value, 'place' => 4, 'points' => 14],
+           ['point_scheme_id' => $scheme25to32->id, 'elimination_stage' => EliminationStage::THIRD->value, 'place' => 3, 'points' => 18],
 
-           ['scheme_id' => $scheme25to32->id, 'elimination_stage' => EliminationStage::FINAL->value, 'place' => 2, 'points' => 22],
-           ['scheme_id' => $scheme25to32->id, 'elimination_stage' => EliminationStage::FINAL->value, 'place' => 1, 'points' => 26],
+           ['point_scheme_id' => $scheme25to32->id, 'elimination_stage' => EliminationStage::FINAL->value, 'place' => 2, 'points' => 22],
+           ['point_scheme_id' => $scheme25to32->id, 'elimination_stage' => EliminationStage::FINAL->value, 'place' => 1, 'points' => 26],
         ]);
 
         $scheme32to39 = PointScheme::create([
@@ -38,18 +38,18 @@ class PointSchemeSeeder extends Seeder
         ]);
 
         PointSchemeRule::insert([
-            ['scheme_id' => $scheme32to39->id, 'elimination_stage' => EliminationStage::GROUP->value, 'place' => 5, 'points' => 2],
-            ['scheme_id' => $scheme32to39->id, 'elimination_stage' => EliminationStage::GROUP->value, 'place' => 4, 'points' => 4],
-            ['scheme_id' => $scheme32to39->id, 'elimination_stage' => EliminationStage::GROUP->value, 'place' => 3, 'points' => 7],
-            ['scheme_id' => $scheme32to39->id, 'elimination_stage' => EliminationStage::EIGHT->value, 'place' => null, 'points' => 10],
+            ['point_scheme_id' => $scheme32to39->id, 'elimination_stage' => EliminationStage::GROUP->value, 'place' => 5, 'points' => 2],
+            ['point_scheme_id' => $scheme32to39->id, 'elimination_stage' => EliminationStage::GROUP->value, 'place' => 4, 'points' => 4],
+            ['point_scheme_id' => $scheme32to39->id, 'elimination_stage' => EliminationStage::GROUP->value, 'place' => 3, 'points' => 7],
+            ['point_scheme_id' => $scheme32to39->id, 'elimination_stage' => EliminationStage::EIGHT->value, 'place' => null, 'points' => 10],
 
-            ['scheme_id' => $scheme32to39->id, 'elimination_stage' => EliminationStage::QUARTER->value, 'place' => null, 'points' => 14],
+            ['point_scheme_id' => $scheme32to39->id, 'elimination_stage' => EliminationStage::QUARTER->value, 'place' => null, 'points' => 14],
 
-            ['scheme_id' => $scheme32to39->id, 'elimination_stage' => EliminationStage::THIRD->value, 'place' => 4, 'points' => 18],
-            ['scheme_id' => $scheme32to39->id, 'elimination_stage' => EliminationStage::THIRD->value, 'place' => 3, 'points' => 22],
+            ['point_scheme_id' => $scheme32to39->id, 'elimination_stage' => EliminationStage::THIRD->value, 'place' => 4, 'points' => 18],
+            ['point_scheme_id' => $scheme32to39->id, 'elimination_stage' => EliminationStage::THIRD->value, 'place' => 3, 'points' => 22],
 
-            ['scheme_id' => $scheme32to39->id, 'elimination_stage' => EliminationStage::FINAL->value, 'place' => 2, 'points' => 26],
-            ['scheme_id' => $scheme32to39->id, 'elimination_stage' => EliminationStage::FINAL->value, 'place' => 1, 'points' => 30],
+            ['point_scheme_id' => $scheme32to39->id, 'elimination_stage' => EliminationStage::FINAL->value, 'place' => 2, 'points' => 26],
+            ['point_scheme_id' => $scheme32to39->id, 'elimination_stage' => EliminationStage::FINAL->value, 'place' => 1, 'points' => 30],
         ]);
     }
 }

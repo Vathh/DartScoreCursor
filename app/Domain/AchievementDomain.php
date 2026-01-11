@@ -8,7 +8,13 @@ use App\Models\Achievement;
 
 class AchievementDomain
 {
-
+    /**
+     * @param int $id
+     * @param TournamentDomain|null $tournament
+     * @param PlayerDomain|null $player
+     * @param AchievementType $type
+     * @param int|null $value
+     */
     public function __construct(
         public readonly int $id,
         public readonly ?TournamentDomain $tournament,

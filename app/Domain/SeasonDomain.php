@@ -9,6 +9,18 @@ use Illuminate\Support\Collection;
 class SeasonDomain
 {
 
+    /**
+     * @param int $id
+     * @param string $name
+     * @param Carbon|null $startDate
+     * @param Carbon|null $endDate
+     * @param Carbon $updatedAt
+     * @param array $admins
+     * @param LeagueDomain|null $league
+     * @param array $relatedUsers
+     * @param Collection<TournamentDomain> $tournaments
+     * @param array $guests
+     */
     public function __construct(
         public readonly int $id,
         public readonly string $name,

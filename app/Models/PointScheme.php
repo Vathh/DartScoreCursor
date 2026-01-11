@@ -13,7 +13,7 @@ class PointScheme extends Model
         'max_players'
     ];
 
-    public function pointSchemeRules(): HasMany
+    public function rules(): HasMany
     {
         return $this->hasMany(PointSchemeRule::class);
     }

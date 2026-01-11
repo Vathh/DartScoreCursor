@@ -6,7 +6,17 @@ use Carbon\Carbon;
 
 class LeagueDomain
 {
-
+    /**
+     * @param int $id
+     * @param string $name
+     * @param string $description
+     * @param Carbon $createdAt
+     * @param Carbon $updatedAt
+     * @param array $admins
+     * @param array<SeasonDomain> $seasons
+     * @param array $relatedUsers
+     * @param array $guests
+     */
     public function __construct(
         public readonly int $id,
         public readonly string $name,

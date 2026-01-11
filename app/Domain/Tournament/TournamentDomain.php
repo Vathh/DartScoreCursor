@@ -14,16 +14,29 @@ use Illuminate\Support\Collection;
 class TournamentDomain
 {
 
+    /**
+     * @param int $id
+     * @param string $name
+     * @param Carbon|null $date
+     * @param SeasonDomain|null $season
+     * @param Carbon|null $updatedAt
+     * @param Collection<AchievementDomain> $achievements
+     * @param Collection<GameDomain> $games
+     * @param Collection<GroupStandingDomain> $groupStandings
+     * @param TournamentStatus $status
+     * @param PointSchemeDomain|null $pointScheme
+     */
     public function __construct(
-        public readonly int             $id,
-        public readonly string          $name,
-        public readonly ?Carbon         $date,
-        public readonly ?SeasonDomain   $season,
-        public readonly ?Carbon         $updatedAt,
-        public readonly ?Collection     $achievements,
-        public readonly ?Collection     $games,
-        public readonly ?Collection     $groupStandings,
-        public readonly TournamentStatus $status,
+        public readonly int                 $id,
+        public readonly string              $name,
+        public readonly ?Carbon             $date,
+        public readonly ?SeasonDomain       $season,
+        public readonly ?Carbon             $updatedAt,
+        public readonly Collection         $achievements,
+        public readonly Collection         $games,
+        public readonly Collection         $groupStandings,
+        public readonly TournamentStatus    $status,
+        public readonly ?PointSchemeDomain   $pointScheme,
     )
     {
     }
@@ -35,7 +48,7 @@ class TournamentDomain
      */
     public static function fromEloquent(Tournament $tournament, array $with = []): self
     {
-        $tournament->loadMissing(array_intersect($with, ['season', 'achievements', 'games', 'groupStandings']));
+        $tournament->loadMissing(array_intersect($with, ['season', 'achievements', 'games', 'groupStandings', 'pointScheme']));
 
         return new self(
             id: $tournament->id,
@@ -54,7 +67,10 @@ class TournamentDomain
             groupStandings: in_array('groupStandings', $with)
                 ? $tournament->groupStandings->map(fn($group) => GroupStandingDomain::fromEloquent($group))->values()
                 : collect(),
-            status: $tournament->status
+            status: $tournament->status,
+            pointScheme: in_array('pointScheme', $with)
+                ? PointSchemeDomain::fromEloquent($tournament->pointScheme)
+                : null,
         );
     }
 

@@ -14,6 +14,23 @@ use DomainException;
 class PlayoffGameDomain
 {
 
+    /**
+     * @param int|null $id
+     * @param int|null $tournamentId
+     * @param TournamentDomain|null $tournament
+     * @param PlayoffRound $round
+     * @param PlayoffSlot $slot
+     * @param int|null $player1Id
+     * @param int|null $player2Id
+     * @param PlayerDomain|null $player1
+     * @param PlayerDomain|null $player2
+     * @param int|null $player1Score
+     * @param int|null $player2Score
+     * @param int|null $winnerId
+     * @param PlayerDomain|null $winner
+     * @param WinnerDestinationSlot|null $winnerDestinationSlot
+     * @param GameStatus|null $status
+     */
     public function __construct(
         public readonly ?int $id,
         public readonly ?int $tournamentId,

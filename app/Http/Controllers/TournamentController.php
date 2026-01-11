@@ -6,7 +6,7 @@ use App\Domain\Tournament\TournamentDomain;
 use App\Models\Tournament;
 use App\Queries\GetTournamentGroupResults;
 use App\Services\PlayerService;
-use App\Services\TournamentService;
+use App\Services\Tournament\TournamentService;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;

@@ -11,6 +11,17 @@ use DomainException;
 class GameDomain
 {
 
+    /**
+     * @param int $id
+     * @param TournamentDomain|null $tournament
+     * @param PlayerDomain|null $player1
+     * @param PlayerDomain|null $player2
+     * @param int $player1Score
+     * @param int $player2Score
+     * @param PlayerDomain|null $winner
+     * @param int $groupNumber
+     * @param GameStatus $status
+     */
     public function __construct(
         public readonly int $id,
         public readonly ?TournamentDomain $tournament,

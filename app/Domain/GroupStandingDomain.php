@@ -7,6 +7,20 @@ use App\Models\GroupStanding;
 
 class GroupStandingDomain
 {
+    /**
+     * @param int $id
+     * @param TournamentDomain|null $tournament
+     * @param int $groupNumber
+     * @param PlayerDomain|null $player
+     * @param int $matchesPlayed
+     * @param int $matchesWon
+     * @param int $matchesLost
+     * @param int $legsWon
+     * @param int $legsLost
+     * @param int $points
+     * @param int $legsDifference
+     * @param int $place
+     */
     public function __construct(
         public readonly int $id,
         public readonly ?TournamentDomain $tournament,

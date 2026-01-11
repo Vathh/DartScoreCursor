@@ -6,6 +6,7 @@ use App\Enums\TournamentStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Tournament extends Model
 {
@@ -43,5 +44,10 @@ class Tournament extends Model
     public function groupStandings(): HasMany
     {
         return $this->hasMany(GroupStanding::class);
+    }
+
+    public function pointScheme(): HasOne
+    {
+        return $this->hasOne(PointScheme::class);
     }
 }

@@ -10,10 +10,15 @@ use Illuminate\Support\Collection;
 class PlayerDomain
 {
 
+    /**
+     * @param int $id
+     * @param string $name
+     * @param Collection<AchievementDomain> $achievements
+     */
     public function __construct(
         public readonly int         $id,
         public readonly string      $name,
-        public readonly ?Collection $achievements
+        public readonly Collection $achievements
     )
     {
     }
