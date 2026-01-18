@@ -2,7 +2,7 @@
 
 namespace App\DTO;
 
-use App\Domain\Game\GameDomain;
+use App\Domain\Game\GroupGameDomain;
 use App\Models\PlayoffGame;
 
 class ActiveGameDTO
@@ -20,10 +20,10 @@ class ActiveGameDTO
     }
 
     /**
-     * @param GameDomain $game
+     * @param GroupGameDomain $game
      * @return ActiveGameDTO
      */
-    public static function fromGame(GameDomain $game): ActiveGameDTO
+    public static function fromGame(GroupGameDomain $game): ActiveGameDTO
     {
         return new self(
             id: $game->id,

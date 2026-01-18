@@ -8,4 +8,5 @@ use App\Models\Tournament;
 
 class PointSchemeRepository
 {
+
 }

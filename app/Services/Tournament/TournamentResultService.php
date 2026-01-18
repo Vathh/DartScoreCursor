@@ -2,8 +2,10 @@
 
 namespace App\Services\Tournament;
 
+use App\Enums\GameStage;
 use App\Factories\TournamentResultsFactory;
 use App\Repositories\PointSchemeRepository;
+use App\Repositories\PointSchemeRuleRepository;
 use App\Repositories\TournamentRepository;
 use App\Repositories\TournamentResultRepository;
 use App\Services\GroupStandingService;
@@ -17,25 +19,46 @@ class TournamentResultService
         private TournamentResultsFactory   $factory,
         private TournamentRepository       $tournamentRepository,
         private TournamentResultRepository $resultRepository,
+        private PointSchemeRuleRepository  $pointSchemeRuleRepository,
     )
     {
     }
 
+    /**
+     * @param int $tournamentId
+     * @return void
+     */
     public function createForGroupLosers(int $tournamentId): void
     {
         $standings = $this->groupStandingService->getLosersGroupStandings($tournamentId);
 
-        $tournament = $this->tournamentRepository->findByIdWithSeasonAndPointScheme($tournamentId);
+        $tournament = $this->tournamentRepository->findWithSeasonAndPointSchemeRules($tournamentId);
 
-        $this->factory->createManyForGroup($tournament->pointScheme->rules, $tournament);
+        $results = $this->factory->createManyForGroup($tournament->pointScheme->rules, $tournament);
 
-        $this->resultRepository->createMany($standings->toArray());
+        $this->resultRepository->createMany($results->toArray());
     }
 
-    public function createForPlayoff(int $tournamentId,)
+    /**
+     * @param int $tournamentId
+     * @param int $playerId
+     * @param GameStage $stage
+     * @param int|null $place
+     * @return void
+     */
+    public function createForPlayoff(int $tournamentId, int $playerId, GameStage $stage, ?int $place): void
     {
-        $tournament = $this->tournamentRepository->findByIdWithSeasonAndPointScheme($tournamentId);
+        $tournament = $this->tournamentRepository->findWithSeasonAndPointScheme($tournamentId);
 
+        $rule = $this->pointSchemeRuleRepository->find($tournament->pointScheme->id, $stage, $place);
 
+        $result = $this->factory->createForPlayoff($tournament->season->id,
+                                        $tournament->id,
+                                        $playerId,
+                                        $rule->points,
+                                        $rule->place,
+                                        $stage);
+
+        $this->resultRepository->create($result);
     }
 }

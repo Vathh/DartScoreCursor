@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Enums\EliminationStage;
+use App\Enums\GameStage;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -16,7 +16,7 @@ class PointSchemeRule extends Model
     ];
 
     protected $casts = [
-        'elimination_stage' => EliminationStage::class,
+        'elimination_stage' => GameStage::class,
     ];
 
     public function pointScheme(): BelongsTo

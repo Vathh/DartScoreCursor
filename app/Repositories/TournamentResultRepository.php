@@ -16,7 +16,7 @@ class TournamentResultRepository
             'player_id' => $result->playerId,
             'points' => $result->points,
             'place' => $result->place,
-            'elimination_stage' => $result->eliminationStage->value,
+            'elimination_stage' => $result->eliminationStage?->value,
             'created_at' => now(),
             'updated_at' => now(),
         ], $tournamentResults);
@@ -26,6 +26,6 @@ class TournamentResultRepository
 
     public function create(TournamentResultDomain $tournamentResult): void
     {
-
+        $this->createMany([$tournamentResult]);
     }
 }

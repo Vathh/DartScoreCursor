@@ -8,7 +8,7 @@ use App\Enums\GameStatus;
 use App\Models\Game;
 use DomainException;
 
-class GameDomain
+class GroupGameDomain
 {
 
     /**
@@ -39,9 +39,9 @@ class GameDomain
     /**
      * @param Game $game
      * @param array $with
-     * @return GameDomain
+     * @return GroupGameDomain
      */
-    public static function fromEloquent(Game $game, array $with = []): GameDomain
+    public static function fromEloquent(Game $game, array $with = []): GroupGameDomain
     {
         $game->loadMissing(array_intersect($with, ['tournament', 'player1', 'player2', 'winner']));
 

@@ -4,7 +4,7 @@ namespace App\Domain\Tournament;
 
 use App\Domain\PlayerDomain;
 use App\Domain\SeasonDomain;
-use App\Enums\EliminationStage;
+use App\Enums\GameStage;
 use App\Models\TournamentResult;
 
 class TournamentResultDomain
@@ -19,7 +19,7 @@ class TournamentResultDomain
      * @param int|null $playerId
      * @param int $points
      * @param int|null $place
-     * @param EliminationStage|null $eliminationStage
+     * @param GameStage|null $eliminationStage
      */
     public function __construct(
         public readonly ?SeasonDomain $season,
@@ -30,7 +30,7 @@ class TournamentResultDomain
         public readonly ?int $playerId,
         public readonly int $points,
         public readonly ?int $place,
-        public readonly ?EliminationStage $eliminationStage,
+        public readonly ?GameStage $eliminationStage,
     )
     {
     }

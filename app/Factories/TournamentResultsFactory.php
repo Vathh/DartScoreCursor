@@ -6,7 +6,7 @@ use App\Domain\GroupStandingDomain;
 use App\Domain\Tournament\PointSchemeRuleDomain;
 use App\Domain\Tournament\TournamentDomain;
 use App\Domain\Tournament\TournamentResultDomain;
-use App\Enums\EliminationStage;
+use App\Enums\GameStage;
 use Illuminate\Support\Collection;
 
 class TournamentResultsFactory
@@ -25,14 +25,14 @@ class TournamentResultsFactory
                     return $this->createForGroup(
                                 standing: $standing,
                                 seasonId: $seasonId,
-                                points: $pointSchemeRules->where('elimination_stage', EliminationStage::GROUP->value)
+                                points: $pointSchemeRules->where('elimination_stage', GameStage::GROUP->value)
                                     ->where('place', $standing->place)
                                     ->points
                             );
                 });
     }
 
-    public function createForGroup(GroupStandingDomain $standing, int $seasonId, int $points, EliminationStage $stage): TournamentResultDomain
+    private function createForGroup(GroupStandingDomain $standing, int $seasonId, int $points): TournamentResultDomain
     {
         return new TournamentResultDomain(
             seasonId: $seasonId,
@@ -40,9 +40,24 @@ class TournamentResultsFactory
             playerId: $standing->player->id,
             points: $points,
             place: $standing->place,
-            eliminationStage: EliminationStage::GROUP,
+            eliminationStage: GameStage::GROUP,
         );
     }
 
-    public function createForPlayoff()
+    public function createForPlayoff(int $seasonId,
+                                     int $tournamentId,
+                                     int $playerId,
+                                     ?int $points,
+                                     int $place,
+                                     GameStage $stage): TournamentResultDomain
+    {
+        return new TournamentResultDomain(
+            seasonId: $seasonId,
+            tournamentId: $tournamentId,
+            playerId: $playerId,
+            points: $points,
+            place: $place,
+            eliminationStage: $stage
+        );
+    }
 }

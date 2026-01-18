@@ -52,10 +52,17 @@ class TournamentRepository
      * @param int $tournamentId
      * @return TournamentDomain|null
      */
-    public function findByIdWithSeasonAndPointScheme(int $tournamentId): ?TournamentDomain
+    public function findWithSeasonAndPointSchemeRules(int $tournamentId): ?TournamentDomain
     {
         $tournament = Tournament::with(['season', 'pointScheme.rules'])->findOrFail($tournamentId);
 
         return TournamentDomain::fromEloquent($tournament, ['season', 'pointScheme', 'pointScheme.rules']);
+    }
+
+    public function findWithSeasonAndPointScheme(int $tournamentId): ?TournamentDomain
+    {
+        $tournament = Tournament::with(['season', 'pointScheme'])->findOrFail($tournamentId);
+
+        return TournamentDomain::fromEloquent($tournament, ['season', 'pointScheme']);
     }
 }

@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\Domain\Game\GameDomain;
+use App\Domain\Game\GroupGameDomain;
 use App\DTO\GameResultDTO;
 use App\Enums\GameStatus;
 use App\Models\Game;
@@ -43,7 +43,7 @@ class GameRepository
     /**
      * @param int $tournamentId
      * @param int $groupNumber
-     * @return Collection<int, GameDomain>
+     * @return Collection<int, GroupGameDomain>
      */
     public function getFinishedGroupGames(int $tournamentId, int $groupNumber): Collection
     {
@@ -51,12 +51,12 @@ class GameRepository
                     ->where('group_number', $groupNumber)
                     ->where('status', GameStatus::FINISHED)
                     ->get()
-                    ->map(fn($game) => GameDomain::fromEloquent($game, ['player1', 'player2', 'winner']));
+                    ->map(fn($game) => GroupGameDomain::fromEloquent($game, ['player1', 'player2', 'winner']));
     }
 
     /**
      * @param int $tournamentId
-     * @return Collection<int, GameDomain>
+     * @return Collection<int, GroupGameDomain>
      */
     public function getActive(int $tournamentId): Collection
     {
@@ -64,7 +64,7 @@ class GameRepository
                     ->where('tournament_id', $tournamentId)
                     ->where('status', GameStatus::SCHEDULED)
                     ->get()
-                    ->map(fn($game) => GameDomain::fromEloquent($game, ['tournament', 'player1', 'player2']));
+                    ->map(fn($game) => GroupGameDomain::fromEloquent($game, ['tournament', 'player1', 'player2']));
     }
 
     public function checkIfPlayoffShouldBeStarted(int $tournamentId): bool
@@ -75,10 +75,10 @@ class GameRepository
                     ->count() === 0;
     }
 
-    public function find(int $id): ?GameDomain
+    public function find(int $id): ?GroupGameDomain
     {
         $game = Game::with('player1', 'player2', 'winner')->where('id', $id)->firstOrFail();
 
-        return GameDomain::fromEloquent($game, ['player1', 'player2', 'winner']);
+        return GroupGameDomain::fromEloquent($game, ['player1', 'player2', 'winner']);
     }
 }

@@ -2,7 +2,8 @@
 
 namespace App\Models;
 
-use App\Enums\EliminationStage;
+use App\Enums\GameStage;
+use App\EnumsGameStage;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -18,7 +19,7 @@ class TournamentResult extends Model
     ];
 
     protected $casts = [
-        'elimination_stage' => EliminationStage::class,
+        'elimination_stage' => GameStage::class,
     ];
 
     public function season(): BelongsTo

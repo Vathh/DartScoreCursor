@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Enums\GameStatus;
-use App\Enums\PlayoffRound;
+use App\Enums\GameStage;
 use App\Enums\PlayoffSlot;
 use App\Enums\WinnerDestinationSlot;
 use Illuminate\Database\Eloquent\Model;
@@ -25,7 +25,7 @@ class PlayoffGame extends Model
     ];
 
     protected $casts = [
-        'round' => PlayoffRound::class,
+        'round' => GameStage::class,
         'slot' => PlayoffSlot::class,
         'winner_destination_slot' => WinnerDestinationSlot::class,
         'status' => GameStatus::class,

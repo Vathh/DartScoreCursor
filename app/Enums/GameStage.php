@@ -2,7 +2,9 @@
 
 namespace App\Enums;
 
-enum PlayoffRound: string{
+enum GameStage: string
+{
+    case GROUP = 'GROUP';
     case EIGHT = 'EIGHT';
     case QUARTER = 'QUARTER';
     case SEMI = 'SEMI';

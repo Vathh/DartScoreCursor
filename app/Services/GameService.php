@@ -5,6 +5,7 @@ namespace App\Services;
 use App\DTO\ActiveGameDTO;
 use App\DTO\GameResultDTO;
 use App\DTO\UpdateGameDTO;
+use App\Enums\GameStage;
 use App\Enums\GameType;
 use App\Enums\TournamentStatus;
 use App\Repositories\GameRepository;
@@ -39,45 +40,10 @@ class GameService
     {
         if($dto->gameResultDTO->type === GameType::PLAYOFF)
         {
-            try {
-                DB::transaction(function () use ($dto) {
-                    $gameToUpdate = $this->playoffGameRepository->find($dto->gameResultDTO->gameId);
-                    $gameToUpdate->checkUpdateDataAccuracy($dto->gameResultDTO->player1Id, $dto->gameResultDTO->player2Id, $dto->gameResultDTO->winnerId);
-
-                    $this->playoffService->update($dto->gameResultDTO, $gameToUpdate);
-
-                    $this->achievementsService->createMany($dto->achievementsDTOs);
-
-                });
-
-                return true;
-            } catch (Throwable $e) {
-                return false;
-            }
+            return $this->handlePlayoffGameUpdate($dto);
         }else if($dto->gameResultDTO->type === GameType::GROUP)
         {
-            try {
-                DB::transaction(function () use ($dto) {
-                    $gameToUpdate = $this->gameRepository->find($dto->gameResultDTO->gameId);
-                    $gameToUpdate->checkUpdateDataAccuracy($dto->gameResultDTO->player1Id, $dto->gameResultDTO->player2Id, $dto->gameResultDTO->winnerId);
-
-                    $this->groupStandingService->updateStandingsDetails($dto->gameResultDTO);
-                    $this->gameRepository->finish($dto->gameResultDTO);
-                    $this->achievementsService->createMany($dto->achievementsDTOs);
-                    $this->groupStandingService->updateGroupStandings($dto->gameResultDTO->tournamentId, $dto->gameResultDTO->groupNumber);
-
-                    if($this->gameRepository->checkIfPlayoffShouldBeStarted($dto->gameResultDTO->tournamentId))
-                    {
-                        $this->tournamentResultService->createForGroupLosers($dto->gameResultDTO->tournamentId);
-                        $this->playoffService->generateBracket($dto->gameResultDTO->tournamentId);
-                        $this->tournamentRepository->changeStatus($dto->gameResultDTO->tournamentId, TournamentStatus::PLAYOFF);
-                    }
-                });
-
-                return true;
-            } catch (Throwable $e) {
-                return false;
-            }
+            return $this->handleGroupGameUpdate($dto);
         }
 
         return false;
@@ -103,5 +69,143 @@ class GameService
         }
 
         return collect();
+    }
+
+    private function handleTournamentResultCreating(int $winnerId,
+                                                   int $player1Id,
+                                                   int $player2Id,
+                                                   int $tournamentId,
+                                                   GameStage $stage,
+                                                   ?int $winnerPlace): void
+    {
+        if($winnerPlace === null) {
+            switch($winnerId){
+                case $player1Id:
+                    $this->tournamentResultService->createForPlayoff($tournamentId,
+                        $player2Id,
+                        $stage,
+                        null);
+                    break;
+                case $player2Id:
+                    $this->tournamentResultService->createForPlayoff($tournamentId,
+                        $player1Id,
+                        $stage,
+                        null);
+                    break;
+            }
+        } else {
+            switch($winnerId){
+                case $player1Id:
+                    $this->tournamentResultService->createForPlayoff($tournamentId,
+                        $player1Id,
+                        $stage,
+                        $winnerPlace);
+
+                    $this->tournamentResultService->createForPlayoff($tournamentId,
+                        $player2Id,
+                        $stage,
+                        $winnerPlace + 1);
+                    break;
+                case $player2Id:
+                    $this->tournamentResultService->createForPlayoff($tournamentId,
+                        $player2Id,
+                        $stage,
+                        $winnerPlace);
+
+                    $this->tournamentResultService->createForPlayoff($tournamentId,
+                        $player1Id,
+                        $stage,
+                        $winnerPlace + 1);
+                    break;
+            }
+        }
+    }
+
+    /** @noinspection PhpConditionAlreadyCheckedInspection */
+    private function handlePlayoffGameUpdate(UpdateGameDTO $dto): bool
+    {
+        try {
+            DB::transaction(function () use ($dto) {
+                $gameToUpdate = $this->playoffGameRepository->find($dto->gameResultDTO->gameId);
+                $gameToUpdate->checkUpdateDataAccuracy($dto->gameResultDTO->player1Id,
+                                                        $dto->gameResultDTO->player2Id,
+                                                        $dto->gameResultDTO->winnerId);
+
+                if($gameToUpdate->round !== GameStage::FINAL && $gameToUpdate->round !== GameStage::THIRD)
+                {
+                    $this->handleTournamentResultCreating($dto->gameResultDTO->winnerId,
+                                                            $dto->gameResultDTO->player1Id,
+                                                            $dto->gameResultDTO->player2Id,
+                                                            $gameToUpdate->tournamentId,
+                                                            $gameToUpdate->round,
+                                                            null);
+                } else if ($gameToUpdate->round === GameStage::THIRD)
+                {
+                    $this->handleTournamentResultCreating($dto->gameResultDTO->winnerId,
+                                                            $dto->gameResultDTO->player1Id,
+                                                            $dto->gameResultDTO->player2Id,
+                                                            $gameToUpdate->tournamentId,
+                                                            GameStage::THIRD,
+                                                            3);
+                } else if ($gameToUpdate->round === GameStage::FINAL)
+                {
+                    $this->handleTournamentResultCreating($dto->gameResultDTO->winnerId,
+                                                            $dto->gameResultDTO->player1Id,
+                                                            $dto->gameResultDTO->player2Id,
+                                                            $gameToUpdate->tournamentId,
+                                                            GameStage::FINAL,
+                                                            1);
+                }
+
+                $this->playoffService->update($dto->gameResultDTO, $gameToUpdate);
+
+                $this->achievementsService->createMany($dto->achievementsDTOs);
+
+            });
+
+            return true;
+        } catch (Throwable $e) {
+            return false;
+        }
+    }
+
+    private function handleGroupGameUpdate(UpdateGameDTO $dto): bool
+    {
+        try {
+            DB::transaction(function () use ($dto) {
+                $gameToUpdate = $this->gameRepository->find($dto->gameResultDTO->gameId);
+                $gameToUpdate->checkUpdateDataAccuracy($dto->gameResultDTO->player1Id,
+                                                        $dto->gameResultDTO->player2Id,
+                                                        $dto->gameResultDTO->winnerId);
+
+                $this->groupStandingService->updateStandingsDetails($dto->gameResultDTO);
+                $this->gameRepository->finish($dto->gameResultDTO);
+                $this->achievementsService->createMany($dto->achievementsDTOs);
+                $this->groupStandingService->updateGroupStandings($dto->gameResultDTO->tournamentId,
+                                                                    $dto->gameResultDTO->groupNumber);
+
+                $this->handlePlayoffStart($dto->gameResultDTO->tournamentId);
+
+            });
+
+            return true;
+        } catch (Throwable $e) {
+            return false;
+        }
+    }
+
+    private function handlePlayoffStart(int $tournamentId): void
+    {
+        if($this->gameRepository->checkIfPlayoffShouldBeStarted($tournamentId))
+        {
+            $this->tournamentResultService->createForGroupLosers($tournamentId);
+            $this->playoffService->generateBracket($tournamentId);
+            try {
+                $this->tournamentRepository->changeStatus($tournamentId,
+                    TournamentStatus::PLAYOFF);
+            } catch (Throwable $e) {
+
+            }
+        }
     }
 }

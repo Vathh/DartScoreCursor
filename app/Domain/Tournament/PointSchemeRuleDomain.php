@@ -2,7 +2,7 @@
 
 namespace App\Domain\Tournament;
 
-use App\Enums\EliminationStage;
+use App\Enums\GameStage;
 use App\Models\PointSchemeRule;
 
 class PointSchemeRuleDomain
@@ -10,7 +10,7 @@ class PointSchemeRuleDomain
 
     public function __construct(
         public readonly int $id,
-        public readonly EliminationStage $stage,
+        public readonly GameStage $stage,
         public readonly int $place,
         public readonly int $points,
     )
@@ -25,7 +25,7 @@ class PointSchemeRuleDomain
     {
         return new self(
             id: $rule->id,
-            stage: EliminationStage::from($rule->elimination_stage),
+            stage: GameStage::from($rule->elimination_stage),
             place: $rule->place,
             points: $rule->points
         );

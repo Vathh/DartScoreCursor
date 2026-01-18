@@ -3,7 +3,7 @@
 namespace App\Domain\Tournament;
 
 use App\Domain\AchievementDomain;
-use App\Domain\Game\GameDomain;
+use App\Domain\Game\GroupGameDomain;
 use App\Domain\GroupStandingDomain;
 use App\Domain\SeasonDomain;
 use App\Enums\TournamentStatus;
@@ -21,7 +21,7 @@ class TournamentDomain
      * @param SeasonDomain|null $season
      * @param Carbon|null $updatedAt
      * @param Collection<AchievementDomain> $achievements
-     * @param Collection<GameDomain> $games
+     * @param Collection<GroupGameDomain> $games
      * @param Collection<GroupStandingDomain> $groupStandings
      * @param TournamentStatus $status
      * @param PointSchemeDomain|null $pointScheme
@@ -62,7 +62,7 @@ class TournamentDomain
                 ? $tournament->achievements->map(fn($achievement) => AchievementDomain::fromEloquent($achievement))->values()
                 : collect(),
             games: in_array('games', $with)
-                ? $tournament->games->map(fn($game) => GameDomain::fromEloquent($game))->values()
+                ? $tournament->games->map(fn($game) => GroupGameDomain::fromEloquent($game))->values()
                 : collect(),
             groupStandings: in_array('groupStandings', $with)
                 ? $tournament->groupStandings->map(fn($group) => GroupStandingDomain::fromEloquent($group))->values()

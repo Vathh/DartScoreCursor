@@ -3,7 +3,7 @@
 namespace App\ViewModels;
 
 use App\Domain\AchievementDomain;
-use App\Domain\Game\GameDomain;
+use App\Domain\Game\GroupGameDomain;
 use App\Domain\Game\PlayoffGameDomain;
 use App\Domain\GroupStandingDomain;
 use App\Domain\PlayerDomain;
@@ -42,14 +42,14 @@ class TournamentResultsViewModel
     }
 
     /**
-     * @return array<GameDomain>
+     * @return array<GroupGameDomain>
      */
     public function games(): array
     {
         $result = [];
 
         $gameDomains = $this->tournament
-                    ->games->map(fn($game) => GameDomain::fromEloquent($game, ['player1', 'player2', 'winner']));
+                    ->games->map(fn($game) => GroupGameDomain::fromEloquent($game, ['player1', 'player2', 'winner']));
 
         foreach ($gameDomains as $game) {
             $result[$game->groupNumber][$game->player1->id][$game->player2->id] = $game;

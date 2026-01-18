@@ -5,7 +5,7 @@ namespace App\Domain\Game;
 use App\Domain\PlayerDomain;
 use App\Domain\Tournament\TournamentDomain;
 use App\Enums\GameStatus;
-use App\Enums\PlayoffRound;
+use App\Enums\GameStage;
 use App\Enums\PlayoffSlot;
 use App\Enums\WinnerDestinationSlot;
 use App\Models\PlayoffGame;
@@ -18,7 +18,7 @@ class PlayoffGameDomain
      * @param int|null $id
      * @param int|null $tournamentId
      * @param TournamentDomain|null $tournament
-     * @param PlayoffRound $round
+     * @param GameStage $round
      * @param PlayoffSlot $slot
      * @param int|null $player1Id
      * @param int|null $player2Id
@@ -32,29 +32,29 @@ class PlayoffGameDomain
      * @param GameStatus|null $status
      */
     public function __construct(
-        public readonly ?int $id,
-        public readonly ?int $tournamentId,
-        public readonly ?TournamentDomain $tournament,
-        public readonly PlayoffRound $round,
-        public readonly PlayoffSlot $slot,
-        public readonly ?int $player1Id,
-        public readonly ?int $player2Id,
-        public readonly ?PlayerDomain $player1,
-        public readonly ?PlayerDomain $player2,
-        public readonly ?int $player1Score,
-        public readonly ?int $player2Score,
-        public readonly ?int $winnerId,
-        public readonly ?PlayerDomain $winner,
+        public readonly ?int                   $id,
+        public readonly ?int                   $tournamentId,
+        public readonly ?TournamentDomain      $tournament,
+        public readonly GameStage              $round,
+        public readonly PlayoffSlot            $slot,
+        public readonly ?int                   $player1Id,
+        public readonly ?int                   $player2Id,
+        public readonly ?PlayerDomain          $player1,
+        public readonly ?PlayerDomain          $player2,
+        public readonly ?int                   $player1Score,
+        public readonly ?int                   $player2Score,
+        public readonly ?int                   $winnerId,
+        public readonly ?PlayerDomain          $winner,
         public readonly ?WinnerDestinationSlot $winnerDestinationSlot,
-        public readonly ?GameStatus $status
+        public readonly ?GameStatus            $status
     )
     {
     }
 
     public static function createForBracket(
-        int $tournamentId,
-        PlayoffRound $round,
-        PlayoffSlot $slot,
+        int                    $tournamentId,
+        GameStage              $round,
+        PlayoffSlot            $slot,
         ?WinnerDestinationSlot $winnerDestinationSlot = null
     ): PlayoffGameDomain
     {

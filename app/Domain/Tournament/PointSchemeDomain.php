@@ -2,7 +2,7 @@
 
 namespace App\Domain\Tournament;
 
-use App\Enums\EliminationStage;
+use App\Enums\GameStage;
 use App\Models\PointScheme;
 use App\Models\PointSchemeRule;
 use Illuminate\Support\Collection;
@@ -47,7 +47,7 @@ class PointSchemeDomain
         );
     }
 
-    public function getPointsAmount(EliminationStage $stage, ?int $place): int
+    public function getPointsAmount(GameStage $stage, ?int $place): int
     {
         return $this->rules->where(fn(PointSchemeRuleDomain $rule) =>
                                         $rule->stage === $stage && $rule->place === $place)
