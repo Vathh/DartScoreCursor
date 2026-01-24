@@ -12,7 +12,7 @@ class AuthController
     {
     }
 
-    public function login(Request $request)
+    public function tournamentLogin(Request $request)
     {
         $validated = $request->validate([
            'code' => 'required|string',
@@ -26,5 +26,15 @@ class AuthController
             'token' => $token,
             'tournamentId' => $loginCode->tournament_id,
         ]);
+    }
+
+    public function login(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => 'required|string|email',
+            'password' => 'required|string|max:30',
+        ]);
+
+
     }
 }

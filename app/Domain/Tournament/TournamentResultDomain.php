@@ -38,9 +38,9 @@ class TournamentResultDomain
     /**
      * @param TournamentResult $result
      * @param array $with
-     * @return self
+     * @return TournamentResultDomain
      */
-    public function fromEloquent(TournamentResult $result, array $with = []): self
+    public static function fromEloquent(TournamentResult $result, array $with = []): self
     {
         $result->loadMissing(array_intersect($with, ['season', 'tournament', 'player']));
 

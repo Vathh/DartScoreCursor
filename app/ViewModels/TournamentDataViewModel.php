@@ -159,8 +159,19 @@ class TournamentDataViewModel
     {
         $resultDomains = $this->tournament
                                 ->results
-                                ->map(fn($result) => TournamentResultDomain::fromEloquent($result, ['player']));
+                                ->map(fn($result) => TournamentResultDomain::fromEloquent($result, ['player']))
+                                ->sortByDesc('points');
 
+        $array = [];
 
+        foreach ($resultDomains as $result)
+        {
+            $array[$result->player->id]['player'] = $result->player;
+            $array[$result->player->id]['place'] = $result->place;
+            $array[$result->player->id]['points'] = $result->points;
+            $array[$result->player->id]['stage'] = $result->eliminationStage;
+        }
+
+        return collect($array);
     }
 }

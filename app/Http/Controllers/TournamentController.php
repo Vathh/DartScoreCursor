@@ -69,6 +69,7 @@ class TournamentController extends Controller
             'playoffGames' => $viewModel->playoffGames(),
             'groupNumbers' => $viewModel->groupNumbers(),
             'achievements' => $viewModel->achievements(),
+            'results' => $viewModel->results(),
             'tab' => \request()->get('tab', 'results'),
         ]);
     }
