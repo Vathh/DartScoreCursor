@@ -2,19 +2,19 @@
 
 namespace App\Services;
 
-use App\DTO\MatchLegDTO;
-use App\Repositories\MatchLegRepository;
+use App\DTO\GameLegDTO;
+use App\Repositories\GameLegRepository;
 
-class MatchLegService
+class GameLegService
 {
     public function __construct(
-        private MatchLegRepository $matchLegRepository
+        private GameLegRepository $gameLegRepository
     )
     {
     }
 
     /**
-     * @param MatchLegDTO[] $legs
+     * @param GameLegDTO[] $legs
      * @param int|null $gameId
      * @param int|null $playoffGameId
      * @param int|null $quickGameId
@@ -26,6 +26,6 @@ class MatchLegService
             return;
         }
 
-        $this->matchLegRepository->createMany($legs, $gameId, $playoffGameId, $quickGameId);
+        $this->gameLegRepository->createMany($legs, $gameId, $playoffGameId, $quickGameId);
     }
 }

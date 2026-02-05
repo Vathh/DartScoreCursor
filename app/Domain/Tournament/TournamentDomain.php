@@ -68,7 +68,7 @@ class TournamentDomain
                 ? $tournament->groupStandings->map(fn($group) => GroupStandingDomain::fromEloquent($group))->values()
                 : collect(),
             status: $tournament->status,
-            pointScheme: in_array('pointScheme', $with)
+            pointScheme: in_array('pointScheme', $with) && $tournament->pointScheme
                 ? PointSchemeDomain::fromEloquent(
                     $tournament->pointScheme,
                     with: in_array('pointScheme.rules', $with) ? ['rules'] : []

@@ -4,8 +4,11 @@ namespace App\Providers;
 
 use App\Models\League;
 use App\Policies\LeaguePolicy;
+use App\Services\FriendshipService;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -23,6 +26,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        View::composer('layouts.app', function ($view) {
+            $friends = collect();
+            if (Auth::check()) {
+                $friends = app(FriendshipService::class)->getFriends(Auth::id());
+            }
+            $view->with('friends', $friends);
+        });
+
         Blade::if('canCreateLeagues', function () {
             return auth()->check() && auth()->user()->can_create_leagues;
         });

@@ -50,6 +50,14 @@ class TournamentResultService
     {
         $tournament = $this->tournamentRepository->findWithSeasonAndPointScheme($tournamentId);
 
+        if ($tournament->pointScheme === null) {
+            throw new \RuntimeException("Tournament {$tournamentId} does not have a point scheme assigned");
+        }
+
+        if ($tournament->season === null) {
+            throw new \RuntimeException("Tournament {$tournamentId} does not have a season assigned");
+        }
+
         $rule = $this->pointSchemeRuleRepository->find($tournament->pointScheme->id, $stage, $place);
 
         $result = $this->factory->createForPlayoff($tournament->season->id,

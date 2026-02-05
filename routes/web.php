@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\LeagueController;
 use App\Http\Controllers\PagesController;
+use App\Http\Controllers\PlayerController;
 use App\Http\Controllers\SeasonController;
 use App\Http\Controllers\TournamentController;
 use Illuminate\Support\Facades\Route;
@@ -15,6 +16,10 @@ Route::post('/register', [AuthController::class, 'register'])->name('register');
 Route::get('/login', [PagesController::class, 'showLoginPage'])->name('pages.loginPanel');
 Route::post('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+Route::get('/players/search', [PlayerController::class, 'search'])->name('players.search');
+Route::get('/players/{player}', [PlayerController::class, 'show'])->name('players.show');
+Route::post('/players/{player}/add-friend', [PlayerController::class, 'addFriend'])->name('players.add-friend')->middleware('auth');
 
 Route::resource('leagues', LeagueController::class);
 Route::prefix('leagues/{league}')->group(function () {

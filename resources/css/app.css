@@ -76,4 +76,8 @@
         -webkit-background-clip: text;
         transition: background-color 5000s ease-in-out 0s;
     }
+
+    [x-cloak] {
+        display: none !important;
+    }
 }

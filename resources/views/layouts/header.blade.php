@@ -7,12 +7,23 @@
                 <span class="text-light-orange pl-5 text-xl">{{ Auth::user()->player->name }}</span>
             @endauth
         </h1>
-        <nav class="flex ">
+        <nav class="flex flex-wrap items-center gap-2 ">
             <a href="/" class="nav-btn {{ request()->routeIs('pages.home') ? 'active' : '' }}">Strona główna</a>
 
             <a href='{{ route('leagues.index') }}' class="nav-btn {{ request()->routeIs('leagues.*') ? 'active' : '' }}">Ligi</a>
             <a href='{{ route('seasons.index') }}' class="nav-btn {{ request()->routeIs('seasons.*') ? 'active' : '' }}">Sezony</a>
             <a href='{{ route('tournaments.index') }}' class="nav-btn {{ request()->routeIs('tournaments.*') ? 'active' : '' }}">Turnieje</a>
+            <a href='{{ route('players.search') }}' class="nav-btn {{ request()->routeIs('players.*') ? 'active' : '' }}">Szukaj graczy</a>
+
+            @auth
+                @if(Auth::user()->player)
+                    @php
+                        $currentPlayer = request()->routeIs('players.show') ? request()->route('player') : null;
+                        $isMyProfile = $currentPlayer && $currentPlayer->id === Auth::user()->player->id;
+                    @endphp
+                    <a href='{{ route('players.show', Auth::user()->player) }}' class="nav-btn {{ $isMyProfile ? 'active' : '' }}">Mój profil</a>
+                @endif
+            @endauth
 
             @guest
                 <a href='{{ route('pages.loginPanel') }}' class="nav-btn">Zaloguj się</a>

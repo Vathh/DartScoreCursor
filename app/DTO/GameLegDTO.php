@@ -2,7 +2,7 @@
 
 namespace App\DTO;
 
-class MatchLegDTO
+class GameLegDTO
 {
     public function __construct(
         public int $legNumber,
@@ -20,7 +20,7 @@ class MatchLegDTO
     {
     }
 
-    public static function fromArray(array $data): MatchLegDTO
+    public static function fromArray(array $data): GameLegDTO
     {
         return new self(
             legNumber: $data['legNumber'],

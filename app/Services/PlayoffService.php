@@ -43,6 +43,7 @@ class PlayoffService
 
         if($gameToUpdate->slot !== PlayoffSlot::THIRD
             && $gameToUpdate->slot !== PlayoffSlot::FINAL
+            && $gameToUpdate->winnerDestinationSlot !== null
         ){
             $winnerDestination = $gameToUpdate->winnerDestinationSlot->toDestination();
 

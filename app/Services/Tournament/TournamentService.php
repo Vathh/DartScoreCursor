@@ -81,7 +81,7 @@ class TournamentService
                 return false;
             });
         } catch (Throwable $e) {
-            throw new RuntimeException('Nie udało się stworzyć grup', $e);
+            throw new RuntimeException('Nie udało się stworzyć grup', 0, $e);
         }
     }
 

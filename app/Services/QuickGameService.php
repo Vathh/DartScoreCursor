@@ -3,12 +3,13 @@
 namespace App\Services;
 
 use App\DTO\UpdateGameDTO;
+use App\DTO\QuickGame\QuickGameResultDTO;
 use App\Domain\Game\QuickGameDomain;
 use App\Enums\GameType;
 use App\Repositories\QuickGameRepository;
 use App\Repositories\PlayerRepository;
 use App\Services\AchievementsService;
-use App\Services\MatchLegService;
+use App\Services\GameLegService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Throwable;
@@ -19,7 +20,8 @@ class QuickGameService
         private QuickGameRepository $quickGameRepository,
         private PlayerRepository $playerRepository,
         private AchievementsService $achievementsService,
-        private MatchLegService $matchLegService
+        private GameLegService $gameLegService,
+        private PlayerStatsService $playerStatsService
     )
     {
     }
@@ -84,7 +86,7 @@ class QuickGameService
 
                 // Zapisz szczegóły legów jeśli są dostępne
                 if (!empty($dto->legsDTOs)) {
-                    $this->matchLegService->createMany(
+                    $this->gameLegService->createMany(
                         $dto->legsDTOs,
                         gameId: null,
                         playoffGameId: null,
@@ -117,5 +119,60 @@ class QuickGameService
     public function setStatusInProgress(int $gameId): void
     {
         $this->quickGameRepository->setStatusInProgress($gameId);
+    }
+
+    /**
+     * Zapisuje wyniki szybkiego meczu (nowy format - lista graczy)
+     * @param QuickGameResultDTO $dto
+     * @param int|null $lobbyId
+     * @return bool
+     */
+    public function updateResults(QuickGameResultDTO $dto, ?int $lobbyId = null): bool
+    {
+        try {
+            // Walidacja: musi być co najmniej 2 zarejestrowanych graczy
+            if (count($dto->players) < 2) {
+                throw new \RuntimeException('Musi być co najmniej 2 zarejestrowanych graczy');
+            }
+
+            DB::transaction(function () use ($dto, $lobbyId) {
+                // Pobierz ID graczy
+                $playerIds = array_map(fn($player) => $player->playerId, $dto->players);
+
+                // Utwórz QuickGame
+                $quickGameId = $this->quickGameRepository->createWithResults($playerIds, $lobbyId);
+
+                // Zapisz wyniki graczy
+                $this->quickGameRepository->saveResults($quickGameId, $dto->players);
+
+                // Zapisz achievementy (tylko dla zarejestrowanych graczy)
+                if (!empty($dto->achievements)) {
+                    $this->achievementsService->createMany($dto->achievements);
+                }
+
+                // TODO: Zapisz szczegóły legów jeśli są dostępne
+                // Na razie GameLegDTO jest dla 2 graczy, więc trzeba będzie rozszerzyć
+                // if (!empty($dto->legs)) {
+                //     $this->gameLegService->createMany(...);
+                // }
+
+                // Aktualizuj cache statystyk dla zarejestrowanych graczy
+                $playerIds = array_unique(array_map(fn($p) => $p->playerId, $dto->players));
+                foreach ($playerIds as $playerId) {
+                    $player = $this->playerRepository->findById($playerId);
+                    if ($player !== null && $player->userId !== null) {
+                        $this->playerStatsService->recalculateAndSave($player->id);
+                    }
+                }
+            });
+
+            return true;
+        } catch (Throwable $e) {
+            \Log::error('Quick game results update failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return false;
+        }
     }
 }

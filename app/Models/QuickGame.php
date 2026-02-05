@@ -5,14 +5,16 @@ namespace App\Models;
 use App\Enums\GameStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class QuickGame extends Model
 {
     protected $fillable = [
-        'player1_id',
-        'player2_id',
-        'player1_score',
-        'player2_score',
+        'lobby_id', // Powiązanie z lobby (opcjonalne)
+        'player1_id', // Zachowane dla kompatybilności wstecznej
+        'player2_id', // Zachowane dla kompatybilności wstecznej
+        'player1_score', // Zachowane dla kompatybilności wstecznej
+        'player2_score', // Zachowane dla kompatybilności wstecznej
         'winner_id',
         'status'
     ];
@@ -21,6 +23,7 @@ class QuickGame extends Model
         'status' => GameStatus::class
     ];
 
+    // Stare relacje - zachowane dla kompatybilności wstecznej
     public function player1(): BelongsTo
     {
         return $this->belongsTo(Player::class, 'player1_id');
@@ -34,5 +37,17 @@ class QuickGame extends Model
     public function winner(): BelongsTo
     {
         return $this->belongsTo(Player::class, 'winner_id');
+    }
+
+    // Relacja do wyników zarejestrowanych graczy
+    public function results(): HasMany
+    {
+        return $this->hasMany(QuickGameResult::class);
+    }
+
+    // Relacja do lobby (jeśli było tworzone przez lobby)
+    public function lobby(): BelongsTo
+    {
+        return $this->belongsTo(QuickGameLobby::class);
     }
 }

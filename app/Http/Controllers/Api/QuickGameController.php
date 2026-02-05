@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\DTO\QuickGameDTO;
+use App\DTO\QuickGame\QuickGameDTO;
+use App\DTO\QuickGame\QuickGameResultDTO;
+use App\Http\Requests\QuickGameResultRequest;
 use App\Repositories\PlayerRepository;
 use App\Services\QuickGameService;
 use Illuminate\Http\JsonResponse;
@@ -88,7 +90,7 @@ class QuickGameController
 
     /**
      * Ustawia status szybkiego meczu na "w trakcie"
-     * POST /api/quick-match/inProgress
+     * POST /api/quick-game/inProgress
      */
     public function setStatusInProgress(Request $request): JsonResponse
     {
@@ -99,5 +101,19 @@ class QuickGameController
         $this->quickGameService->setStatusInProgress($validated['gameId']);
 
         return response()->json(['success' => true]);
+    }
+
+    /**
+     * Zapisuje wyniki szybkiego meczu
+     * POST /api/quick-game/update
+     */
+    public function update(QuickGameResultRequest $request): JsonResponse
+    {
+        $dto = QuickGameResultDTO::fromArray($request->validated());
+        $lobbyId = $request->input('lobbyId'); // Opcjonalne
+
+        $success = $this->quickGameService->updateResults($dto, $lobbyId);
+
+        return response()->json(['success' => $success]);
     }
 }

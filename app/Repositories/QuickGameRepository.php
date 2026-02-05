@@ -94,4 +94,56 @@ class QuickGameRepository
             return QuickGameDomain::fromEloquent($quickGame, ['player1', 'player2']);
         });
     }
+
+    /**
+     * Tworzy QuickGame i zapisuje wyniki graczy
+     * @param array $playerIds Lista ID zarejestrowanych graczy
+     * @param int|null $lobbyId ID lobby (opcjonalne)
+     * @return int ID utworzonego QuickGame
+     */
+    public function createWithResults(array $playerIds, ?int $lobbyId = null): int
+    {
+        // Dla kompatybilności wstecznej - używamy player1_id i player2_id
+        $player1Id = $playerIds[0] ?? null;
+        $player2Id = $playerIds[1] ?? null;
+
+        $quickGame = QuickGame::create([
+            'lobby_id' => $lobbyId,
+            'player1_id' => $player1Id,
+            'player2_id' => $player2Id,
+            'player1_score' => 0,
+            'player2_score' => 0,
+            'winner_id' => null,
+            'status' => GameStatus::FINISHED, // Od razu finished, bo wyniki są wysyłane po zakończeniu
+        ]);
+
+        return $quickGame->id;
+    }
+
+    /**
+     * Zapisuje wyniki graczy do quick_game_results
+     * @param int $quickGameId
+     * @param array $playerResults Array of \App\DTO\QuickGame\PlayerResultDTO
+     * @return void
+     */
+    public function saveResults(int $quickGameId, array $playerResults): void
+    {
+        $data = array_map(function ($playerResult) use ($quickGameId) {
+            return [
+                'quick_game_id' => $quickGameId,
+                'player_id' => $playerResult->playerId,
+                'score' => $playerResult->score,
+                'place' => $playerResult->place,
+                'average' => $playerResult->average,
+                'darts_thrown' => $playerResult->dartsThrown,
+                'points_earned' => $playerResult->pointsEarned,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }, $playerResults);
+
+        if (!empty($data)) {
+            \App\Models\QuickGameResult::insert($data);
+        }
+    }
 }

@@ -27,7 +27,7 @@ class ActiveGameDTO
     {
         return new self(
             id: $game->id,
-            tournamentId: $game->tournament_id,
+            tournamentId: $game->tournament?->id ?? 0,
             type: 'group',
             player1: [
                 'id' => $game->player1->id,

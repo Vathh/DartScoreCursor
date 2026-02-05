@@ -110,4 +110,151 @@ class FriendshipController
             })
         ]);
     }
+
+    /**
+     * Wysyła zaproszenie do znajomych
+     * POST /api/friends/invite
+     */
+    public function sendInvitation(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'receiverId' => 'required|integer|exists:users,id',
+        ]);
+
+        $userId = $request->user()->id;
+        $receiverId = $validated['receiverId'];
+
+        // Nie można wysłać zaproszenia do siebie
+        if ($userId === $receiverId) {
+            return response()->json([
+                'message' => 'Nie możesz wysłać zaproszenia do siebie'
+            ], 400);
+        }
+
+        try {
+            $invitation = $this->friendshipService->sendInvitation($userId, $receiverId);
+
+            return response()->json([
+                'message' => 'Zaproszenie zostało wysłane',
+                'invitation' => [
+                    'id' => $invitation->id,
+                    'sender' => [
+                        'id' => $invitation->senderId,
+                        'name' => $invitation->senderPlayer->name,
+                        'playerId' => $invitation->senderPlayer->id,
+                    ],
+                    'receiver' => [
+                        'id' => $invitation->receiverId,
+                        'name' => $invitation->receiverPlayer?->name ?? 'Brak nazwy',
+                        'playerId' => $invitation->receiverPlayer?->id ?? null,
+                    ],
+                    'status' => $invitation->status,
+                ]
+            ], 201);
+        } catch (\RuntimeException $e) {
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 400);
+        }
+    }
+
+    /**
+     * Akceptuje zaproszenie do znajomych
+     * POST /api/friends/accept
+     */
+    public function acceptInvitation(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'invitationId' => 'required|integer|exists:friendship_invitations,id',
+        ]);
+
+        $userId = $request->user()->id;
+
+        try {
+            $this->friendshipService->acceptInvitation($validated['invitationId'], $userId);
+
+            return response()->json([
+                'message' => 'Zaproszenie zostało zaakceptowane'
+            ]);
+        } catch (\RuntimeException $e) {
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 400);
+        }
+    }
+
+    /**
+     * Odrzuca zaproszenie do znajomych
+     * POST /api/friends/reject
+     */
+    public function rejectInvitation(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'invitationId' => 'required|integer|exists:friendship_invitations,id',
+        ]);
+
+        $userId = $request->user()->id;
+
+        try {
+            $this->friendshipService->rejectInvitation($validated['invitationId'], $userId);
+
+            return response()->json([
+                'message' => 'Zaproszenie zostało odrzucone'
+            ]);
+        } catch (\RuntimeException $e) {
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 400);
+        }
+    }
+
+    /**
+     * Pobiera zaproszenia otrzymane przez użytkownika
+     * GET /api/friends/invitations/received
+     */
+    public function getReceivedInvitations(Request $request): JsonResponse
+    {
+        $userId = $request->user()->id;
+        $invitations = $this->friendshipService->getReceivedInvitations($userId);
+
+        return response()->json([
+            'invitations' => $invitations->map(function ($invitation) {
+                return [
+                    'id' => $invitation->id,
+                    'sender' => [
+                        'id' => $invitation->senderId,
+                        'name' => $invitation->senderPlayer?->name ?? 'Brak nazwy',
+                        'playerId' => $invitation->senderPlayer?->id ?? null,
+                    ],
+                    'status' => $invitation->status,
+                    'createdAt' => $invitation->createdAt->toIso8601String(),
+                ];
+            })
+        ]);
+    }
+
+    /**
+     * Pobiera zaproszenia wysłane przez użytkownika
+     * GET /api/friends/invitations/sent
+     */
+    public function getSentInvitations(Request $request): JsonResponse
+    {
+        $userId = $request->user()->id;
+        $invitations = $this->friendshipService->getSentInvitations($userId);
+
+        return response()->json([
+            'invitations' => $invitations->map(function ($invitation) {
+                return [
+                    'id' => $invitation->id,
+                    'receiver' => [
+                        'id' => $invitation->receiverId,
+                        'name' => $invitation->receiverPlayer?->name ?? 'Brak nazwy',
+                        'playerId' => $invitation->receiverPlayer?->id ?? null,
+                    ],
+                    'status' => $invitation->status,
+                    'createdAt' => $invitation->createdAt->toIso8601String(),
+                ];
+            })
+        ]);
+    }
 }

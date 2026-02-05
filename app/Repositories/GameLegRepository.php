@@ -2,13 +2,13 @@
 
 namespace App\Repositories;
 
-use App\DTO\MatchLegDTO;
-use App\Models\MatchLeg;
+use App\DTO\GameLegDTO;
+use App\Models\GameLeg;
 
-class MatchLegRepository
+class GameLegRepository
 {
     /**
-     * @param MatchLegDTO[] $legs
+     * @param GameLegDTO[] $legs
      * @param int|null $gameId
      * @param int|null $playoffGameId
      * @param int|null $quickGameId
@@ -16,7 +16,7 @@ class MatchLegRepository
      */
     public function createMany(array $legs, ?int $gameId = null, ?int $playoffGameId = null, ?int $quickGameId = null): void
     {
-        $data = array_map(function (MatchLegDTO $leg) use ($gameId, $playoffGameId, $quickGameId) {
+        $data = array_map(function (GameLegDTO $leg) use ($gameId, $playoffGameId, $quickGameId) {
             return [
                 'game_id' => $gameId,
                 'playoff_game_id' => $playoffGameId,
@@ -38,7 +38,7 @@ class MatchLegRepository
         }, $legs);
 
         if (!empty($data)) {
-            MatchLeg::insert($data);
+            GameLeg::insert($data);
         }
     }
 
@@ -48,7 +48,7 @@ class MatchLegRepository
      */
     public function getByGameId(int $gameId): \Illuminate\Support\Collection
     {
-        return MatchLeg::where('game_id', $gameId)
+        return GameLeg::where('game_id', $gameId)
             ->orderBy('leg_number')
             ->get();
     }
@@ -59,7 +59,7 @@ class MatchLegRepository
      */
     public function getByPlayoffGameId(int $playoffGameId): \Illuminate\Support\Collection
     {
-        return MatchLeg::where('playoff_game_id', $playoffGameId)
+        return GameLeg::where('playoff_game_id', $playoffGameId)
             ->orderBy('leg_number')
             ->get();
     }

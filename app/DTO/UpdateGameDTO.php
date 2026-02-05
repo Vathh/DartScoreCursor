@@ -9,7 +9,7 @@ class UpdateGameDTO
         public GameResultDTO $gameResultDTO,
         /** @var GameAchievementDTO[] */
         public array $achievementsDTOs,
-        /** @var MatchLegDTO[] */
+        /** @var GameLegDTO[] */
         public array $legsDTOs = []
     )
     {
@@ -22,7 +22,7 @@ class UpdateGameDTO
     public static function fromArray(array $data): UpdateGameDTO
     {
         $legs = isset($data['legs']) && is_array($data['legs'])
-            ? array_map(fn($array) => MatchLegDTO::fromArray($array), $data['legs'])
+            ? array_map(fn($array) => GameLegDTO::fromArray($array), $data['legs'])
             : [];
 
         return new self(

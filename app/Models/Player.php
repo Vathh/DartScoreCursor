@@ -29,4 +29,9 @@ class Player extends Model
     {
         return $this->hasMany(Achievement::class);
     }
+
+    public function playerStat(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(PlayerStat::class);
+    }
 }

@@ -11,15 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('match_legs', function (Blueprint $table) {
+        Schema::create('game_legs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('game_id')->nullable()->constrained('games')->nullOnDelete();
-            $table->foreignId('playoff_game_id')->nullable()->constrained('playoffgames')->nullOnDelete();
-            $table->foreignId('quick_game_id')->nullable()->constrained('quick_games')->nullOnDelete();
+            $table->foreignId('game_id')->nullable()->constrained('games')->onDelete('set null');
+            $table->foreignId('playoff_game_id')->nullable()->constrained('playoff_games')->onDelete('set null');
+            $table->foreignId('quick_game_id')->nullable()->constrained('quick_games')->onDelete('set null');
             $table->unsignedInteger('leg_number'); // Numer lega w meczu (1, 2, 3, ...)
             $table->unsignedInteger('player1_score')->default(0); // Punkty gracza 1 w tym legu
             $table->unsignedInteger('player2_score')->default(0); // Punkty gracza 2 w tym legu
-            $table->foreignId('winner_id')->nullable()->constrained('players')->nullOnDelete();
+            $table->foreignId('winner_id')->nullable()->constrained('players')->onDelete('set null');
             $table->unsignedInteger('player1_average')->nullable(); // Średnia gracza 1 w tym legu
             $table->unsignedInteger('player2_average')->nullable(); // Średnia gracza 2 w tym legu
             $table->unsignedInteger('player1_darts_thrown')->nullable(); // Liczba rzutów gracza 1
@@ -41,6 +41,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('match_legs');
+        Schema::dropIfExists('game_legs');
     }
 };

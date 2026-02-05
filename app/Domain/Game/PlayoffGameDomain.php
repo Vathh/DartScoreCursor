@@ -152,6 +152,14 @@ class PlayoffGameDomain extends GameDomain
         );
     }
 
+    public function playerIds(): array
+    {
+        return [
+            $this->player1Id ?? 0,
+            $this->player2Id ?? 0
+        ];
+    }
+
     public function checkUpdateDataAccuracy(GameResultDTO $dto): void
     {
         if ($dto->player1Id !== $this->player1Id || $dto->player2Id !== $this->player2Id) {

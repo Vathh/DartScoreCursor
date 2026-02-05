@@ -3,63 +3,95 @@
 namespace App\Http\Controllers;
 
 use App\Models\Player;
+use App\Services\FriendshipService;
+use App\Services\PlayerStatsService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 
 class PlayerController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
+    public function __construct(
+        private PlayerStatsService $playerStatsService,
+        private FriendshipService $friendshipService,
+    ) {
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Wyszukiwarka graczy (strona z formularzem i wynikami).
      */
-    public function create()
+    public function search(Request $request): View
     {
-        //
+        $q = $request->query('q', '');
+        $players = collect();
+
+        if ($q !== '') {
+            $players = Player::query()
+                ->whereNotNull('user_id')
+                ->where('name', 'like', '%' . $q . '%')
+                ->orderBy('name')
+                ->limit(50)
+                ->get();
+        }
+
+        return view('players.search', [
+            'q' => $q,
+            'players' => $players,
+        ]);
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Profil gracza (przegląd + statystyki quick / turniejowe).
      */
-    public function store(Request $request)
+    public function show(Player $player): View|RedirectResponse
     {
-        //
+        if (!$player->user_id) {
+            abort(404, 'Profil dostępny tylko dla graczy zarejestrowanych.');
+        }
+        $player->load('user');
+        $quickStats = $this->playerStatsService->getStoredQuickStats($player);
+        $tournamentStats = $this->playerStatsService->getStoredTournamentStats($player);
+
+        $isFriend = false;
+        $canAddFriend = false;
+        $viewerPlayer = null;
+
+        if (Auth::check()) {
+            $viewerPlayer = Auth::user()->player;
+            if ($viewerPlayer && $player->user_id) {
+                $isFriend = $this->friendshipService->areFriends(Auth::id(), $player->user_id);
+                $canAddFriend = !$isFriend && $viewerPlayer->id !== $player->id;
+            }
+        }
+
+        return view('players.show', [
+            'player' => $player,
+            'quickStats' => $quickStats,
+            'tournamentStats' => $tournamentStats,
+            'isFriend' => $isFriend,
+            'canAddFriend' => $canAddFriend,
+        ]);
     }
 
     /**
-     * Display the specified resource.
+     * Dodaj gracza do znajomych (gracz musi być zarejestrowany – mieć user_id).
      */
-    public function show(Player $player)
+    public function addFriend(Request $request, Player $player): RedirectResponse
     {
-        //
-    }
+        if (!$player->user_id) {
+            return back()->with('error', 'Tego gracza nie można dodać do znajomych.');
+        }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Player $player)
-    {
-        //
-    }
+        if (Auth::user()->player && Auth::user()->player->id === $player->id) {
+            return back()->with('error', 'Nie możesz dodać siebie do znajomych.');
+        }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Player $player)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Player $player)
-    {
-        //
+        try {
+            $this->friendshipService->addFriend(Auth::id(), $player->user_id);
+            return back()->with('success', 'Dodano do znajomych.');
+        } catch (\Throwable $e) {
+            return back()->with('error', $e->getMessage());
+        }
     }
 }

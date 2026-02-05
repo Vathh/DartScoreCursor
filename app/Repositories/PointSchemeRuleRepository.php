@@ -20,6 +20,7 @@ class PointSchemeRuleRepository
             return PointSchemeRuleDomain::fromEloquent(
                             PointSchemeRule::where('point_scheme_id', $schemeId)
                                 ->where('elimination_stage', $stage->value)
+                                ->whereNull('place')
                                 ->firstOrFail()
                         );
         } else {

@@ -6,8 +6,10 @@ use App\Models\QuickGame;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class MatchLeg extends Model
+class GameLeg extends Model
 {
+    protected $table = 'game_legs';
+
     protected $fillable = [
         'game_id',
         'playoff_game_id',

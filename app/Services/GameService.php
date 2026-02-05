@@ -10,9 +10,10 @@ use App\Enums\GameType;
 use App\Enums\TournamentStatus;
 use App\Repositories\GameRepository;
 use App\Repositories\PlayoffGameRepository;
+use App\Repositories\PlayerRepository;
 use App\Repositories\TournamentRepository;
 use App\Services\Tournament\TournamentResultService;
-use App\Services\MatchLegService;
+use App\Services\GameLegService;
 use App\Services\QuickGameService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -24,13 +25,14 @@ class GameService
     public function __construct(
         private GameRepository       $gameRepository,
         private PlayoffGameRepository $playoffGameRepository,
+        private PlayerRepository    $playerRepository,
         private GroupStandingService $groupStandingService,
         private AchievementsService  $achievementsService,
         private PlayoffService       $playoffService,
         private TournamentRepository $tournamentRepository,
         private TournamentResultService  $tournamentResultService,
-        private MatchLegService      $matchLegService,
-        private QuickGameService    $quickGameService,
+        private GameLegService      $gameLegService,
+        private PlayerStatsService   $playerStatsService,
     )
     {
     }
@@ -48,11 +50,9 @@ class GameService
         }else if($dto->gameResultDTO->type === GameType::GROUP)
         {
             return $this->handleGroupGameUpdate($dto);
-        }else if($dto->gameResultDTO->type === GameType::QUICK_MATCH)
-        {
-            return $this->quickGameService->updateQuickGame($dto);
         }
 
+        // Quick games są obsługiwane przez /api/quick-game/update
         return false;
     }
 
@@ -63,19 +63,14 @@ class GameService
     public function getActiveGames(int $tournamentId): Collection
     {
         try {
-            DB::transaction(function () use ($tournamentId) {
-                $games = $this->gameRepository->getActive($tournamentId);
-                $playoffGames = $this->playoffGameRepository->getActive($tournamentId);
+            $games = $this->gameRepository->getActive($tournamentId);
+            $playoffGames = $this->playoffGameRepository->getActive($tournamentId);
 
             return collect($games->map(fn($game) => ActiveGameDTO::fromGame($game)))
                     ->merge($playoffGames->map(fn($game) => ActiveGameDTO::fromPlayoffGame($game)));
-            });
-
         } catch (Throwable $e) {
             return collect();
         }
-
-        return collect();
     }
 
     private function handleTournamentResultCreating(int $winnerId,
@@ -170,17 +165,29 @@ class GameService
 
                 // Zapisz szczegóły legów jeśli są dostępne
                 if (!empty($dto->legsDTOs)) {
-                    $this->matchLegService->createMany(
+                    $this->gameLegService->createMany(
                         $dto->legsDTOs,
                         gameId: null,
                         playoffGameId: $gameToUpdate->id
                     );
                 }
 
+                // Aktualizuj cache statystyk graczy (tylko zarejestrowanych)
+                foreach ([$dto->gameResultDTO->player1Id, $dto->gameResultDTO->player2Id] as $playerId) {
+                    $player = $this->playerRepository->findById($playerId);
+                    if ($player !== null && $player->userId !== null) {
+                        $this->playerStatsService->recalculateAndSave($player->id);
+                    }
+                }
             });
 
             return true;
         } catch (Throwable $e) {
+            \Log::error('Playoff game update failed', [
+                'gameId' => $dto->gameResultDTO->gameId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             return false;
         }
     }
@@ -202,11 +209,19 @@ class GameService
 
                 // Zapisz szczegóły legów jeśli są dostępne
                 if (!empty($dto->legsDTOs)) {
-                    $this->matchLegService->createMany(
+                    $this->gameLegService->createMany(
                         $dto->legsDTOs,
                         gameId: $dto->gameResultDTO->gameId,
                         playoffGameId: null
                     );
+                }
+
+                // Aktualizuj cache statystyk graczy (tylko zarejestrowanych)
+                foreach ([$dto->gameResultDTO->player1Id, $dto->gameResultDTO->player2Id] as $playerId) {
+                    $player = $this->playerRepository->findById($playerId);
+                    if ($player !== null && $player->userId !== null) {
+                        $this->playerStatsService->recalculateAndSave($player->id);
+                    }
                 }
 
                 $this->handlePlayoffStart($dto->gameResultDTO->tournamentId);

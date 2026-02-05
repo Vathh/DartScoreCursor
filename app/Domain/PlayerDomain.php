@@ -20,7 +20,7 @@ class PlayerDomain
         public readonly int         $id,
         public readonly string      $name,
         public readonly ?int        $userId = null,
-        public readonly Collection $achievements = null
+        public readonly Collection $achievements = new Collection()
     )
     {
     }

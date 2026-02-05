@@ -28,34 +28,22 @@ class GameResultRequest extends FormRequest
 
         $rules = [
             'game.id' => 'required|integer',
-            'game.type' => 'required|string|in:group,playoff,quick_match',
+            'game.type' => 'required|string|in:group,playoff', // Quick games są w osobnym endpoincie
             'game.player1Id' => 'required|integer|exists:players,id',
             'game.player2Id' => 'required|integer|exists:players,id',
             'game.player1Score' => 'required|integer',
             'game.player2Score' => 'required|integer',
             'game.winnerId' => 'required|integer|exists:players,id',
+            'game.tournamentId' => 'required|integer|exists:tournaments,id',
+            'game.groupNumber' => 'required|integer',
         ];
 
-        // Dla szybkich meczów tournamentId i groupNumber nie są wymagane
-        if ($gameType !== 'quick_match') {
-            $rules['game.tournamentId'] = 'required|integer|exists:tournaments,id';
-            $rules['game.groupNumber'] = 'required|integer';
-        } else {
-            $rules['game.tournamentId'] = 'nullable';
-            $rules['game.groupNumber'] = 'nullable|integer';
-        }
-
-        return array_merge($rules, [
-
+        $additionalRules = [
             'achievements' => 'array',
             'achievements.*.playerId' => 'required|integer|exists:players,id',
-            'achievements.*.tournamentId' => $gameType === 'quick_match' 
-                ? 'nullable' 
-                : 'required|integer|exists:tournaments,id',
+            'achievements.*.tournamentId' => 'required|integer|exists:tournaments,id',
             'achievements.*.value' => 'nullable|integer',
             'achievements.*.type' => 'required|string',
-
-            // Opcjonalne szczegóły legów (dla kompatybilności wstecznej)
             'legs' => 'nullable|array',
             'legs.*.legNumber' => 'required|integer|min:1',
             'legs.*.player1Score' => 'required|integer|min:0',
@@ -69,6 +57,8 @@ class GameResultRequest extends FormRequest
             'legs.*.startedAt' => 'nullable|date',
             'legs.*.finishedAt' => 'nullable|date',
         ];
+
+        return array_merge($rules, $additionalRules);
     }
 
     public function toDTO(): UpdateGameDTO

@@ -109,6 +109,17 @@ class PlayerRepository
     }
 
     /**
+     * Znajduje gracza po ID
+     * @param int $playerId
+     * @return PlayerDomain|null
+     */
+    public function findById(int $playerId): ?PlayerDomain
+    {
+        $player = Player::find($playerId);
+        return $player ? PlayerDomain::fromEloquent($player) : null;
+    }
+
+    /**
      * Znajduje gracza po user_id
      * @param int $userId
      * @return PlayerDomain|null
