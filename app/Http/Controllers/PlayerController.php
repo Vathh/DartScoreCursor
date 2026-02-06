@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Player;
 use App\Services\FriendshipService;
+use App\Services\PlayerMatchHistoryService;
 use App\Services\PlayerStatsService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,6 +16,7 @@ class PlayerController extends Controller
 {
     public function __construct(
         private PlayerStatsService $playerStatsService,
+        private PlayerMatchHistoryService $playerMatchHistoryService,
         private FriendshipService $friendshipService,
     ) {
     }
@@ -65,13 +68,30 @@ class PlayerController extends Controller
             }
         }
 
+        $historyFirstPage = $this->playerMatchHistoryService->getHistoryPage($player->id, 1);
+
         return view('players.show', [
             'player' => $player,
             'quickStats' => $quickStats,
             'tournamentStats' => $tournamentStats,
             'isFriend' => $isFriend,
             'canAddFriend' => $canAddFriend,
+            'matchHistoryItems' => $historyFirstPage['items'],
+            'matchHistoryHasMore' => $historyFirstPage['has_more'],
         ]);
+    }
+
+    /**
+     * Historia meczów gracza – stronicowana (JSON dla „Załaduj więcej”).
+     */
+    public function matchHistory(Request $request, Player $player): JsonResponse
+    {
+        if (!$player->user_id) {
+            abort(404, 'Profil dostępny tylko dla graczy zarejestrowanych.');
+        }
+        $page = max(1, (int) $request->query('page', 1));
+        $data = $this->playerMatchHistoryService->getHistoryPage($player->id, $page);
+        return response()->json($data);
     }
 
     /**
