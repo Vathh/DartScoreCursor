@@ -4,7 +4,7 @@
             DartScore
             @auth
                 <span class="text-light-green pl-5">/</span>
-                <span class="text-light-orange pl-5 text-xl">{{ Auth::user()->player->name }}</span>
+                <span class="text-light-orange pl-5 text-xl">{{ Auth::user()->player?->name ?? 'Użytkownik' }}</span>
             @endauth
         </h1>
         <nav class="flex flex-wrap items-center gap-2 ">
@@ -32,7 +32,7 @@
             @auth
                 <form action="{{ route('logout') }}" method="POST" class="m-0">
                     @csrf
-                    <button class="nav-btn hover:cursor-pointer">Wyloguj się</button>
+                    <button class="nav-btn">Wyloguj się</button>
                 </form>
             @endauth
         </nav>

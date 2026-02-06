@@ -28,8 +28,12 @@
 }
 
 @layer components {
+    button {
+        @apply cursor-pointer;
+    }
+
     .btn {
-        @apply font-bold py-3 px-6 rounded transition-all duration-300 transform hover:cursor-pointer;
+        @apply font-bold py-3 px-6 rounded transition-all duration-300 transform;
     }
 
     .btn-primary {
@@ -42,7 +46,7 @@
 
     .btn-mini {
         @apply text-sm font-semibold px-3 py-1.5 rounded transition-all
-        duration-300 transform hover:cursor-pointer bg-light-green text-dark-bg hover:bg-medium-green hover:shadow-[0_0_6px_var(--color-light-green)];
+        duration-300 transform bg-light-green text-dark-bg hover:bg-medium-green hover:shadow-[0_0_6px_var(--color-light-green)];
     }
 
     .btn__title{
