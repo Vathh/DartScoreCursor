@@ -18,7 +18,7 @@ class GroupStanding extends Model
         'legs_won',
         'legs_lost',
         'points',
-        'legs_difference'
+        'place',
     ];
 
     protected $casts = [

@@ -82,4 +82,13 @@ class TournamentRepository
     {
         Tournament::where('id', $tournamentId)->update(['point_scheme_id' => $pointSchemeId]);
     }
+
+    /**
+     * Zwraca league_id dla turnieju (przez sezon). Null jeśli turniej nie ma sezonu.
+     */
+    public function getLeagueIdForTournament(int $tournamentId): ?int
+    {
+        $tournament = Tournament::with('season')->find($tournamentId);
+        return $tournament?->season?->league_id;
+    }
 }

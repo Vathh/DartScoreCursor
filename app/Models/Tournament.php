@@ -11,9 +11,11 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 class Tournament extends Model
 {
     protected $fillable = [
-      'name',
-      'season_id',
-      'date'
+        'name',
+        'season_id',
+        'date',
+        'status',
+        'point_scheme_id',
     ];
 
     protected $casts = [

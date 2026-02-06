@@ -14,6 +14,7 @@ use App\Repositories\PlayerRepository;
 use App\Repositories\TournamentRepository;
 use App\Services\Tournament\TournamentResultService;
 use App\Services\GameLegService;
+use App\Services\LeagueStatsService;
 use App\Services\QuickGameService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -33,6 +34,7 @@ class GameService
         private TournamentResultService  $tournamentResultService,
         private GameLegService      $gameLegService,
         private PlayerStatsService   $playerStatsService,
+        private LeagueStatsService   $leagueStatsService,
     )
     {
     }
@@ -179,6 +181,11 @@ class GameService
                         $this->playerStatsService->recalculateAndSave($player->id);
                     }
                 }
+
+                $leagueId = $this->tournamentRepository->getLeagueIdForTournament($gameToUpdate->tournamentId);
+                if ($leagueId !== null) {
+                    $this->leagueStatsService->recalculateForLeague($leagueId);
+                }
             });
 
             return true;
@@ -222,6 +229,11 @@ class GameService
                     if ($player !== null && $player->userId !== null) {
                         $this->playerStatsService->recalculateAndSave($player->id);
                     }
+                }
+
+                $leagueId = $this->tournamentRepository->getLeagueIdForTournament($dto->gameResultDTO->tournamentId);
+                if ($leagueId !== null) {
+                    $this->leagueStatsService->recalculateForLeague($leagueId);
                 }
 
                 $this->handlePlayoffStart($dto->gameResultDTO->tournamentId);

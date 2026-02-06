@@ -19,6 +19,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::get('/players/search', [PlayerController::class, 'search'])->name('players.search');
 Route::get('/players/{player}', [PlayerController::class, 'show'])->name('players.show');
+Route::get('/players/{player}/matches', [PlayerController::class, 'matchHistory'])->name('players.matches');
 Route::post('/players/{player}/add-friend', [PlayerController::class, 'addFriend'])->name('players.add-friend')->middleware('auth');
 
 Route::resource('leagues', LeagueController::class);
