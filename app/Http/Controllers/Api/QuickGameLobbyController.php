@@ -118,11 +118,40 @@ class QuickGameLobbyController
      * POST /api/quick-game/lobby/{lobbyId}/start
      * Rozpoczyna mecz (tylko host).
      */
+    /**
+     * PATCH /api/quick-game/lobby/{lobbyId}
+     * Aktualizuje ustawienia lobby (tylko host). Body: legsCount?, gameType?
+     */
+    public function updateSettings(Request $request, string $lobbyId): JsonResponse
+    {
+        $userId = $request->user()->id;
+        $legsCount = $request->input('legsCount');
+        $gameType = $request->input('gameType');
+        try {
+            $lobby = $this->lobbyService->updateSettings(
+                (int) $lobbyId,
+                $userId,
+                $legsCount !== null ? (int) $legsCount : null,
+                $gameType !== null && in_array($gameType, ['501', 'cricket'], true) ? $gameType : null
+            );
+            return response()->json($this->lobbyToArray($lobby, $userId));
+        } catch (\RuntimeException $e) {
+            return response()->json(['message' => $e->getMessage()], 400);
+        }
+    }
+
     public function start(Request $request, string $lobbyId): JsonResponse
     {
         $userId = $request->user()->id;
+        $legsCount = $request->input('legsCount');
+        $gameType = $request->input('gameType');
         try {
-            $lobby = $this->lobbyService->startGame((int) $lobbyId, $userId);
+            $lobby = $this->lobbyService->startGame(
+                (int) $lobbyId,
+                $userId,
+                $legsCount !== null ? (int) $legsCount : null,
+                $gameType !== null && in_array($gameType, ['501', 'cricket'], true) ? $gameType : null
+            );
             $lobby->load(['host.player', 'players.player']);
             $players = $lobby->players->map(function ($p) {
                 return [
@@ -136,6 +165,8 @@ class QuickGameLobbyController
                 'code' => $lobby->code,
                 'hostId' => $lobby->host_id,
                 'status' => $lobby->status,
+                'legsCount' => (int) ($lobby->legs_count ?? 3),
+                'gameType' => $lobby->game_type ?? '501',
                 'players' => $players,
             ]);
         } catch (\RuntimeException $e) {
@@ -197,6 +228,7 @@ class QuickGameLobbyController
             'hostId' => $lobby->host_id,
             'status' => $lobby->status,
             'legsCount' => $lobby->legs_count ?? 3,
+            'gameType' => $lobby->game_type ?? '501',
             'youAreHost' => $currentUserId !== null && (int) $lobby->host_id === (int) $currentUserId,
             'players' => $players,
         ];

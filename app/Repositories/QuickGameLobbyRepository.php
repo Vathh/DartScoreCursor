@@ -66,17 +66,47 @@ class QuickGameLobbyRepository
             ->update(['is_ready' => $isReady]);
     }
 
-    public function startGame(int $lobbyId): QuickGameLobby
+    public function updateSettings(int $lobbyId, int $hostUserId, ?int $legsCount = null, ?string $gameType = null): QuickGameLobby
+    {
+        $lobby = $this->find($lobbyId);
+        if ($lobby->host_id !== $hostUserId) {
+            throw new \RuntimeException('Tylko host może zmieniać ustawienia lobby');
+        }
+        if ($lobby->status !== 'waiting') {
+            throw new \RuntimeException('Nie można zmieniać ustawień po rozpoczęciu meczu');
+        }
+        $updates = [];
+        if ($legsCount !== null && $legsCount >= 1 && $legsCount <= 15) {
+            $updates['legs_count'] = $legsCount;
+        }
+        if ($gameType !== null && in_array($gameType, ['501', 'cricket'], true)) {
+            $updates['game_type'] = $gameType;
+        }
+        if (!empty($updates)) {
+            $updates['updated_at'] = now();
+            DB::table('quick_game_lobbies')->where('id', $lobbyId)->update($updates);
+        }
+        return $this->find($lobbyId);
+    }
+
+    public function startGame(int $lobbyId, ?int $legsCount = null, ?string $gameType = null): QuickGameLobby
     {
         $this->find($lobbyId); // ensure lobby exists
         $now = now();
+        $updates = [
+            'status' => 'started',
+            'started_at' => $now,
+            'updated_at' => $now,
+        ];
+        if ($legsCount !== null && $legsCount >= 1 && $legsCount <= 15) {
+            $updates['legs_count'] = $legsCount;
+        }
+        if ($gameType !== null && in_array($gameType, ['501', 'cricket'], true)) {
+            $updates['game_type'] = $gameType;
+        }
         DB::table('quick_game_lobbies')
             ->where('id', $lobbyId)
-            ->update([
-                'status' => 'started',
-                'started_at' => $now,
-                'updated_at' => $now,
-            ]);
+            ->update($updates);
         return $this->find($lobbyId);
     }
 }

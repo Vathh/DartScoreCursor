@@ -196,9 +196,11 @@ class QuickGameLobbyService
      * Rozpoczyna mecz (tworzy QuickGame i zmienia status lobby)
      * @param int $lobbyId
      * @param int $hostUserId ID hosta (musi być hostem)
+     * @param int|null $legsCount Liczba legów do wygranej (1-15), domyślnie 3
+     * @param string|null $gameType Typ gry: '501' lub 'cricket'
      * @return QuickGameLobby
      */
-    public function startGame(int $lobbyId, int $hostUserId): QuickGameLobby
+    public function startGame(int $lobbyId, int $hostUserId, ?int $legsCount = null, ?string $gameType = null): QuickGameLobby
     {
         $lobby = $this->lobbyRepository->find($lobbyId);
 
@@ -230,6 +232,14 @@ class QuickGameLobbyService
             }
         }
 
-        return $this->lobbyRepository->startGame($lobbyId);
+        return $this->lobbyRepository->startGame($lobbyId, $legsCount ?? $lobby->legs_count, $gameType ?? $lobby->game_type ?? '501');
+    }
+
+    /**
+     * Aktualizuje ustawienia lobby (tylko host)
+     */
+    public function updateSettings(int $lobbyId, int $hostUserId, ?int $legsCount = null, ?string $gameType = null): QuickGameLobby
+    {
+        return $this->lobbyRepository->updateSettings($lobbyId, $hostUserId, $legsCount, $gameType);
     }
 }

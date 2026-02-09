@@ -13,6 +13,8 @@ class QuickGameLobby extends Model
         'host_id',
         'code',
         'status',
+        'legs_count',
+        'game_type',
         'started_at',
     ];
 

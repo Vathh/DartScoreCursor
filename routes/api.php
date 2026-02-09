@@ -50,6 +50,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('quick-game/lobby')->group(function () {
         Route::post('/create', [QuickGameLobbyController::class, 'create']);
         Route::get('/{lobbyId}', [QuickGameLobbyController::class, 'get']);
+        Route::patch('/{lobbyId}', [QuickGameLobbyController::class, 'updateSettings']);
         Route::post('/{lobbyId}/join', [QuickGameLobbyController::class, 'joinById']);
         Route::post('/{lobbyId}/leave', [QuickGameLobbyController::class, 'leave']);
         Route::post('/{lobbyId}/ready', [QuickGameLobbyController::class, 'setReady']);
