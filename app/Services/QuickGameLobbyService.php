@@ -11,7 +11,8 @@ class QuickGameLobbyService
 {
     public function __construct(
         private QuickGameLobbyRepository $lobbyRepository,
-        private PlayerRepository $playerRepository
+        private PlayerRepository $playerRepository,
+        private QuickGameSessionService $sessionService
     ) {
     }
 
@@ -88,8 +89,76 @@ class QuickGameLobbyService
         }
 
         $this->lobbyRepository->addPlayer($lobby->id, $player->id, null, true);
+        $this->lobbyRepository->markInvitationAccepted($lobbyId, $player->id);
 
         return $lobby->fresh(['host.player', 'players.player']);
+    }
+
+    /**
+     * Wysyła zaproszenie do lobby (tylko host).
+     * @param int $lobbyId
+     * @param int $hostUserId ID hosta
+     * @param int $invitedPlayerId ID gracza (players.id) zapraszanego do lobby
+     */
+    public function invite(int $lobbyId, int $hostUserId, int $invitedPlayerId): void
+    {
+        $lobby = $this->lobbyRepository->find($lobbyId);
+
+        if ($lobby->host_id !== $hostUserId) {
+            throw new \RuntimeException('Tylko host może zapraszać do lobby');
+        }
+
+        if ($lobby->status !== 'waiting') {
+            throw new \RuntimeException('Lobby nie przyjmuje już graczy');
+        }
+
+        $alreadyInLobby = $lobby->players->contains('player_id', $invitedPlayerId);
+        if ($alreadyInLobby) {
+            throw new \RuntimeException('Ten gracz jest już w lobby');
+        }
+
+        if ($this->lobbyRepository->hasPendingInvitation($lobbyId, $invitedPlayerId)) {
+            throw new \RuntimeException('Zaproszenie do tego gracza zostało już wysłane');
+        }
+
+        $this->lobbyRepository->createInvitation($lobbyId, $invitedPlayerId);
+    }
+
+    /**
+     * Pobiera oczekujące zaproszenia do lobby dla zalogowanego użytkownika.
+     * @param int $userId ID użytkownika
+     * @return \Illuminate\Support\Collection
+     */
+    public function getPendingInvitationsForUser(int $userId): \Illuminate\Support\Collection
+    {
+        $player = $this->playerRepository->findByUserId($userId);
+        if (!$player) {
+            return collect([]);
+        }
+
+        return $this->lobbyRepository->getPendingInvitationsForPlayer($player->id)
+            ->map(function ($inv) {
+                $lobby = $inv->lobby;
+                $hostName = $lobby->host->player?->name ?? 'Host';
+                return [
+                    'id' => $inv->id,
+                    'lobbyId' => $lobby->id,
+                    'lobbyCode' => $lobby->code,
+                    'hostName' => $hostName,
+                ];
+            });
+    }
+
+    /**
+     * Odrzuca zaproszenie do lobby.
+     */
+    public function rejectInvitation(int $invitationId, int $userId): void
+    {
+        $player = $this->playerRepository->findByUserId($userId);
+        if (!$player) {
+            throw new \RuntimeException('Nie znaleziono gracza');
+        }
+        $this->lobbyRepository->markInvitationRejected($invitationId, $player->id);
     }
 
     /**
@@ -193,14 +262,15 @@ class QuickGameLobbyService
     }
 
     /**
-     * Rozpoczyna mecz (tworzy QuickGame i zmienia status lobby)
+     * Rozpoczyna mecz (tworzy QuickGame, sesję synchronizacji i zmienia status lobby)
      * @param int $lobbyId
      * @param int $hostUserId ID hosta (musi być hostem)
      * @param int|null $legsCount Liczba legów do wygranej (1-15), domyślnie 3
      * @param string|null $gameType Typ gry: '501' lub 'cricket'
+     * @param string|null $scoringMode Tryb liczenia: 'one_device' | 'each_own'
      * @return QuickGameLobby
      */
-    public function startGame(int $lobbyId, int $hostUserId, ?int $legsCount = null, ?string $gameType = null): QuickGameLobby
+    public function startGame(int $lobbyId, int $hostUserId, ?int $legsCount = null, ?string $gameType = null, ?string $scoringMode = null): QuickGameLobby
     {
         $lobby = $this->lobbyRepository->find($lobbyId);
 
@@ -232,7 +302,14 @@ class QuickGameLobbyService
             }
         }
 
-        return $this->lobbyRepository->startGame($lobbyId, $legsCount ?? $lobby->legs_count, $gameType ?? $lobby->game_type ?? '501');
+        $legs = $legsCount ?? $lobby->legs_count ?? 3;
+        $game = $gameType ?? $lobby->game_type ?? '501';
+        $mode = $scoringMode ?? $lobby->scoring_mode ?? 'each_own';
+        $lobby = $this->lobbyRepository->startGame($lobbyId, $legs, $game, $mode);
+
+        $this->sessionService->createSession($lobbyId, $hostUserId, $mode, $game, $legs, $playersCount);
+
+        return $lobby;
     }
 
     /**
@@ -241,5 +318,13 @@ class QuickGameLobbyService
     public function updateSettings(int $lobbyId, int $hostUserId, ?int $legsCount = null, ?string $gameType = null): QuickGameLobby
     {
         return $this->lobbyRepository->updateSettings($lobbyId, $hostUserId, $legsCount, $gameType);
+    }
+
+    /**
+     * Ustawia tryb liczenia w lobby (tylko host).
+     */
+    public function updateScoringMode(int $lobbyId, int $hostUserId, string $scoringMode): QuickGameLobby
+    {
+        return $this->lobbyRepository->updateScoringMode($lobbyId, $hostUserId, $scoringMode);
     }
 }

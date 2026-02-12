@@ -15,6 +15,7 @@ class QuickGameLobby extends Model
         'status',
         'legs_count',
         'game_type',
+        'scoring_mode',
         'started_at',
     ];
 
@@ -41,5 +42,15 @@ class QuickGameLobby extends Model
     public function players(): HasMany
     {
         return $this->hasMany(QuickGameLobbyPlayer::class, 'lobby_id')->orderBy('created_at');
+    }
+
+    public function invitations(): HasMany
+    {
+        return $this->hasMany(QuickGameLobbyInvitation::class, 'lobby_id');
+    }
+
+    public function session(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(\App\Models\QuickGameSession::class, 'lobby_id');
     }
 }

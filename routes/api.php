@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\FriendshipController;
 use App\Http\Controllers\Api\GameController;
 use App\Http\Controllers\Api\QuickGameController;
 use App\Http\Controllers\Api\QuickGameLobbyController;
+use App\Http\Controllers\Api\QuickGameSessionController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthController::class, 'tournamentLogin']); // kod turnieju – do sędziowania
@@ -49,6 +50,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::prefix('quick-game/lobby')->group(function () {
         Route::post('/create', [QuickGameLobbyController::class, 'create']);
+        Route::get('/invitations', [QuickGameLobbyController::class, 'myInvitations']);
+        Route::post('/invitations/{invitationId}/reject', [QuickGameLobbyController::class, 'rejectInvitation']);
         Route::get('/{lobbyId}', [QuickGameLobbyController::class, 'get']);
         Route::patch('/{lobbyId}', [QuickGameLobbyController::class, 'updateSettings']);
         Route::post('/{lobbyId}/join', [QuickGameLobbyController::class, 'joinById']);
@@ -57,6 +60,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/{lobbyId}/start', [QuickGameLobbyController::class, 'start']);
         Route::post('/{lobbyId}/invite', [QuickGameLobbyController::class, 'invite']);
         Route::post('/{lobbyId}/add-guest', [QuickGameLobbyController::class, 'addGuest']);
+    });
+
+    Route::prefix('quick-game/session')->group(function () {
+        Route::get('/{sessionId}', [QuickGameSessionController::class, 'get']);
+        Route::post('/{sessionId}/visit', [QuickGameSessionController::class, 'visit']);
     });
 
 });

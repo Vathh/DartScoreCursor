@@ -127,6 +127,7 @@ class QuickGameLobbyController
         $userId = $request->user()->id;
         $legsCount = $request->input('legsCount');
         $gameType = $request->input('gameType');
+        $scoringMode = $request->input('scoringMode');
         try {
             $lobby = $this->lobbyService->updateSettings(
                 (int) $lobbyId,
@@ -134,6 +135,9 @@ class QuickGameLobbyController
                 $legsCount !== null ? (int) $legsCount : null,
                 $gameType !== null && in_array($gameType, ['501', 'cricket'], true) ? $gameType : null
             );
+            if ($scoringMode !== null && in_array($scoringMode, ['one_device', 'each_own'], true)) {
+                $lobby = $this->lobbyService->updateScoringMode((int) $lobbyId, $userId, $scoringMode);
+            }
             return response()->json($this->lobbyToArray($lobby, $userId));
         } catch (\RuntimeException $e) {
             return response()->json(['message' => $e->getMessage()], 400);
@@ -145,14 +149,16 @@ class QuickGameLobbyController
         $userId = $request->user()->id;
         $legsCount = $request->input('legsCount');
         $gameType = $request->input('gameType');
+        $scoringMode = $request->input('scoringMode');
         try {
             $lobby = $this->lobbyService->startGame(
                 (int) $lobbyId,
                 $userId,
                 $legsCount !== null ? (int) $legsCount : null,
-                $gameType !== null && in_array($gameType, ['501', 'cricket'], true) ? $gameType : null
+                $gameType !== null && in_array($gameType, ['501', 'cricket'], true) ? $gameType : null,
+                $scoringMode !== null && in_array($scoringMode, ['one_device', 'each_own'], true) ? $scoringMode : null
             );
-            $lobby->load(['host.player', 'players.player']);
+            $lobby->load(['host.player', 'players.player', 'session']);
             $players = $lobby->players->map(function ($p) {
                 return [
                     'id' => $p->id,
@@ -160,6 +166,15 @@ class QuickGameLobbyController
                     'name' => $p->player?->name ?? $p->temp_player_name ?? 'Gracz',
                 ];
             })->values()->all();
+            $sessionId = $lobby->session?->id;
+            $isHost = (int) $lobby->host_id === (int) $userId;
+            $myPlayerIndex = null;
+            foreach ($lobby->players as $i => $lp) {
+                if ($lp->player_id && $lp->player && (int) $lp->player->user_id === (int) $userId) {
+                    $myPlayerIndex = $i;
+                    break;
+                }
+            }
             return response()->json([
                 'id' => $lobby->id,
                 'code' => $lobby->code,
@@ -168,6 +183,10 @@ class QuickGameLobbyController
                 'legsCount' => (int) ($lobby->legs_count ?? 3),
                 'gameType' => $lobby->game_type ?? '501',
                 'players' => $players,
+                'sessionId' => $sessionId,
+                'scoringMode' => $lobby->scoring_mode ?? 'each_own',
+                'isHost' => $isHost,
+                'myPlayerIndex' => $myPlayerIndex,
             ]);
         } catch (\RuntimeException $e) {
             return response()->json(['message' => $e->getMessage()], 400);
@@ -183,8 +202,39 @@ class QuickGameLobbyController
         $validated = $request->validate([
             'playerId' => 'required|integer|exists:players,id',
         ]);
-        // TODO: implementacja zaproszeń do lobby (np. tabela lobby_invitations)
-        return response()->json(['message' => 'Zaproszenie wysłane'], 200);
+        $userId = $request->user()->id;
+        try {
+            $this->lobbyService->invite((int) $lobbyId, $userId, $validated['playerId']);
+            return response()->json(['message' => 'Zaproszenie wysłane'], 200);
+        } catch (\RuntimeException $e) {
+            return response()->json(['message' => $e->getMessage()], 400);
+        }
+    }
+
+    /**
+     * GET /api/quick-game/lobby/invitations
+     * Pobiera oczekujące zaproszenia do lobby dla zalogowanego użytkownika.
+     */
+    public function myInvitations(Request $request): JsonResponse
+    {
+        $userId = $request->user()->id;
+        $invitations = $this->lobbyService->getPendingInvitationsForUser($userId);
+        return response()->json(['invitations' => $invitations]);
+    }
+
+    /**
+     * POST /api/quick-game/lobby/invitations/{invitationId}/reject
+     * Odrzuca zaproszenie do lobby.
+     */
+    public function rejectInvitation(Request $request, int $invitationId): JsonResponse
+    {
+        $userId = $request->user()->id;
+        try {
+            $this->lobbyService->rejectInvitation($invitationId, $userId);
+            return response()->json(['message' => 'Zaproszenie odrzucone'], 200);
+        } catch (\RuntimeException $e) {
+            return response()->json(['message' => $e->getMessage()], 400);
+        }
     }
 
     /**
@@ -222,15 +272,34 @@ class QuickGameLobbyController
             ];
         })->values()->all();
 
-        return [
+        $out = [
             'id' => $lobby->id,
             'code' => $lobby->code,
             'hostId' => $lobby->host_id,
             'status' => $lobby->status,
             'legsCount' => $lobby->legs_count ?? 3,
             'gameType' => $lobby->game_type ?? '501',
+            'scoringMode' => $lobby->scoring_mode ?? 'each_own',
             'youAreHost' => $currentUserId !== null && (int) $lobby->host_id === (int) $currentUserId,
             'players' => $players,
         ];
+
+        if ($lobby->status === 'started') {
+            $lobby->load('session');
+            if ($lobby->relationLoaded('session') && $lobby->session) {
+                $out['sessionId'] = $lobby->session->id;
+            }
+            $out['myPlayerIndex'] = null;
+            if ($currentUserId !== null) {
+                foreach ($lobby->players as $i => $lp) {
+                    if ($lp->player_id && $lp->player && (int) $lp->player->user_id === (int) $currentUserId) {
+                        $out['myPlayerIndex'] = $i;
+                        break;
+                    }
+                }
+            }
+        }
+
+        return $out;
     }
 }
