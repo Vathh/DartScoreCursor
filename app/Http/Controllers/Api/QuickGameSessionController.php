@@ -30,7 +30,10 @@ class QuickGameSessionController
 
     /**
      * POST /api/quick-game/session/{sessionId}/visit
-     * Zapisuje wizytę (rzut). Body: playerIndex (int), visitScore (int), bust (bool, opcjonalnie).
+     *
+     * Cała wizyta (do 3 lotek): suma punktów w visitScore (0–180). Klient zbiera lotki lokalnie;
+     * API nie przyjmuje ani nie waliduje pojedynczych rzutów — tylko sumę wizyty.
+     * Body: playerIndex (int), visitScore (int), bust (bool, opcjonalnie).
      */
     public function visit(Request $request, string $sessionId): JsonResponse
     {

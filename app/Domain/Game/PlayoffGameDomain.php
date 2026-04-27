@@ -43,7 +43,7 @@ class PlayoffGameDomain extends GameDomain
         ?PlayerDomain $player2,
         ?int $player1Score,
         ?int $player2Score,
-        ?int $winnerId,
+        public readonly ?int $winnerId,
         ?PlayerDomain $winner,
         public readonly ?WinnerDestinationSlot $winnerDestinationSlot,
         ?GameStatus $status
