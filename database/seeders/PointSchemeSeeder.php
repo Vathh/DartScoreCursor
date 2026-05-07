@@ -3,8 +3,8 @@
 namespace Database\Seeders;
 
 use App\Enums\GameStage;
-use App\Models\PointScheme;
-use App\Models\PointSchemeRule;
+use App\Models\PointScheme\PointScheme;
+use App\Models\PointScheme\PointSchemeRule;
 use Illuminate\Database\Seeder;
 
 class PointSchemeSeeder extends Seeder
@@ -53,3 +53,4 @@ class PointSchemeSeeder extends Seeder
         ]);
     }
 }
+
