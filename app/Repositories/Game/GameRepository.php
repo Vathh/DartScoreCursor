@@ -5,7 +5,7 @@ namespace App\Repositories\Game;
 use App\Domain\Game\GroupGameDomain;
 use App\DTO\GameResultDTO;
 use App\Enums\GameStatus;
-use App\Models\Game;
+use App\Models\Game\Game;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -82,6 +82,7 @@ class GameRepository
         return GroupGameDomain::fromEloquent($game, ['player1', 'player2', 'winner']);
     }
 }
+
 
 
 

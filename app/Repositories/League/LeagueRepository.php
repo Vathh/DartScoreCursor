@@ -3,7 +3,7 @@
 namespace App\Repositories\League;
 
 use App\Domain\LeagueDomain;
-use App\Models\League;
+use App\Models\League\League;
 use Illuminate\Support\Collection;
 
 class LeagueRepository
@@ -93,6 +93,7 @@ class LeagueRepository
         return LeagueDomain::fromEloquent($league, ['guests']);
     }
 }
+
 
 
 

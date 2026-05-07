@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Friends;
 
+use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -28,3 +29,5 @@ class FriendshipInvitation extends Model
         return $this->belongsTo(User::class, 'receiver_id');
     }
 }
+
+

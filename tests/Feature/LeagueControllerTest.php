@@ -2,9 +2,9 @@
 
 namespace Tests\Feature;
 
-use App\Models\League;
-use App\Models\Player;
-use App\Models\User;
+use App\Models\League\League;
+use App\Models\Player\Player;
+use App\Models\Users\User;
 use App\Services\PlayerService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -254,3 +254,4 @@ class LeagueControllerTest extends TestCase
         $response->assertSessionHasErrors('name');
     }
 }
+

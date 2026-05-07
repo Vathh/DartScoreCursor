@@ -1,8 +1,14 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Tournament;
 
 use App\Enums\TournamentStatus;
+use App\Models\Achievements\Achievement;
+use App\Models\Game\Game;
+use App\Models\GroupStanding\GroupStanding;
+use App\Models\PlayoffGame\PlayoffGame;
+use App\Models\PointScheme\PointScheme;
+use App\Models\Season\Season;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -58,3 +64,5 @@ class Tournament extends Model
         return $this->hasMany(TournamentResult::class);
     }
 }
+
+

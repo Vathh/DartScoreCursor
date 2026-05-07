@@ -22,7 +22,7 @@ class QuickGameSessionService
         int $legsCount,
         int $playersCount,
         array $playerOrderLobbyPlayerIds = []
-    ): \App\Models\QuickGameSession
+    ): \App\Models\QuickGame\QuickGameSession
     {
         $initialScores = array_fill(0, $playersCount, 501);
         $state = [
@@ -150,6 +150,7 @@ class QuickGameSessionService
         return $this->getState($sessionId, $currentUserId);
     }
 }
+
 
 
 

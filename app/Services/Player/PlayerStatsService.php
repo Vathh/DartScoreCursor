@@ -3,8 +3,8 @@
 namespace App\Services\Player;
 
 use App\Enums\AchievementType;
-use App\Models\Player;
-use App\Models\PlayerStat;
+use App\Models\Player\Player;
+use App\Models\Player\PlayerStat;
 use App\Repositories\Player\PlayerStatRepository;
 use Illuminate\Support\Collection;
 
@@ -162,6 +162,7 @@ class PlayerStatsService
         ];
     }
 }
+
 
 
 

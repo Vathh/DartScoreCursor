@@ -2,7 +2,7 @@
 
 namespace App\Services\Tournament;
 
-use App\Models\LoginCode;
+use App\Models\Tournament\LoginCode;
 use App\Repositories\Tournament\LoginCodeRepository;
 use Illuminate\Support\Collection;
 
@@ -26,6 +26,7 @@ class LoginCodeService
         $this->loginCodeRepository->save($result, $tournamentId);
     }
 }
+
 
 
 

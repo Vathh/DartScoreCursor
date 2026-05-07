@@ -1,7 +1,11 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Season;
 
+use App\Models\League\League;
+use App\Models\Player\Player;
+use App\Models\Tournament\Tournament;
+use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -58,3 +62,5 @@ class Season extends Model
         return $this->hasMany(Player::class);
     }
 }
+
+

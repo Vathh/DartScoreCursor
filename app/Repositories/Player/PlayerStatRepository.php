@@ -2,7 +2,7 @@
 
 namespace App\Repositories\Player;
 
-use App\Models\PlayerStat;
+use App\Models\Player\PlayerStat;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -143,6 +143,7 @@ class PlayerStatRepository
         return $p1->merge($p2);
     }
 }
+
 
 
 

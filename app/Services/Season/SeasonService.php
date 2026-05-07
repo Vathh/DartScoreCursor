@@ -3,7 +3,7 @@ namespace App\Services\Season;
 
 use App\Domain\LeagueDomain;
 use App\Domain\SeasonDomain;
-use App\Models\League;
+use App\Models\League\League;
 use App\Repositories\Player\PlayerRepository;
 use App\Repositories\Season\SeasonRepository;
 use App\Services\Player\PlayerService;
@@ -101,6 +101,7 @@ class SeasonService
     }
 
 }
+
 
 
 

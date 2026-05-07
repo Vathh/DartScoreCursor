@@ -4,7 +4,7 @@ namespace App\Repositories\PointScheme;
 
 use App\Domain\Tournament\PointSchemeRuleDomain;
 use App\Enums\GameStage;
-use App\Models\PointSchemeRule;
+use App\Models\PointScheme\PointSchemeRule;
 
 class PointSchemeRuleRepository
 {
@@ -33,6 +33,7 @@ class PointSchemeRuleRepository
         }
     }
 }
+
 
 
 

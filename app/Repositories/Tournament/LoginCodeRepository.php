@@ -2,7 +2,7 @@
 
 namespace App\Repositories\Tournament;
 
-use App\Models\LoginCode;
+use App\Models\Tournament\LoginCode;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
@@ -23,6 +23,7 @@ class LoginCodeRepository
         LoginCode::insert($codesToInsert);
     }
 }
+
 
 
 

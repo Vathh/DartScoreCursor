@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Models\Player;
-use App\Models\User;
+use App\Models\Player\Player;
+use App\Models\Users\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -143,3 +143,4 @@ class AuthControllerTest extends TestCase
         $this->assertNotEquals($oldToken, session()->token());
     }
 }
+

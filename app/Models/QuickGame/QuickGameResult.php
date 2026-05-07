@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\QuickGame;
 
+use App\Models\Player\Player;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -35,3 +36,5 @@ class QuickGameResult extends Model
         return $this->belongsTo(Player::class);
     }
 }
+
+

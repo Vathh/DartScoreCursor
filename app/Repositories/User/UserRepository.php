@@ -3,7 +3,7 @@
 namespace App\Repositories\User;
 
 use App\Domain\PlayerDomain;
-use App\Models\User;
+use App\Models\Users\User;
 use Illuminate\Support\Collection;
 
 class UserRepository
@@ -34,6 +34,7 @@ class UserRepository
         });
     }
 }
+
 
 
 

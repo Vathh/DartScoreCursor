@@ -1,31 +1,31 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\GroupStanding;
 
-use App\Enums\GameStage;
-use App\EnumsGameStage;
+use App\Enums\GameStatus;
+use App\Models\Player\Player;
+use App\Models\Tournament\Tournament;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class TournamentResult extends Model
+class GroupStanding extends Model
 {
     protected $fillable = [
-        'season_id',
         'tournament_id',
+        'group_number',
         'player_id',
+        'matches_played',
+        'matches_won',
+        'matches_lost',
+        'legs_won',
+        'legs_lost',
         'points',
         'place',
-        'elimination_stage'
     ];
 
     protected $casts = [
-        'elimination_stage' => GameStage::class,
+        'status' => GameStatus::class
     ];
-
-    public function season(): BelongsTo
-    {
-        return $this->belongsTo(Season::class);
-    }
 
     public function tournament(): BelongsTo
     {
@@ -37,3 +37,5 @@ class TournamentResult extends Model
         return $this->belongsTo(Player::class);
     }
 }
+
+

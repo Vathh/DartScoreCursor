@@ -5,7 +5,7 @@ namespace App\Domain\Game;
 use App\Domain\PlayerDomain;
 use App\Domain\Tournament\TournamentDomain;
 use App\Enums\GameStatus;
-use App\Models\Game;
+use App\Models\Game\Game;
 
 class GroupGameDomain extends GameDomain
 {
@@ -84,3 +84,4 @@ class GroupGameDomain extends GameDomain
         $this->validateNotFinished();
     }
 }
+

@@ -7,7 +7,7 @@ use App\DTO\GameResultDTO;
 use App\Enums\GameStatus;
 use App\Enums\PlayerSlot;
 use App\Enums\PlayoffSlot;
-use App\Models\PlayoffGame;
+use App\Models\PlayoffGame\PlayoffGame;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -75,6 +75,7 @@ class PlayoffGameRepository
             ->update(['player2_id' => $playerId]);
     }
 }
+
 
 
 

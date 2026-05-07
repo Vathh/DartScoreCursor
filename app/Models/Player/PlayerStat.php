@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Player;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -39,3 +39,5 @@ class PlayerStat extends Model
         return $this->belongsTo(Player::class);
     }
 }
+
+

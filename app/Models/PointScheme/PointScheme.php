@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\PointScheme;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -19,3 +19,5 @@ class PointScheme extends Model
         return $this->hasMany(PointSchemeRule::class);
     }
 }
+
+

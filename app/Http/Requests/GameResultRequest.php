@@ -66,3 +66,4 @@ class GameResultRequest extends FormRequest
         return UpdateGameDTO::fromArray($this->validated());
     }
 }
+

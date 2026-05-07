@@ -7,7 +7,7 @@ use App\Domain\Game\GroupGameDomain;
 use App\Domain\GroupStandingDomain;
 use App\Domain\SeasonDomain;
 use App\Enums\TournamentStatus;
-use App\Models\Tournament;
+use App\Models\Tournament\Tournament;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
@@ -97,3 +97,4 @@ class TournamentDomain
         return in_array($this->status, [TournamentStatus::PLAYOFF, TournamentStatus::FINISHED]);
     }
 }
+

@@ -2,10 +2,10 @@
 
 namespace Tests\Feature;
 
-use App\Models\League;
-use App\Models\Player;
-use App\Models\Season;
-use App\Models\User;
+use App\Models\League\League;
+use App\Models\Player\Player;
+use App\Models\Season\Season;
+use App\Models\Users\User;
 use App\Services\PlayerService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -238,3 +238,4 @@ class SeasonControllerTest extends TestCase
         $this->assertDatabaseMissing('players', ['id' => $guest->id]);
     }
 }
+

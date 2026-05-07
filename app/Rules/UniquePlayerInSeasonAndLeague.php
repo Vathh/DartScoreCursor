@@ -2,7 +2,7 @@
 
 namespace App\Rules;
 
-use App\Models\Player;
+use App\Models\Player\Player;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Translation\PotentiallyTranslatedString;
@@ -42,3 +42,4 @@ class UniquePlayerInSeasonAndLeague implements ValidationRule
         }
     }
 }
+

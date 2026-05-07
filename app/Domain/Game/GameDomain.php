@@ -88,3 +88,4 @@ abstract class GameDomain
         }
     }
 }
+

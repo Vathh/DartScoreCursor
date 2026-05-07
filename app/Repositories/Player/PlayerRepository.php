@@ -4,9 +4,9 @@ namespace App\Repositories\Player;
 
 use App\Domain\PlayerDomain;
 use App\Enums\AssignableEntityType;
-use App\Models\League;
-use App\Models\Player;
-use App\Models\Season;
+use App\Models\League\League;
+use App\Models\Player\Player;
+use App\Models\Season\Season;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -167,6 +167,7 @@ class PlayerRepository
         ]);
     }
 }
+
 
 
 

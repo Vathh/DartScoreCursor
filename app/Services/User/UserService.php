@@ -2,7 +2,7 @@
 
 namespace App\Services\User;
 
-use App\Models\User;
+use App\Models\Users\User;
 use App\Repositories\User\UserRepository;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
@@ -76,6 +76,7 @@ class UserService
         return $this->userRepository->searchByPlayerName($searchTerm, $excludeUserId, $limit);
     }
 }
+
 
 
 

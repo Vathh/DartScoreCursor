@@ -1,8 +1,10 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Game;
 
 use App\Enums\GameStatus;
+use App\Models\Player\Player;
+use App\Models\Tournament\Tournament;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -43,3 +45,5 @@ class Game extends Model
         return $this->belongsTo(Player::class, 'winner_id');
     }
 }
+
+

@@ -2,12 +2,9 @@
 
 namespace App\Providers;
 
-use App\Models\League;
-use App\Policies\LeaguePolicy;
 use App\Services\Friends\FriendshipService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 

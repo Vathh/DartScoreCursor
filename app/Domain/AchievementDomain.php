@@ -4,7 +4,7 @@ namespace App\Domain;
 
 use App\Domain\Tournament\TournamentDomain;
 use App\Enums\AchievementType;
-use App\Models\Achievement;
+use App\Models\Achievements\Achievement;
 
 class AchievementDomain
 {
@@ -46,3 +46,4 @@ class AchievementDomain
         );
     }
 }
+

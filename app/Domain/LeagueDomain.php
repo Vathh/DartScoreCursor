@@ -1,7 +1,7 @@
 <?php
 namespace App\Domain;
 
-use App\Models\League;
+use App\Models\League\League;
 use Carbon\Carbon;
 
 class LeagueDomain
@@ -85,3 +85,4 @@ class LeagueDomain
         return array_column($this->admins, 'id');
     }
 }
+

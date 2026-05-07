@@ -3,7 +3,7 @@
 namespace App\Domain;
 
 use App\Domain\Tournament\TournamentDomain;
-use App\Models\GroupStanding;
+use App\Models\GroupStanding\GroupStanding;
 
 class GroupStandingDomain
 {
@@ -89,3 +89,4 @@ class GroupStandingDomain
         );
     }
 }
+

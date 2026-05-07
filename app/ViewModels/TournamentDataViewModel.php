@@ -11,7 +11,7 @@ use App\Domain\SeasonDomain;
 use App\Domain\Tournament\TournamentDomain;
 use App\Domain\Tournament\TournamentResultDomain;
 use App\Enums\AchievementType;
-use App\Models\Tournament;
+use App\Models\Tournament\Tournament;
 use Illuminate\Support\Collection;
 
 class TournamentDataViewModel
@@ -175,3 +175,4 @@ class TournamentDataViewModel
         return collect($array);
     }
 }
+

@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\LoginCode;
-use App\Models\User;
+use App\Models\Tournament\LoginCode;
+use App\Models\Users\User;
 use App\Rules\UniquePlayerNameForRegistered;
 use App\Services\Player\PlayerService;
 use Illuminate\Http\JsonResponse;
@@ -112,6 +112,7 @@ class AuthController
         ]);
     }
 }
+
 
 
 

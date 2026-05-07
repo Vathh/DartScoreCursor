@@ -3,7 +3,7 @@
 namespace App\Repositories\Game;
 
 use App\DTO\GameLegDTO;
-use App\Models\GameLeg;
+use App\Models\Game\GameLeg;
 
 class GameLegRepository
 {
@@ -64,6 +64,7 @@ class GameLegRepository
             ->get();
     }
 }
+
 
 
 

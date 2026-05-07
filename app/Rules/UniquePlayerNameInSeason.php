@@ -2,8 +2,8 @@
 
 namespace App\Rules;
 
-use App\Models\Player;
-use App\Models\Season;
+use App\Models\Player\Player;
+use App\Models\Season\Season;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Translation\PotentiallyTranslatedString;
@@ -54,3 +54,4 @@ class UniquePlayerNameInSeason implements ValidationRule
         }
     }
 }
+

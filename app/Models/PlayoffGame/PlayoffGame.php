@@ -1,11 +1,13 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\PlayoffGame;
 
 use App\Enums\GameStatus;
 use App\Enums\GameStage;
 use App\Enums\PlayoffSlot;
 use App\Enums\WinnerDestinationSlot;
+use App\Models\Player\Player;
+use App\Models\Tournament\Tournament;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -51,3 +53,5 @@ class PlayoffGame extends Model
         return $this->belongsTo(Player::class, 'winner_id');
     }
 }
+
+

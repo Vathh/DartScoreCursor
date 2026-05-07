@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Domain\LeagueDomain;
 use App\Enums\AssignableEntityType;
-use App\Models\League;
-use App\Models\User;
+use App\Models\League\League;
+use App\Models\Users\User;
 use App\Services\League\LeagueService;
 use App\Services\League\LeagueStatsService;
 use App\Services\Player\PlayerService;
@@ -241,6 +241,7 @@ class LeagueController extends Controller
         return LeagueDomain::fromEloquent($league, $allRelations);
     }
 }
+
 
 
 

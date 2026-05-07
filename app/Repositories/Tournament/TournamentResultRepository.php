@@ -3,7 +3,7 @@
 namespace App\Repositories\Tournament;
 
 use App\Domain\Tournament\TournamentResultDomain;
-use App\Models\TournamentResult;
+use App\Models\Tournament\TournamentResult;
 use Illuminate\Support\Collection;
 
 class TournamentResultRepository
@@ -29,6 +29,7 @@ class TournamentResultRepository
         $this->createMany([$tournamentResult]);
     }
 }
+
 
 
 

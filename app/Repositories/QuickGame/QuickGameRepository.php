@@ -5,7 +5,7 @@ namespace App\Repositories\QuickGame;
 use App\Domain\Game\QuickGameDomain;
 use App\DTO\GameResultDTO;
 use App\Enums\GameStatus;
-use App\Models\QuickGame;
+use App\Models\QuickGame\QuickGame;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -143,10 +143,11 @@ class QuickGameRepository
         }, $playerResults);
 
         if (!empty($data)) {
-            \App\Models\QuickGameResult::insert($data);
+            \App\Models\QuickGame\QuickGameResult::insert($data);
         }
     }
 }
+
 
 
 

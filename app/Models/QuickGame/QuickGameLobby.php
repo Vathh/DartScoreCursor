@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\QuickGame;
 
+use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -51,6 +52,8 @@ class QuickGameLobby extends Model
 
     public function session(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
-        return $this->hasOne(\App\Models\QuickGameSession::class, 'lobby_id');
+        return $this->hasOne(QuickGameSession::class, 'lobby_id');
     }
 }
+
+

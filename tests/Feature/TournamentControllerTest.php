@@ -4,13 +4,13 @@ namespace Tests\Feature;
 
 use App\Enums\GameStage;
 use App\Enums\TournamentStatus;
-use App\Models\League;
-use App\Models\Player;
-use App\Models\PointScheme;
-use App\Models\PointSchemeRule;
-use App\Models\Season;
-use App\Models\Tournament;
-use App\Models\User;
+use App\Models\League\League;
+use App\Models\Player\Player;
+use App\Models\PointScheme\PointScheme;
+use App\Models\PointScheme\PointSchemeRule;
+use App\Models\Season\Season;
+use App\Models\Tournament\Tournament;
+use App\Models\Users\User;
 use App\Services\PlayerService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -238,3 +238,4 @@ class TournamentControllerTest extends TestCase
         $response->assertSessionHasErrors('groupsCount');
     }
 }
+

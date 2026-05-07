@@ -2,9 +2,9 @@
 
 namespace App\Repositories\QuickGame;
 
-use App\Models\QuickGameLobby;
-use App\Models\QuickGameLobbyPlayer;
-use App\Models\QuickGameLobbyInvitation;
+use App\Models\QuickGame\QuickGameLobby;
+use App\Models\QuickGame\QuickGameLobbyPlayer;
+use App\Models\QuickGame\QuickGameLobbyInvitation;
 use Illuminate\Support\Facades\DB;
 
 class QuickGameLobbyRepository
@@ -176,6 +176,7 @@ class QuickGameLobbyRepository
             ->exists();
     }
 }
+
 
 
 

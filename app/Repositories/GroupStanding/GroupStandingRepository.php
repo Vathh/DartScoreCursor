@@ -3,7 +3,7 @@
 namespace App\Repositories\GroupStanding;
 
 use App\Domain\GroupStandingDomain;
-use App\Models\GroupStanding;
+use App\Models\GroupStanding\GroupStanding;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -98,6 +98,7 @@ class GroupStandingRepository
             ->map(fn($standing) => GroupStandingDomain::fromEloquent($standing, ['tournament', 'player']));
     }
 }
+
 
 
 

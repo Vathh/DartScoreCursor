@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\QuickGame;
 
 use App\Enums\GameStatus;
+use App\Models\Player\Player;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -36,3 +37,5 @@ class QuickGame extends Model
         return $this->belongsTo(Player::class, 'winner_id');
     }
 }
+
+

@@ -3,7 +3,7 @@
 namespace App\Services\PointScheme;
 
 use App\Domain\Tournament\PointSchemeDomain;
-use App\Models\PointScheme;
+use App\Models\PointScheme\PointScheme;
 use App\Repositories\PointScheme\PointSchemeRepository;
 
 class PointSchemeService
@@ -22,6 +22,7 @@ class PointSchemeService
                             });
     }
 }
+
 
 
 

@@ -2,8 +2,8 @@
 
 namespace App\Domain;
 
-use App\Models\League;
-use App\Models\Player;
+use App\Models\League\League;
+use App\Models\Player\Player;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
@@ -48,3 +48,4 @@ class PlayerDomain
         );
     }
 }
+

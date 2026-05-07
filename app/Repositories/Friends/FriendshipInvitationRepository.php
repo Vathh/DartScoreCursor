@@ -3,7 +3,7 @@
 namespace App\Repositories\Friends;
 
 use App\Domain\FriendshipInvitationDomain;
-use App\Models\FriendshipInvitation;
+use App\Models\Friends\FriendshipInvitation;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -158,6 +158,7 @@ class FriendshipInvitationRepository
         ->exists();
     }
 }
+
 
 
 

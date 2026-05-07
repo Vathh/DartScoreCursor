@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\League;
+use App\Models\League\League;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 
@@ -27,3 +27,4 @@ class PagesController extends Controller
         return view('tournament.tournaments');
     }
 }
+

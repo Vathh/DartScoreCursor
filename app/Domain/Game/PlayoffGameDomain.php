@@ -9,7 +9,7 @@ use App\Enums\GameStatus;
 use App\Enums\GameStage;
 use App\Enums\PlayoffSlot;
 use App\Enums\WinnerDestinationSlot;
-use App\Models\PlayoffGame;
+use App\Models\PlayoffGame\PlayoffGame;
 
 class PlayoffGameDomain extends GameDomain
 {
@@ -181,3 +181,4 @@ class PlayoffGameDomain extends GameDomain
         }
     }
 }
+

@@ -5,7 +5,7 @@ namespace App\Repositories\Tournament;
 use App\Domain\Tournament\PointSchemeDomain;
 use App\Domain\Tournament\TournamentDomain;
 use App\Enums\TournamentStatus;
-use App\Models\Tournament;
+use App\Models\Tournament\Tournament;
 use Illuminate\Support\Collection;
 use Throwable;
 
@@ -92,6 +92,7 @@ class TournamentRepository
         return $tournament?->season?->league_id;
     }
 }
+
 
 
 

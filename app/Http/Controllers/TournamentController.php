@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Domain\Tournament\TournamentDomain;
-use App\Models\Season;
-use App\Models\Tournament;
+use App\Models\Season\Season;
+use App\Models\Tournament\Tournament;
 use App\Queries\GetTournamentData;
 use App\Services\Player\PlayerService;
 use App\Services\Tournament\TournamentService;
@@ -136,6 +136,7 @@ class TournamentController extends Controller
         return TournamentDomain::fromEloquent($tournament, $allRelations);
     }
 }
+
 
 
 

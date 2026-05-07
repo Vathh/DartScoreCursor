@@ -4,8 +4,8 @@ namespace App\Services\QuickGame;
 
 use App\Repositories\QuickGame\QuickGameLobbyRepository;
 use App\Repositories\Player\PlayerRepository;
-use App\Models\QuickGameLobby;
-use App\Models\QuickGameLobbyPlayer;
+use App\Models\QuickGame\QuickGameLobby;
+use App\Models\QuickGame\QuickGameLobbyPlayer;
 
 class QuickGameLobbyService
 {
@@ -355,6 +355,7 @@ class QuickGameLobbyService
         return $this->lobbyRepository->updateScoringMode($lobbyId, $hostUserId, $scoringMode);
     }
 }
+
 
 
 

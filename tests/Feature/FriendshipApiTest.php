@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
+use App\Models\Users\User;
 use App\Services\PlayerService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
@@ -134,3 +134,4 @@ class FriendshipApiTest extends TestCase
         $this->assertNotContains($this->user1->id, $userIds);
     }
 }
+

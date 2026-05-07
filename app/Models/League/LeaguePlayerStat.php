@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\League;
 
+use App\Models\Player\Player;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -31,3 +32,5 @@ class LeaguePlayerStat extends Model
         return $this->belongsTo(Player::class);
     }
 }
+
+

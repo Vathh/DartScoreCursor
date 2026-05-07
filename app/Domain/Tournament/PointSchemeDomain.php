@@ -3,8 +3,8 @@
 namespace App\Domain\Tournament;
 
 use App\Enums\GameStage;
-use App\Models\PointScheme;
-use App\Models\PointSchemeRule;
+use App\Models\PointScheme\PointScheme;
+use App\Models\PointScheme\PointSchemeRule;
 use Illuminate\Support\Collection;
 
 class PointSchemeDomain
@@ -54,3 +54,4 @@ class PointSchemeDomain
                             ->first()->points;
     }
 }
+

@@ -8,16 +8,16 @@ use App\Enums\GameType;
 use App\Enums\PlayoffSlot;
 use App\Enums\TournamentStatus;
 use App\Enums\WinnerDestinationSlot;
-use App\Models\Game;
-use App\Models\GroupStanding;
-use App\Models\League;
-use App\Models\Player;
-use App\Models\PlayoffGame;
-use App\Models\PointScheme;
-use App\Models\PointSchemeRule;
-use App\Models\Season;
-use App\Models\Tournament;
-use App\Models\User;
+use App\Models\Game\Game;
+use App\Models\GroupStanding\GroupStanding;
+use App\Models\League\League;
+use App\Models\Player\Player;
+use App\Models\PlayoffGame\PlayoffGame;
+use App\Models\PointScheme\PointScheme;
+use App\Models\PointScheme\PointSchemeRule;
+use App\Models\Season\Season;
+use App\Models\Tournament\Tournament;
+use App\Models\Users\User;
 use App\Services\PlayerService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
@@ -476,3 +476,4 @@ class GameControllerApiTest extends TestCase
                  ->assertJson(['success' => false]);
     }
 }
+

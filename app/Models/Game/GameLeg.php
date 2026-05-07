@@ -1,8 +1,10 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Game;
 
-use App\Models\QuickGame;
+use App\Models\PlayoffGame\PlayoffGame;
+use App\Models\Player\Player;
+use App\Models\QuickGame\QuickGame;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -52,3 +54,5 @@ class GameLeg extends Model
         return $this->belongsTo(Player::class, 'winner_id');
     }
 }
+
+

@@ -1,7 +1,9 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Users;
 
+use App\Models\League\League;
+use App\Models\Player\Player;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -63,3 +65,5 @@ class User extends Authenticatable
         return $this->belongsToMany(League::class, 'league_user');
     }
 }
+
+

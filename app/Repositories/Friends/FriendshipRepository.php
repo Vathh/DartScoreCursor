@@ -3,7 +3,7 @@
 namespace App\Repositories\Friends;
 
 use App\Domain\FriendshipDomain;
-use App\Models\User;
+use App\Models\Users\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -152,6 +152,7 @@ class FriendshipRepository
             ->exists();
     }
 }
+
 
 
 

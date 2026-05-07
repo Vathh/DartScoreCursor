@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\PointScheme;
 
 use App\Enums\GameStage;
 use Illuminate\Database\Eloquent\Model;
@@ -24,3 +24,5 @@ class PointSchemeRule extends Model
         return $this->belongsTo(PointScheme::class);
     }
 }
+
+

@@ -3,7 +3,7 @@
 namespace App\Repositories\League;
 
 use App\Enums\AchievementType;
-use App\Models\LeaguePlayerStat;
+use App\Models\League\LeaguePlayerStat;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -165,6 +165,7 @@ class LeaguePlayerStatRepository
         });
     }
 }
+
 
 
 

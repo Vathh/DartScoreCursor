@@ -3,9 +3,9 @@
 namespace Tests\Feature;
 
 use App\Enums\GameStatus;
-use App\Models\Player;
-use App\Models\QuickGame;
-use App\Models\User;
+use App\Models\Player\Player;
+use App\Models\QuickGame\QuickGame;
+use App\Models\Users\User;
 use App\Services\PlayerService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
@@ -355,3 +355,4 @@ class QuickGameApiTest extends TestCase
                  ->assertJsonCount(0, 'games');
     }
 }
+

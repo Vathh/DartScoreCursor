@@ -1,28 +1,24 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Achievements;
 
-use App\Enums\GameStatus;
+use App\Enums\AchievementType;
+use App\Models\Player\Player;
+use App\Models\Tournament\Tournament;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class GroupStanding extends Model
+class Achievement extends Model
 {
     protected $fillable = [
         'tournament_id',
-        'group_number',
         'player_id',
-        'matches_played',
-        'matches_won',
-        'matches_lost',
-        'legs_won',
-        'legs_lost',
-        'points',
-        'place',
+        'type',
+        'value'
     ];
 
     protected $casts = [
-        'status' => GameStatus::class
+          'type' => AchievementType::class,
     ];
 
     public function tournament(): BelongsTo
@@ -35,3 +31,5 @@ class GroupStanding extends Model
         return $this->belongsTo(Player::class);
     }
 }
+
+

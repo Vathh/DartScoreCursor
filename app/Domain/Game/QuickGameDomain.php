@@ -4,7 +4,7 @@ namespace App\Domain\Game;
 
 use App\Domain\PlayerDomain;
 use App\Enums\GameStatus;
-use App\Models\QuickGame;
+use App\Models\QuickGame\QuickGame;
 
 class QuickGameDomain extends GameDomain
 {
@@ -75,3 +75,4 @@ class QuickGameDomain extends GameDomain
         $this->validateNotFinished();
     }
 }
+

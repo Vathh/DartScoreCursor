@@ -1,7 +1,11 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Player;
 
+use App\Models\Achievements\Achievement;
+use App\Models\League\League;
+use App\Models\Season\Season;
+use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -35,3 +39,5 @@ class Player extends Model
         return $this->hasOne(PlayerStat::class);
     }
 }
+
+

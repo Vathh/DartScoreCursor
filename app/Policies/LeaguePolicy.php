@@ -3,7 +3,7 @@
 namespace App\Policies;
 
 use App\Models\League;
-use App\Models\User;
+use App\Models\Users\User;
 use Illuminate\Auth\Access\Response;
 
 class LeaguePolicy

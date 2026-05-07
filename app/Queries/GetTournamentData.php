@@ -2,7 +2,7 @@
 
 namespace App\Queries;
 
-use App\Models\Tournament;
+use App\Models\Tournament\Tournament;
 use App\ViewModels\TournamentDataViewModel;
 
 class GetTournamentData
@@ -26,3 +26,4 @@ class GetTournamentData
         return new TournamentDataViewModel($tournament);
     }
 }
+

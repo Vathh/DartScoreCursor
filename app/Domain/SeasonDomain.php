@@ -2,7 +2,7 @@
 namespace App\Domain;
 
 use App\Domain\Tournament\TournamentDomain;
-use App\Models\Season;
+use App\Models\Season\Season;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
@@ -93,3 +93,4 @@ class SeasonDomain
         return $this->updatedAt->format('Y-m-d');
     }
 }
+

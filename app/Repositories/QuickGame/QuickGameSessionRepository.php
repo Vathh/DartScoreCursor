@@ -2,7 +2,7 @@
 
 namespace App\Repositories\QuickGame;
 
-use App\Models\QuickGameSession;
+use App\Models\QuickGame\QuickGameSession;
 
 class QuickGameSessionRepository
 {
@@ -28,6 +28,7 @@ class QuickGameSessionRepository
         return $session->fresh();
     }
 }
+
 
 
 

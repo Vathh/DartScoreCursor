@@ -5,7 +5,7 @@ namespace App\Domain\Tournament;
 use App\Domain\PlayerDomain;
 use App\Domain\SeasonDomain;
 use App\Enums\GameStage;
-use App\Models\TournamentResult;
+use App\Models\Tournament\TournamentResult;
 
 class TournamentResultDomain
 {
@@ -63,3 +63,4 @@ class TournamentResultDomain
         );
     }
 }
+

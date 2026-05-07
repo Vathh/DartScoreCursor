@@ -3,8 +3,8 @@
 namespace App\Repositories\Season;
 
 use App\Domain\SeasonDomain;
-use App\Models\Season;
-use App\Models\User;
+use App\Models\Season\Season;
+use App\Models\Users\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Throwable;
@@ -96,6 +96,7 @@ class SeasonRepository
         return SeasonDomain::fromEloquent($season, ['league', 'guests']);
     }
 }
+
 
 
 

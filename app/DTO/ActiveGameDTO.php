@@ -3,7 +3,7 @@
 namespace App\DTO;
 
 use App\Domain\Game\GroupGameDomain;
-use App\Models\PlayoffGame;
+use App\Models\PlayoffGame\PlayoffGame;
 
 class ActiveGameDTO
 {
@@ -63,3 +63,4 @@ class ActiveGameDTO
         );
     }
 }
+
