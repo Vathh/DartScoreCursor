@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Services\Friends\FriendshipService;
+use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Broadcast;
@@ -24,9 +25,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Tylko Sanctum (Bearer z telefonu), bez `web`/sesji. Musi być jedyne wywołanie Broadcast::routes —
+        // patrz bootstrap/app.php (brak `channels:` w withRouting).
         Broadcast::routes([
-            'middleware' => ['auth:sanctum'],
+            'middleware' => [Authenticate::using('sanctum')],
         ]);
+        require base_path('routes/channels.php');
 
         View::composer('layouts.app', function ($view) {
             $friends = collect();

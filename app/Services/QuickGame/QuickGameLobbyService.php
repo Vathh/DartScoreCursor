@@ -2,10 +2,10 @@
 
 namespace App\Services\QuickGame;
 
+use App\Events\QuickGameLobbyUpdated;
 use App\Repositories\QuickGame\QuickGameLobbyRepository;
 use App\Repositories\Player\PlayerRepository;
 use App\Models\QuickGame\QuickGameLobby;
-use App\Models\QuickGame\QuickGameLobbyPlayer;
 
 class QuickGameLobbyService
 {
@@ -31,7 +31,10 @@ class QuickGameLobbyService
             $this->lobbyRepository->addPlayer($lobby->id, $hostPlayer->id, null, true);
         }
 
-        return $lobby->fresh(['host.player', 'players.player']);
+        $fresh = $lobby->fresh(['host.player', 'players.player', 'session']);
+        $this->broadcastLobbyUpdated($fresh);
+
+        return $fresh;
     }
 
     /**
@@ -66,7 +69,10 @@ class QuickGameLobbyService
             $this->lobbyRepository->addPlayer($lobby->id, null, $tempPlayerName, false);
         }
 
-        return $lobby->fresh(['host.player', 'players.player']);
+        $fresh = $lobby->fresh(['host.player', 'players.player', 'session']);
+        $this->broadcastLobbyUpdated($fresh);
+
+        return $fresh;
     }
 
     /**
@@ -91,7 +97,10 @@ class QuickGameLobbyService
         $this->lobbyRepository->addPlayer($lobby->id, $player->id, null, true);
         $this->lobbyRepository->markInvitationAccepted($lobbyId, $player->id);
 
-        return $lobby->fresh(['host.player', 'players.player']);
+        $fresh = $lobby->fresh(['host.player', 'players.player', 'session']);
+        $this->broadcastLobbyUpdated($fresh);
+
+        return $fresh;
     }
 
     /**
@@ -122,6 +131,7 @@ class QuickGameLobbyService
         }
 
         $this->lobbyRepository->createInvitation($lobbyId, $invitedPlayerId);
+        $this->broadcastLobbyUpdatedById($lobbyId);
     }
 
     /**
@@ -179,6 +189,9 @@ class QuickGameLobbyService
         }
 
         $this->lobbyRepository->removePlayer($lobbyId, $playerId, $tempPlayerName);
+        if (!($userId && $lobby->host_id === $userId)) {
+            $this->broadcastLobbyUpdatedById($lobbyId);
+        }
 
         // Jeśli host opuszcza lobby, usuń lobby
         if ($userId && $lobby->host_id === $userId) {
@@ -239,7 +252,10 @@ class QuickGameLobbyService
 
         $this->lobbyRepository->addPlayer($lobby->id, null, $name, false);
 
-        return $lobby->fresh(['host.player', 'players.player']);
+        $fresh = $lobby->fresh(['host.player', 'players.player', 'session']);
+        $this->broadcastLobbyUpdated($fresh);
+
+        return $fresh;
     }
 
     /**
@@ -258,7 +274,10 @@ class QuickGameLobbyService
 
         $this->lobbyRepository->setPlayerReady($lobbyId, $player->id, $isReady);
 
-        return $this->lobbyRepository->find($lobbyId);
+        $fresh = $this->lobbyRepository->find($lobbyId);
+        $this->broadcastLobbyUpdated($fresh);
+
+        return $fresh;
     }
 
     /**
@@ -336,6 +355,9 @@ class QuickGameLobbyService
             $finalOrderIds
         );
 
+        $lobby->load(['host.player', 'players.player', 'session']);
+        $this->broadcastLobbyUpdated($lobby);
+
         return $lobby;
     }
 
@@ -344,7 +366,10 @@ class QuickGameLobbyService
      */
     public function updateSettings(int $lobbyId, int $hostUserId, ?int $legsCount = null, ?string $gameType = null): QuickGameLobby
     {
-        return $this->lobbyRepository->updateSettings($lobbyId, $hostUserId, $legsCount, $gameType);
+        $lobby = $this->lobbyRepository->updateSettings($lobbyId, $hostUserId, $legsCount, $gameType);
+        $this->broadcastLobbyUpdated($lobby);
+
+        return $lobby;
     }
 
     /**
@@ -352,7 +377,20 @@ class QuickGameLobbyService
      */
     public function updateScoringMode(int $lobbyId, int $hostUserId, string $scoringMode): QuickGameLobby
     {
-        return $this->lobbyRepository->updateScoringMode($lobbyId, $hostUserId, $scoringMode);
+        $lobby = $this->lobbyRepository->updateScoringMode($lobbyId, $hostUserId, $scoringMode);
+        $this->broadcastLobbyUpdated($lobby);
+
+        return $lobby;
+    }
+
+    private function broadcastLobbyUpdatedById(int $lobbyId): void
+    {
+        $this->broadcastLobbyUpdated($this->lobbyRepository->find($lobbyId));
+    }
+
+    private function broadcastLobbyUpdated(QuickGameLobby $lobby): void
+    {
+        broadcast(new QuickGameLobbyUpdated($lobby));
     }
 }
 
