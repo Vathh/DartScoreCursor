@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Services\Friends\FriendshipService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -23,6 +24,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Broadcast::routes([
+            'middleware' => ['auth:sanctum'],
+        ]);
+
         View::composer('layouts.app', function ($view) {
             $friends = collect();
             if (Auth::check()) {

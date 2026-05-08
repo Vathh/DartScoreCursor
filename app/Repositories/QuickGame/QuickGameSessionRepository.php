@@ -2,18 +2,23 @@
 
 namespace App\Repositories\QuickGame;
 
+use App\Events\QuickGameSessionUpdated;
 use App\Models\QuickGame\QuickGameSession;
 
 class QuickGameSessionRepository
 {
     public function create(int $lobbyId, int $hostUserId, string $scoringMode, array $state): QuickGameSession
     {
-        return QuickGameSession::create([
+        $session = QuickGameSession::create([
             'lobby_id' => $lobbyId,
             'host_user_id' => $hostUserId,
             'scoring_mode' => $scoringMode,
             'state' => $state,
         ]);
+        $fresh = $session->fresh();
+        broadcast(new QuickGameSessionUpdated($fresh));
+
+        return $fresh;
     }
 
     public function find(int $sessionId): QuickGameSession
@@ -25,7 +30,10 @@ class QuickGameSessionRepository
     {
         $session = QuickGameSession::findOrFail($sessionId);
         $session->update(['state' => $state]);
-        return $session->fresh();
+        $fresh = $session->fresh();
+        broadcast(new QuickGameSessionUpdated($fresh));
+
+        return $fresh;
     }
 }
 
