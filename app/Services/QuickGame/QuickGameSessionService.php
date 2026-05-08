@@ -2,7 +2,9 @@
 
 namespace App\Services\QuickGame;
 
+use App\Models\QuickGame\QuickGameSession;
 use App\Repositories\QuickGame\QuickGameSessionRepository;
+use Illuminate\Support\Collection;
 
 class QuickGameSessionService
 {
@@ -42,10 +44,12 @@ class QuickGameSessionService
      * Pobiera stan sesji i indeks bieżącego użytkownika w liście graczy.
      * @return array{state: array, players: array, scoringMode: string, hostUserId: int, myPlayerIndex: int|null}
      */
-    public function getState(int $sessionId, ?int $currentUserId): array
+    /**
+     * Kolejność graczy w lobby zgodna ze stanem sesji (playerOrderLobbyPlayerIds).
+     */
+    private function orderedLobbyPlayers(QuickGameSession $session): Collection
     {
-        $session = $this->sessionRepository->find($sessionId);
-        $session->load('lobby.players.player');
+        $session->loadMissing('lobby.players.player');
         $orderedLobbyPlayers = $session->lobby->players;
         $orderIds = $session->state['playerOrderLobbyPlayerIds'] ?? [];
         if (is_array($orderIds) && count($orderIds) > 0) {
@@ -55,6 +59,14 @@ class QuickGameSessionService
                 return $orderPos[$id] ?? (10000 + $id);
             })->values();
         }
+
+        return $orderedLobbyPlayers;
+    }
+
+    public function getState(int $sessionId, ?int $currentUserId): array
+    {
+        $session = $this->sessionRepository->find($sessionId);
+        $orderedLobbyPlayers = $this->orderedLobbyPlayers($session);
 
         $players = $orderedLobbyPlayers->map(function ($p) {
             return [
@@ -110,6 +122,21 @@ class QuickGameSessionService
         $isHost = (int) $session->host_user_id === (int) $currentUserId;
         if ($session->scoring_mode === 'one_device' && !$isHost) {
             throw new \RuntimeException('W trybie „liczenie na 1 urządzeniu” tylko host może wpisywać punkty');
+        }
+
+        if ($session->scoring_mode === 'each_own') {
+            $orderedLobbyPlayers = $this->orderedLobbyPlayers($session);
+            $lp = $orderedLobbyPlayers->get($playerIndex);
+            if ($lp === null) {
+                throw new \RuntimeException('Nieprawidłowy gracz');
+            }
+            if ($lp->player_id && $lp->player) {
+                if ((int) $lp->player->user_id !== (int) $currentUserId) {
+                    throw new \RuntimeException('W tym trybie tylko rzucający gracz może wpisać swoją wizytę');
+                }
+            } elseif (!$isHost) {
+                throw new \RuntimeException('Wizyty gościa może wpisać tylko host');
+            }
         }
 
         if ($state['gameType'] !== '501') {
