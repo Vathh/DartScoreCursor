@@ -9,6 +9,10 @@ class AchievementsRepository
 {
     public function createMany(array $achievements): void
     {
+        if ($achievements === []) {
+            return;
+        }
+
         $mapped = array_map(fn (GameAchievementDTO $dto) => [
                                 'player_id' => $dto->playerId,
                                 "tournament_id" => $dto->tournamentId, // null dla szybkich meczów

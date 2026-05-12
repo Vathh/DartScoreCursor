@@ -24,9 +24,9 @@ class LeagueService
     public function getAll(): Collection
     {
         return $this->leagueRepository
-                    ->getAll()
-                    ->sortByDesc(fn(LeagueDomain $league) => $league->updatedAt)
-                    ->values();
+            ->getAll()
+            ->sortByDesc(fn (LeagueDomain $league) => $league->updatedAt->getTimestamp())
+            ->values();
     }
 
     public function getByIdWithAdmins(int $id): ?LeagueDomain

@@ -17,7 +17,10 @@ class SeasonRepository
      */
     public function getAll(): Collection
     {
-        return Season::all()->map(fn($season) => SeasonDomain::fromEloquent($season));
+        return Season::query()
+            ->with('league')
+            ->get()
+            ->map(fn (Season $season) => SeasonDomain::fromEloquent($season, ['league']));
     }
 
     /**

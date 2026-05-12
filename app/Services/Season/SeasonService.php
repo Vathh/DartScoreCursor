@@ -25,8 +25,13 @@ class SeasonService
     public function getAll(): Collection
     {
         return $this->seasonRepository->getAll()
-                                        ->sortByDesc(fn($season) => $season->updatedAt)
-                                        ->values();
+            ->sortByDesc(function ($season) {
+                $ts = $season->startDate?->getTimestamp()
+                    ?? $season->endDate?->getTimestamp();
+
+                return $ts ?? PHP_INT_MIN;
+            })
+            ->values();
     }
 
     public function create(

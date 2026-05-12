@@ -36,3 +36,16 @@ app/
 └── Http/
     └── Controllers/ # Kontrolery API i web
 ```
+
+## Użytkownik a gracz (Player)
+
+- **Każdy zarejestrowany użytkownik (`User`) ma dokładnie jeden powiązany rekord `Player`** (`players.user_id` jest unikalne). Nie zakładamy istnienia konta bez gracza.
+- **Rejestracja** (API: `App\Http\Controllers\Api\AuthController::register`, web: `App\Http\Controllers\AuthController::register`) tworzy najpierw `User`, potem `Player` z wybraną nazwą — tak samo należy postępować w **seedach i testach**, gdy tworzysz użytkownika „jak po rejestracji”.
+- **Goście** turniejowi / ligowi to `Player` z `user_id = null`; dotyczy to tylko gości, nie kont użytkowników.
+
+## Turniej a schematy punktów (`PointScheme`)
+
+- **Liczba uczestników** przy starcie (`TournamentService::tryCreateGroupGames`, `count($playerIds)`) musi wpadać w co najmniej jeden przedział `min_players`–`max_players` w `point_schemes` (obecnie seed pokrywa **4–80**). Dobór: `PointSchemeService::findByPlayersAmount`; przy braku dopasowania — wyjątek.
+- **Reguły** w `point_scheme_rules` opisują punkty za miejsca w grupie oraz za etapy drabinki (`EIGHT`, `QUARTER`, `THIRD`, `FINAL`). **Większy turniej = wyższa skala punktów** przy tym samym etapie (porównaj np. zwycięstwo w finale między przedziałami w seedzie).
+- Przedziały w seedzie są **rozłączne** (4–8, 9–16, …, aż do 73–80). Jeśli kiedyś dodasz nakładające się zakresy, `PointSchemeService::findByPlayersAmount` wybiera schemat z **największym `min_players`** (wyższa skala przy granicy).
+- **Źródło prawdy** i zmiany przedziałów / liczb: `database/seeders/PointSchemeSeeder.php` — nowe przedziały tylko po uzgodnieniu; pilnuj monotoniczności i spójności z kodem wyników.

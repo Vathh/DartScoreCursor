@@ -54,16 +54,16 @@ class SeasonDomain
             admins: in_array('admins', $with)
                 ? $season->admins->map(fn($user) => [
                     'id' => $user->id,
-                    'name' => $user->player->name
+                    'name' => $user->player->name,
                 ])->toArray()
                 : [],
-            league: in_array('league', $with)
+            league: in_array('league', $with) && $season->league
                 ? LeagueDomain::fromEloquent($season->league)
                 : null,
             relatedUsers: in_array('relatedUsers', $with)
                 ? $season->relatedUsers->map(fn($user) => [
                     'id' => $user->id,
-                    'name' => $user->player->name
+                    'name' => $user->player->name,
                 ])->toArray()
                 : [],
             tournaments: in_array('tournaments', $with)
@@ -86,6 +86,37 @@ class SeasonDomain
     public function getEndDate(): ?string
     {
         return $this->endDate?->format('Y-m-d');
+    }
+
+    /** Nagłówek listy: „Liga – nazwa sezonu”, gdy znana jest liga. */
+    public function displayTitle(): string
+    {
+        $leagueName = $this->league?->name;
+        if (is_string($leagueName) && $leagueName !== '') {
+            return $leagueName.' - '.$this->name;
+        }
+
+        return $this->name;
+    }
+
+    /** Tekst pod kafelkiem: przedział lub pojedyncza data rozgrywek. */
+    public function getPlayDatesFormatted(): ?string
+    {
+        $loc = app()->getLocale();
+
+        if ($this->startDate && $this->endDate) {
+            return $this->startDate->locale($loc)->translatedFormat('j F Y')
+                .' – '
+                .$this->endDate->locale($loc)->translatedFormat('j F Y');
+        }
+        if ($this->startDate) {
+            return 'od '.$this->startDate->locale($loc)->translatedFormat('j F Y');
+        }
+        if ($this->endDate) {
+            return 'do '.$this->endDate->locale($loc)->translatedFormat('j F Y');
+        }
+
+        return null;
     }
 
     public function getUpdatedAtDate(): string

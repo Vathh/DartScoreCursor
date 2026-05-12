@@ -16,7 +16,10 @@ class TournamentRepository
      */
     public function getAll(): Collection
     {
-        return Tournament::all()->map(fn($tournament) => TournamentDomain::fromEloquent($tournament));
+        return Tournament::query()
+            ->with(['season.league'])
+            ->get()
+            ->map(fn (Tournament $tournament) => TournamentDomain::fromEloquent($tournament, ['season']));
     }
 
     public function create(
@@ -54,14 +57,14 @@ class TournamentRepository
      */
     public function findWithSeasonAndPointSchemeRules(int $tournamentId): ?TournamentDomain
     {
-        $tournament = Tournament::with(['season', 'pointScheme.rules'])->findOrFail($tournamentId);
+        $tournament = Tournament::with(['season.league', 'pointScheme.rules'])->findOrFail($tournamentId);
 
         return TournamentDomain::fromEloquent($tournament, ['season', 'pointScheme', 'pointScheme.rules']);
     }
 
     public function findWithSeasonAndPointScheme(int $tournamentId): ?TournamentDomain
     {
-        $tournament = Tournament::with(['season', 'pointScheme'])->findOrFail($tournamentId);
+        $tournament = Tournament::with(['season.league', 'pointScheme'])->findOrFail($tournamentId);
 
         return TournamentDomain::fromEloquent($tournament, ['season', 'pointScheme']);
     }

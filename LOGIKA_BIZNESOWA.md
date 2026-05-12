@@ -82,7 +82,7 @@ Każda z nich ma **inny sposób uwierzytelnienia** i **inny cel** – nie miesza
 
 ## Dane do testowego logowania (DemoDataSeeder)
 
-Po uruchomieniu `php artisan db:seed` (lub `DatabaseSeeder` z `DemoDataSeeder`) w bazie są użytkownicy testowi do **logowania na konto** (Szybki mecz):
+Po uruchomieniu **`php artisan migrate:fresh --seed`** (lub sam `DemoDataSeeder` przy już zmigrowanej bazie) w bazie są dane demo do **logowania na konto** (panel WWW / opcjonalnie Szybki mecz, jeśli logujesz się tym samym kontem):
 
 | Email           | Hasło    | Gracz (nazwa)           |
 |-----------------|----------|-------------------------|
@@ -95,9 +95,15 @@ Po uruchomieniu `php artisan db:seed` (lub `DatabaseSeeder` z `DemoDataSeeder`) 
 | gracz7@test.pl  | password | Marcin Zieliński        |
 | gracz8@test.pl  | password | Magdalena Szymańska     |
 
-- **Logowanie na konto (Szybki mecz):** dowolny z powyższych emaili + hasło `password`.
-- **Kod turnieju:** kody są generowane **przy starcie turnieju** w panelu webowym (DartScore). W seedzie nie ma gotowych kodów – trzeba uruchomić turniej w panelu, żeby wygenerować kody i użyć ich w aplikacji mobilnej w sekcji „Turniej”.
+**Konto z aktualnego `DemoDataSeeder`** (po `php artisan migrate:fresh --seed`) — logowanie w **panelu WWW** (zarządzanie ligą, sezonem, turniejami demo):
+
+| Kontekst | Email | Hasło |
+|----------|-------|-------|
+| Administrator demo (liga „Suwałki — Liga demonstracyjna”, sezon, turnieje) | `demo-admin@dartscore.local` | `password` |
+
+- **Logowanie na konto (Szybki mecz):** w domyślnym seedzie jest powyższy **admin**; tabela `gracz1@test.pl` … `gracz8@test.pl` to **przykładowe** konta do ręcznych testów API / mobilki — **nie są** tworzone przez obecny `DemoDataSeeder`, chyba że dodasz je osobno w bazie lub seedzie.
+- **Kod turnieju:** kody powstają **przy starcie turnieju** w panelu. Turniej demo **„Mistrzostwa 32 — pełny bracket (demo)”** startuje już w seedzie — gotowe kody sędziowskie są w tabeli `login_codes` (pole `tournament_id` wskazuje ten turniej). Dla nowego turnieju uruchomionego ręcznie w panelu kody pojawią się tak samo po starcie.
 
 ---
 
-*Ostatnia aktualizacja: luty 2025*
+*Ostatnia aktualizacja: maj 2026*

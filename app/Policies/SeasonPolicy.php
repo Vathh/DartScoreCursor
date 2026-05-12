@@ -2,7 +2,7 @@
 
 namespace App\Policies;
 
-use App\Models\Season;
+use App\Models\Season\Season;
 use App\Models\Users\User;
 use Illuminate\Auth\Access\Response;
 

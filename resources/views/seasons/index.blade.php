@@ -4,18 +4,29 @@
 
 @section('content')
 
-    <div class="flex flex-wrap gap-1 items-center justify-center pt-10">
+    <div class="max-w-6xl mx-auto px-4 pt-10 pb-28">
         @if($seasons->isEmpty())
-            <p>Brak.</p>
+            <p class="text-center text-[#c5c5c5]">Brak sezonów.</p>
         @else
-            @foreach($seasons as $season)
-                <a href="{{ route('seasons.show', ['season' => $season->id]) }}">
-                    <div class="bg-lighter-bg shadow rounded-lg p-6 hover:shadow-xl hover:cursor-pointer hover:bg-[#333333] transition">
-                        <h3 class="btn__title">{{ $season->name }}</h3>
-                        <p class="btn__description">Ostatnia aktywność : {{ $season->getUpdatedAtDate() }}</p>
-                    </div>
-                </a>
-            @endforeach
+            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                @foreach($seasons as $season)
+                    <a href="{{ route('seasons.show', ['season' => $season->id]) }}" class="block group">
+                        <div
+                            class="bg-lighter-bg shadow rounded-lg p-6 h-full min-h-[120px] flex flex-col justify-center hover:shadow-xl hover:cursor-pointer hover:bg-[#333333] transition border border-transparent group-hover:border-white/10">
+                            <h3 class="text-lg font-semibold text-white leading-snug mb-3">
+                                {{ $season->displayTitle() }}
+                            </h3>
+                            <p class="text-sm text-[#a8a8a8]">
+                                @if($season->getPlayDatesFormatted())
+                                    Data rozgrywek: {{ $season->getPlayDatesFormatted() }}
+                                @else
+                                    <span class="italic">Data rozgrywek: nie ustawiono</span>
+                                @endif
+                            </p>
+                        </div>
+                    </a>
+                @endforeach
+            </div>
         @endif
     </div>
 
@@ -27,4 +38,3 @@
     @endcanCreateLeagues
 
 @endsection
-

@@ -30,8 +30,10 @@ class TournamentService
     public function getAll(): Collection
     {
         return $this->tournamentRepository->getAll()
-                                            ->sortByDesc(fn($tournament) => $tournament->updatedAt)
-                                            ->values();
+            ->sortByDesc(
+                fn ($tournament) => $tournament->date?->getTimestamp() ?? PHP_INT_MIN,
+            )
+            ->values();
     }
 
     public function create(

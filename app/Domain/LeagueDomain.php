@@ -48,7 +48,7 @@ class LeagueDomain
             admins: in_array('admins', $with)
                 ? $league->admins->map(fn($user) => [
                     'id' => $user->id,
-                    'name' => $user->player->name
+                    'name' => $user->player->name,
                 ])->toArray()
                 : [],
             seasons: in_array('seasons', $with)
@@ -78,6 +78,25 @@ class LeagueDomain
     public function createdAtDate(): string
     {
         return $this->createdAt->format('Y-m-d');
+    }
+
+    /** Tytuł kafelka na liście (spójnie z sezonami / turniejami). */
+    public function displayTitle(): string
+    {
+        return $this->name;
+    }
+
+    /**
+     * Drugi wiersz kafelka: ostatnia aktywność (data aktualizacji rekordu).
+     */
+    public function getCardSubtitle(): string
+    {
+        return 'Ostatnia aktywność: '.$this->getUpdatedAtFormatted();
+    }
+
+    public function getUpdatedAtFormatted(): string
+    {
+        return $this->updatedAt->locale((string) config('app.locale'))->translatedFormat('j F Y');
     }
 
     public function getAdminsIds(): array

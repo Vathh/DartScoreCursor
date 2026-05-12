@@ -48,14 +48,19 @@ class TournamentDomain
      */
     public static function fromEloquent(Tournament $tournament, array $with = []): self
     {
-        $tournament->loadMissing(array_intersect($with, ['season', 'achievements', 'games', 'groupStandings', 'pointScheme', 'pointScheme.rules']));
+        $relations = array_intersect($with, ['season', 'achievements', 'games', 'groupStandings', 'pointScheme', 'pointScheme.rules']);
+        if (in_array('season', $relations, true)) {
+            $relations = array_values(array_diff($relations, ['season']));
+            $relations[] = 'season.league';
+        }
+        $tournament->loadMissing($relations);
 
         return new self(
             id: $tournament->id,
             name: $tournament->name,
             date: $tournament->date,
-            season: in_array('season', $with)
-                ? SeasonDomain::fromEloquent($tournament->season)
+            season: in_array('season', $with) && $tournament->season
+                ? SeasonDomain::fromEloquent($tournament->season, ['league'])
                 : null,
             updatedAt: $tournament->updated_at,
             achievements: in_array('achievements', $with)
@@ -80,6 +85,26 @@ class TournamentDomain
     public function getDate(): ?string
     {
         return $this->date?->format('Y-m-d');
+    }
+
+    /** Nagłówek listy: „Liga – nazwa turnieju”, jeśli znana jest liga sezonu. */
+    public function displayTitle(): string
+    {
+        $leagueName = $this->season?->league?->name;
+        if (is_string($leagueName) && $leagueName !== '') {
+            return $leagueName.' - '.$this->name;
+        }
+
+        return $this->name;
+    }
+
+    public function getPlayDateFormatted(): ?string
+    {
+        if ($this->date === null) {
+            return null;
+        }
+
+        return $this->date->locale(app()->getLocale())->translatedFormat('j F Y');
     }
 
     public function getUpdatedAtDate(): string

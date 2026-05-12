@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Services\Friends\FriendshipService;
 use Illuminate\Auth\Middleware\Authenticate;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Broadcast;
@@ -25,6 +26,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Carbon::setLocale((string) config('app.locale'));
+
         // Tylko Sanctum (Bearer z telefonu), bez `web`/sesji. Musi być jedyne wywołanie Broadcast::routes —
         // patrz bootstrap/app.php (brak `channels:` w withRouting).
         Broadcast::routes([

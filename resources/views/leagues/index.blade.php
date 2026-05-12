@@ -4,18 +4,25 @@
 
 @section('content')
 
-    <div class="flex flex-wrap gap-1 items-center justify-center pt-10">
+    <div class="max-w-6xl mx-auto px-4 pt-10 pb-28">
         @if($leagues->isEmpty())
-            <p>Brak.</p>
+            <p class="text-center text-[#c5c5c5]">Brak lig.</p>
         @else
-            @foreach($leagues as $league)
-                <a href="{{ route('leagues.show', ['league' => $league->id]) }}">
-                    <div class="bg-lighter-bg shadow rounded-lg p-6 hover:shadow-xl hover:cursor-pointer hover:bg-[#333333] transition">
-                        <h3 class="btn__title">{{ $league->name }}</h3>
-                        <p class="btn__description">Ostatnia aktywność : {{ $league->updatedAt }}</p>
-                    </div>
-                </a>
-            @endforeach
+            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                @foreach($leagues as $league)
+                    <a href="{{ route('leagues.show', ['league' => $league->id]) }}" class="block group">
+                        <div
+                            class="bg-lighter-bg shadow rounded-lg p-6 h-full min-h-[120px] flex flex-col justify-center hover:shadow-xl hover:cursor-pointer hover:bg-[#333333] transition border border-transparent group-hover:border-white/10">
+                            <h3 class="text-lg font-semibold text-white leading-snug mb-3">
+                                {{ $league->displayTitle() }}
+                            </h3>
+                            <p class="text-sm text-[#a8a8a8] leading-relaxed">
+                                {{ $league->getCardSubtitle() }}
+                            </p>
+                        </div>
+                    </a>
+                @endforeach
+            </div>
         @endif
     </div>
 
@@ -27,4 +34,3 @@
     @endcanCreateLeagues
 
 @endsection
-

@@ -2,7 +2,7 @@
 
 namespace App\Policies;
 
-use App\Models\League;
+use App\Models\League\League;
 use App\Models\Users\User;
 use Illuminate\Auth\Access\Response;
 
