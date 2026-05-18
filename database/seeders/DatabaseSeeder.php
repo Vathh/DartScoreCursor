@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             PointSchemeSeeder::class,
             DemoDataSeeder::class,
+            DemoPlayersSeeder::class,
         ]);
     }
 }

@@ -95,13 +95,19 @@ Po uruchomieniu **`php artisan migrate:fresh --seed`** (lub sam `DemoDataSeeder`
 | gracz7@test.pl  | password | Marcin Zieliński        |
 | gracz8@test.pl  | password | Magdalena Szymańska     |
 
+**Znajomi i zaproszenia (`DemoPlayersSeeder`):**
+
+- **Znajomi (zaakceptowane):** 1–2, 1–3, 1–4, 2–3, 3–5, 4–6, 5–7, 6–8, 7–8 (np. Jan widzi Annę, Piotra, Marię).
+- **Oczekujące zaproszenia:** Jan→Tomasz (5), Anna→Katarzyna (6), Marcin→Jan (1), Maria→Magdalena (8).
+- **Odrzucone:** Piotr→Magdalena (3→8).
+
 **Konto z aktualnego `DemoDataSeeder`** (po `php artisan migrate:fresh --seed`) — logowanie w **panelu WWW** (zarządzanie ligą, sezonem, turniejami demo):
 
 | Kontekst | Email | Hasło |
 |----------|-------|-------|
 | Administrator demo (liga „Suwałki — Liga demonstracyjna”, sezon, turnieje) | `demo-admin@dartscore.local` | `password` |
 
-- **Logowanie na konto (Szybki mecz):** w domyślnym seedzie jest powyższy **admin**; tabela `gracz1@test.pl` … `gracz8@test.pl` to **przykładowe** konta do ręcznych testów API / mobilki — **nie są** tworzone przez obecny `DemoDataSeeder`, chyba że dodasz je osobno w bazie lub seedzie.
+- **Logowanie na konto (Szybki mecz):** konta `gracz1@test.pl` … `gracz8@test.pl` (hasło `password`) tworzy **`DemoPlayersSeeder`** — znajomi i zaproszenia (pending / rejected) między nimi. Administrator turniejów: `demo-admin@dartscore.local` / `password`.
 - **Kod turnieju:** kody powstają **przy starcie turnieju** w panelu. Turniej demo **„Mistrzostwa 32 — pełny bracket (demo)”** startuje już w seedzie — gotowe kody sędziowskie są w tabeli `login_codes` (pole `tournament_id` wskazuje ten turniej). Dla nowego turnieju uruchomionego ręcznie w panelu kody pojawią się tak samo po starcie.
 
 ---

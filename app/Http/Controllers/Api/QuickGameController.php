@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\DTO\QuickGame\QuickGameResultDTO;
 use App\DTO\QuickGameDTO;
+use App\Http\Requests\QuickGameResultRequest;
 use App\Repositories\Player\PlayerRepository;
 use App\Services\QuickGame\QuickGameService;
 use Illuminate\Http\JsonResponse;
@@ -26,6 +28,7 @@ class QuickGameController
         $validated = $request->validate([
             'player1Id' => 'required|integer|exists:players,id',
             'player2Id' => 'required|integer|exists:players,id',
+            'legsCount' => 'nullable|integer|min:1|max:15',
         ]);
 
         $userId = $request->user()->id;
@@ -35,7 +38,8 @@ class QuickGameController
             $gameId = $this->quickGameService->createQuickGame(
                 $dto->player1Id,
                 $dto->player2Id,
-                $userId
+                $userId,
+                (int) ($validated['legsCount'] ?? 3),
             );
 
             return response()->json([
@@ -99,6 +103,31 @@ class QuickGameController
         $this->quickGameService->setStatusInProgress($validated['gameId']);
 
         return response()->json(['success' => true]);
+    }
+
+    /**
+     * POST /api/quick-game/update
+     * Lobby: players[] bez gameId. Po scoring API: gameId + achievements (opcjonalnie players).
+     */
+    public function update(QuickGameResultRequest $request): JsonResponse
+    {
+        $validated = $request->validated();
+        $dto = QuickGameResultDTO::fromArray($validated);
+
+        try {
+            $this->quickGameService->finishFromMobile(
+                $dto,
+                isset($validated['lobbyId']) ? (int) $validated['lobbyId'] : null,
+                isset($validated['gameId']) ? (int) $validated['gameId'] : null,
+            );
+
+            return response()->json(['success' => true]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 400);
+        }
     }
 }
 

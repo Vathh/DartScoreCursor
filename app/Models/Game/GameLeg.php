@@ -7,6 +7,7 @@ use App\Models\Player\Player;
 use App\Models\QuickGame\QuickGame;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class GameLeg extends Model
 {
@@ -52,6 +53,21 @@ class GameLeg extends Model
     public function winner(): BelongsTo
     {
         return $this->belongsTo(Player::class, 'winner_id');
+    }
+
+    public function visits(): HasMany
+    {
+        return $this->hasMany(GameVisit::class);
+    }
+
+    public function playerStats(): HasMany
+    {
+        return $this->hasMany(GameLegPlayerStat::class);
+    }
+
+    public function isOpen(): bool
+    {
+        return $this->finished_at === null;
     }
 }
 

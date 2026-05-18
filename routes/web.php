@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\LeagueController;
+use App\Http\Controllers\MatchController;
 use App\Http\Controllers\PagesController;
 use App\Http\Controllers\PlayerController;
 use App\Http\Controllers\SeasonController;
@@ -9,6 +10,11 @@ use App\Http\Controllers\TournamentController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [PagesController::class, 'showHomePage'])->name('pages.home');
+
+Route::get('/matches/{type}/{id}', [MatchController::class, 'show'])
+    ->where('type', 'group|playoff|quick')
+    ->whereNumber('id')
+    ->name('matches.show');
 
 Route::get('/register', [PagesController::class, 'showRegisterPage'])->name('pages.registerPanel');
 Route::post('/register', [AuthController::class, 'register'])->name('register');

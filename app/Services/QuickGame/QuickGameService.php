@@ -2,9 +2,12 @@
 
 namespace App\Services\QuickGame;
 
+use App\DTO\QuickGame\QuickGameResultDTO;
 use App\DTO\UpdateGameDTO;
 use App\Domain\Game\QuickGameDomain;
+use App\Enums\GameStatus;
 use App\Enums\GameType;
+use App\Models\QuickGame\QuickGame;
 use App\Repositories\QuickGame\QuickGameRepository;
 use App\Repositories\Player\PlayerRepository;
 use App\Services\Achievements\AchievementsService;
@@ -32,7 +35,7 @@ class QuickGameService
      * @return int ID utworzonego meczu
      * @throws \RuntimeException
      */
-    public function createQuickGame(int $player1Id, int $player2Id, int $requestingUserId): int
+    public function createQuickGame(int $player1Id, int $player2Id, int $requestingUserId, int $legsCount = 3): int
     {
         // Sprawdź czy gracze są zarejestrowani (mają user_id)
         $player1 = $this->playerRepository->findById($player1Id);
@@ -51,7 +54,7 @@ class QuickGameService
             throw new \RuntimeException('Możesz tworzyć mecze tylko z własnym udziałem');
         }
 
-        return $this->quickGameRepository->create($player1Id, $player2Id);
+        return $this->quickGameRepository->create($player1Id, $player2Id, $legsCount);
     }
 
     /**
@@ -117,6 +120,90 @@ class QuickGameService
     public function setStatusInProgress(int $gameId): void
     {
         $this->quickGameRepository->setStatusInProgress($gameId);
+    }
+
+    /**
+     * Zapis wyniku z lobby (bez wcześniejszego quick_games) lub samych achievementów po scoring API.
+     */
+    public function finishFromMobile(QuickGameResultDTO $dto, ?int $lobbyId = null, ?int $gameId = null): void
+    {
+        DB::transaction(function () use ($dto, $lobbyId, $gameId) {
+            if ($gameId !== null && $dto->players === []) {
+                QuickGame::findOrFail($gameId);
+                $this->achievementsService->createMany($dto->achievements);
+
+                return;
+            }
+
+            if ($gameId !== null) {
+                $game = QuickGame::findOrFail($gameId);
+                $this->applyPlayerResultsToGame($game, $dto->players);
+                $this->achievementsService->createMany($dto->achievements);
+
+                return;
+            }
+
+            if ($dto->players === []) {
+                throw new \RuntimeException('Brak wyników graczy');
+            }
+
+            $playerIds = array_map(fn ($p) => $p->playerId, $dto->players);
+            $newGameId = $this->quickGameRepository->createWithResults($playerIds, $lobbyId);
+            $this->quickGameRepository->saveResults($newGameId, $dto->players);
+
+            $sorted = $dto->players;
+            usort($sorted, fn ($a, $b) => ($b->place ?? 0) <=> ($a->place ?? 0));
+            $winner = $sorted[0] ?? null;
+            if ($winner) {
+                $game = QuickGame::findOrFail($newGameId);
+                $p1Score = 0;
+                $p2Score = 0;
+                foreach ($dto->players as $pr) {
+                    if ((int) $pr->playerId === (int) $game->player1_id) {
+                        $p1Score = (int) $pr->score;
+                    }
+                    if ((int) $pr->playerId === (int) $game->player2_id) {
+                        $p2Score = (int) $pr->score;
+                    }
+                }
+                $game->update([
+                    'player1_score' => $p1Score,
+                    'player2_score' => $p2Score,
+                    'winner_id' => $winner->playerId,
+                    'status' => GameStatus::FINISHED,
+                ]);
+            }
+
+            $this->achievementsService->createMany($dto->achievements);
+        });
+    }
+
+    /**
+     * @param  \App\DTO\QuickGame\PlayerResultDTO[]  $players
+     */
+    private function applyPlayerResultsToGame(QuickGame $game, array $players): void
+    {
+        $this->quickGameRepository->saveResults($game->id, $players);
+        $p1Score = 0;
+        $p2Score = 0;
+        $winnerId = null;
+        foreach ($players as $pr) {
+            if ((int) $pr->playerId === (int) $game->player1_id) {
+                $p1Score = (int) $pr->score;
+            }
+            if ((int) $pr->playerId === (int) $game->player2_id) {
+                $p2Score = (int) $pr->score;
+            }
+            if ($pr->place === 1) {
+                $winnerId = $pr->playerId;
+            }
+        }
+        $game->update([
+            'player1_score' => $p1Score,
+            'player2_score' => $p2Score,
+            'winner_id' => $winnerId ?? $game->winner_id,
+            'status' => GameStatus::FINISHED,
+        ]);
     }
 }
 

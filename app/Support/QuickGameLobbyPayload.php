@@ -9,11 +9,14 @@ class QuickGameLobbyPayload
     /**
      * @return array<string, mixed>
      */
-    public static function fromLobby(QuickGameLobby $lobby): array
+    public static function fromLobby(QuickGameLobby $lobby, ?int $currentUserId = null): array
     {
-        $lobby->loadMissing(['host.player', 'players.player', 'session']);
+        $lobby->loadMissing(['host.player', 'players.player']);
 
-        $players = $lobby->players->map(function ($p) use ($lobby) {
+        $orderIds = is_array($lobby->player_order) ? $lobby->player_order : null;
+        $lobbyPlayers = QuickGameLobbyPlayerOrder::sort($lobby->players, $orderIds);
+
+        $players = $lobbyPlayers->map(function ($p) use ($lobby) {
             $isRegistered = $p->player_id !== null;
             $isHost = $p->player && (int) $p->player->user_id === (int) $lobby->host_id;
 
@@ -39,10 +42,34 @@ class QuickGameLobbyPayload
             'players' => $players,
         ];
 
-        if ($lobby->status === 'started' && $lobby->session) {
-            $out['sessionId'] = $lobby->session->id;
+        if ($lobby->status === 'started' && $lobby->quick_game_id) {
+            $out['quickGameId'] = $lobby->quick_game_id;
+        }
+
+        if ($currentUserId !== null) {
+            $out['youAreHost'] = (int) $lobby->host_id === (int) $currentUserId;
+            if ($lobby->status === 'started') {
+                $myIndex = self::resolveMyPlayerIndex($lobbyPlayers, $currentUserId);
+                if ($myIndex !== null) {
+                    $out['myPlayerIndex'] = $myIndex;
+                }
+            }
         }
 
         return $out;
+    }
+
+    /**
+     * @param  \Illuminate\Support\Collection<int, object>  $orderedPlayers
+     */
+    private static function resolveMyPlayerIndex($orderedPlayers, int $currentUserId): ?int
+    {
+        foreach ($orderedPlayers as $i => $lp) {
+            if ($lp->player_id && $lp->player && (int) $lp->player->user_id === $currentUserId) {
+                return $i;
+            }
+        }
+
+        return null;
     }
 }

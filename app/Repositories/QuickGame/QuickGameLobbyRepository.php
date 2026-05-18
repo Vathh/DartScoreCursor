@@ -133,6 +133,15 @@ class QuickGameLobbyRepository
         return $this->find($lobbyId);
     }
 
+    public function attachMatchMeta(int $lobbyId, ?int $quickGameId, array $playerOrderLobbyPlayerIds): void
+    {
+        DB::table('quick_game_lobbies')->where('id', $lobbyId)->update([
+            'quick_game_id' => $quickGameId,
+            'player_order' => json_encode(array_values(array_map('intval', $playerOrderLobbyPlayerIds))),
+            'updated_at' => now(),
+        ]);
+    }
+
     public function createInvitation(int $lobbyId, int $invitedPlayerId): QuickGameLobbyInvitation
     {
         return QuickGameLobbyInvitation::create([

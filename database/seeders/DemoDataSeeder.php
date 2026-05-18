@@ -2,8 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\DTO\GameAchievementDTO;
 use App\DTO\GameResultDTO;
 use App\DTO\UpdateGameDTO;
+use App\Enums\AchievementType;
 use App\Enums\GameStage;
 use App\Enums\GameStatus;
 use App\Enums\GameType;
@@ -18,6 +20,7 @@ use App\Models\Tournament\Tournament;
 use App\Models\Users\User;
 use App\Services\Game\GameService;
 use App\Services\Tournament\TournamentService;
+use Database\Seeders\Support\DemoMatchScoringFactory;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Collection;
@@ -162,6 +165,7 @@ class DemoDataSeeder extends Seeder
         }
         $this->finishAllPlayoffGamesPlayer1Wins($big->id, $gameService);
         $big->update(['status' => TournamentStatus::FINISHED]);
+        DemoMatchScoringFactory::seedTournament($big->id);
 
         $small = Tournament::create([
             'season_id' => $seasonA->id,
@@ -324,7 +328,14 @@ class DemoDataSeeder extends Seeder
                         tournamentId: $tournamentId,
                         groupNumber: $groupNumber,
                     ),
-                    achievementsDTOs: [],
+                    achievementsDTOs: $this->demoAchievementsForGame(
+                        seed: $game->id,
+                        tournamentId: $tournamentId,
+                        player1Id: (int) $game->player1_id,
+                        player2Id: (int) $game->player2_id,
+                        winnerId: $winnerId,
+                        isPlayoff: false,
+                    ),
                 );
 
                 if (! $gameService->update($dto)) {
@@ -389,7 +400,14 @@ class DemoDataSeeder extends Seeder
                         tournamentId: $tournamentId,
                         groupNumber: 0,
                     ),
-                    achievementsDTOs: [],
+                    achievementsDTOs: $this->demoAchievementsForGame(
+                        seed: $pg->id,
+                        tournamentId: $tournamentId,
+                        player1Id: (int) $pg->player1_id,
+                        player2Id: (int) $pg->player2_id,
+                        winnerId: $winnerId,
+                        isPlayoff: true,
+                    ),
                 );
 
                 if (! $gameService->update($dto)) {
@@ -397,5 +415,70 @@ class DemoDataSeeder extends Seeder
                 }
             }
         }
+    }
+
+    /**
+     * Deterministyczne osiągnięcia demo (jak w aplikacji sędziowskiej: 180, 170+, HF, QF).
+     *
+     * @return list<GameAchievementDTO>
+     */
+    private function demoAchievementsForGame(
+        int $seed,
+        int $tournamentId,
+        int $player1Id,
+        int $player2Id,
+        int $winnerId,
+        bool $isPlayoff,
+    ): array {
+        $hash = crc32("demo-ach-{$seed}-{$player1Id}-{$player2Id}");
+        $loserId = $winnerId === $player1Id ? $player2Id : $player1Id;
+
+        $chancePercent = $isPlayoff ? 72 : 55;
+        if (($hash % 100) >= $chancePercent) {
+            return [];
+        }
+
+        $achievements = [];
+        $achievements[] = $this->demoAchievementRoll(
+            hash: $hash,
+            tournamentId: $tournamentId,
+            playerId: (($hash >> 4) % 10) < 7 ? $winnerId : $loserId,
+        );
+
+        if ((($hash >> 24) % 100) < 14) {
+            $secondPlayer = $achievements[0]->playerId === $winnerId ? $loserId : $winnerId;
+            $achievements[] = $this->demoAchievementRoll(
+                hash: $hash >> 8,
+                tournamentId: $tournamentId,
+                playerId: $secondPlayer,
+            );
+        }
+
+        return $achievements;
+    }
+
+    private function demoAchievementRoll(int $hash, int $tournamentId, int $playerId): GameAchievementDTO
+    {
+        $typeRoll = ($hash >> 8) % 100;
+
+        if ($typeRoll < 7) {
+            return new GameAchievementDTO($playerId, $tournamentId, null, AchievementType::MAX);
+        }
+
+        if ($typeRoll < 20) {
+            $value = 170 + (($hash >> 12) % 9);
+
+            return new GameAchievementDTO($playerId, $tournamentId, $value, AchievementType::ONE_SEVENTY);
+        }
+
+        if ($typeRoll < 58) {
+            $value = 120 + (($hash >> 16) % 50);
+
+            return new GameAchievementDTO($playerId, $tournamentId, $value, AchievementType::HF);
+        }
+
+        $value = 9 + (($hash >> 20) % 11);
+
+        return new GameAchievementDTO($playerId, $tournamentId, $value, AchievementType::QF);
     }
 }

@@ -5,7 +5,9 @@ use App\Http\Controllers\Api\FriendshipController;
 use App\Http\Controllers\Api\GameController;
 use App\Http\Controllers\Api\QuickGameController;
 use App\Http\Controllers\Api\QuickGameLobbyController;
-use App\Http\Controllers\Api\QuickGameSessionController;
+use App\Http\Controllers\Api\Match\GroupGameScoringController;
+use App\Http\Controllers\Api\Match\PlayoffGameScoringController;
+use App\Http\Controllers\Api\Match\QuickGameScoringController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthController::class, 'tournamentLogin']); // kod turnieju – do sędziowania
@@ -25,6 +27,30 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/inProgress', [GameController::class, 'setStatusInProgress']);
         Route::post('/update', [GameController::class, 'update']);
         Route::get('/active', [GameController::class, 'getActiveGames']);
+    });
+
+    Route::prefix('group-games/{game}')->whereNumber('game')->group(function () {
+        Route::get('/scoring/state', [GroupGameScoringController::class, 'state']);
+        Route::post('/legs', [GroupGameScoringController::class, 'startLeg']);
+        Route::post('/legs/{leg}/visits', [GroupGameScoringController::class, 'recordVisit'])->whereNumber('leg');
+        Route::post('/legs/{leg}/visits/undo', [GroupGameScoringController::class, 'undoVisit'])->whereNumber('leg');
+        Route::post('/legs/{leg}/close', [GroupGameScoringController::class, 'closeLeg'])->whereNumber('leg');
+    });
+
+    Route::prefix('playoff-games/{playoffGame}')->whereNumber('playoffGame')->group(function () {
+        Route::get('/scoring/state', [PlayoffGameScoringController::class, 'state']);
+        Route::post('/legs', [PlayoffGameScoringController::class, 'startLeg']);
+        Route::post('/legs/{leg}/visits', [PlayoffGameScoringController::class, 'recordVisit'])->whereNumber('leg');
+        Route::post('/legs/{leg}/visits/undo', [PlayoffGameScoringController::class, 'undoVisit'])->whereNumber('leg');
+        Route::post('/legs/{leg}/close', [PlayoffGameScoringController::class, 'closeLeg'])->whereNumber('leg');
+    });
+
+    Route::prefix('quick-games/{quickGame}')->whereNumber('quickGame')->group(function () {
+        Route::get('/scoring/state', [QuickGameScoringController::class, 'state']);
+        Route::post('/legs', [QuickGameScoringController::class, 'startLeg']);
+        Route::post('/legs/{leg}/visits', [QuickGameScoringController::class, 'recordVisit'])->whereNumber('leg');
+        Route::post('/legs/{leg}/visits/undo', [QuickGameScoringController::class, 'undoVisit'])->whereNumber('leg');
+        Route::post('/legs/{leg}/close', [QuickGameScoringController::class, 'closeLeg'])->whereNumber('leg');
     });
 
     Route::prefix('friends')->group(function () {
@@ -60,11 +86,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/{lobbyId}/start', [QuickGameLobbyController::class, 'start']);
         Route::post('/{lobbyId}/invite', [QuickGameLobbyController::class, 'invite']);
         Route::post('/{lobbyId}/add-guest', [QuickGameLobbyController::class, 'addGuest']);
-    });
-
-    Route::prefix('quick-game/session')->group(function () {
-        Route::get('/{sessionId}', [QuickGameSessionController::class, 'get']);
-        Route::post('/{sessionId}/visit', [QuickGameSessionController::class, 'visit']);
     });
 
 });

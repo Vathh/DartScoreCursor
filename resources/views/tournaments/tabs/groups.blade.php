@@ -33,17 +33,22 @@
                             </td>
                         @else
                             @if($games[$number][$rowPlayer->id][$columnPlayer->id]->isFinished())
-                                @if($rowPlayer->id === $games[$number][$rowPlayer->id][$columnPlayer->id]->player1->id)
+                                @php($cellGame = $games[$number][$rowPlayer->id][$columnPlayer->id])
+                                @if($rowPlayer->id === $cellGame->player1->id)
                                     <td class="px-2 py-2 text-center">
-                                        {{ $games[$number][$rowPlayer->id][$columnPlayer->id]->player1Score }}
-                                        -
-                                        {{ $games[$number][$rowPlayer->id][$columnPlayer->id]->player2Score }}
+                                        <a href="{{ route('matches.show', ['type' => 'group', 'id' => $cellGame->id]) }}" class="text-light-green hover:underline">
+                                            {{ $cellGame->player1Score }}
+                                            -
+                                            {{ $cellGame->player2Score }}
+                                        </a>
                                     </td>
                                 @else
                                     <td class="px-2 py-2 text-center">
-                                        {{ $games[$number][$rowPlayer->id][$columnPlayer->id]->player2Score }}
-                                        -
-                                        {{ $games[$number][$rowPlayer->id][$columnPlayer->id]->player1Score }}
+                                        <a href="{{ route('matches.show', ['type' => 'group', 'id' => $cellGame->id]) }}" class="text-light-green hover:underline">
+                                            {{ $cellGame->player2Score }}
+                                            -
+                                            {{ $cellGame->player1Score }}
+                                        </a>
                                     </td>
                                 @endif
                             @else

@@ -10,12 +10,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class QuickGame extends Model
 {
     protected $fillable = [
+        'lobby_id',
         'player1_id',
         'player2_id',
         'player1_score',
         'player2_score',
         'winner_id',
-        'status'
+        'status',
+        'legs_count',
     ];
 
     protected $casts = [

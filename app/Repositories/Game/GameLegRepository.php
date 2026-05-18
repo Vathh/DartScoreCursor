@@ -3,7 +3,9 @@
 namespace App\Repositories\Game;
 
 use App\DTO\GameLegDTO;
+use App\Enums\MatchKind;
 use App\Models\Game\GameLeg;
+use App\Support\Match\MatchContext;
 
 class GameLegRepository
 {
@@ -62,6 +64,66 @@ class GameLegRepository
         return GameLeg::where('playoff_game_id', $playoffGameId)
             ->orderBy('leg_number')
             ->get();
+    }
+
+    public function getByQuickGameId(int $quickGameId): \Illuminate\Support\Collection
+    {
+        return GameLeg::where('quick_game_id', $quickGameId)
+            ->orderBy('leg_number')
+            ->get();
+    }
+
+    public function getForContext(MatchContext $context): \Illuminate\Support\Collection
+    {
+        return match ($context->kind) {
+            MatchKind::GROUP => $this->getByGameId($context->matchId),
+            MatchKind::PLAYOFF => $this->getByPlayoffGameId($context->matchId),
+            MatchKind::QUICK => $this->getByQuickGameId($context->matchId),
+        };
+    }
+
+    public function findOpenForContext(MatchContext $context): ?GameLeg
+    {
+        $query = GameLeg::query()->whereNull('finished_at');
+
+        match ($context->kind) {
+            MatchKind::GROUP => $query->where('game_id', $context->matchId),
+            MatchKind::PLAYOFF => $query->where('playoff_game_id', $context->matchId),
+            MatchKind::QUICK => $query->where('quick_game_id', $context->matchId),
+        };
+
+        return $query->first();
+    }
+
+    public function startLeg(MatchContext $context, int $legNumber): GameLeg
+    {
+        $data = [
+            'leg_number' => $legNumber,
+            'player1_score' => 0,
+            'player2_score' => 0,
+            'started_at' => now(),
+            'finished_at' => null,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ];
+
+        match ($context->kind) {
+            MatchKind::GROUP => $data['game_id'] = $context->matchId,
+            MatchKind::PLAYOFF => $data['playoff_game_id'] = $context->matchId,
+            MatchKind::QUICK => $data['quick_game_id'] = $context->matchId,
+        };
+
+        return GameLeg::create($data);
+    }
+
+    public function finishLeg(GameLeg $leg, int $winnerId, int $player1LegPoints, int $player2LegPoints): void
+    {
+        $leg->update([
+            'winner_id' => $winnerId,
+            'player1_score' => $player1LegPoints,
+            'player2_score' => $player2LegPoints,
+            'finished_at' => now(),
+        ]);
     }
 }
 

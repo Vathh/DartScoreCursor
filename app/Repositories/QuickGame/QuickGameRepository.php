@@ -17,15 +17,17 @@ class QuickGameRepository
      * @param int $player2Id
      * @return int ID utworzonego meczu
      */
-    public function create(int $player1Id, int $player2Id): int
+    public function create(int $player1Id, int $player2Id, int $legsCount = 3, ?int $lobbyId = null): int
     {
         $quickGame = QuickGame::create([
+            'lobby_id' => $lobbyId,
             'player1_id' => $player1Id,
             'player2_id' => $player2Id,
             'player1_score' => 0,
             'player2_score' => 0,
             'winner_id' => null,
             'status' => GameStatus::SCHEDULED,
+            'legs_count' => max(1, min(15, $legsCount)),
         ]);
 
         return $quickGame->id;
