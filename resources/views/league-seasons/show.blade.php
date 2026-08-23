@@ -21,10 +21,19 @@
                 <h2 class="admin-sidebar-title">⚙️ Sezon ligowy</h2>
                 <nav class="flex flex-col space-y-3">
                     @if($season->status->value === 'draft')
-                        <form method="POST" action="{{ route('league-seasons.start', $season) }}">
-                            @csrf
-                            <button type="submit" class="admin-sidebar-link w-full text-left">▶️ Wystartuj sezon</button>
-                        </form>
+                        @if($canStartSeason)
+                            <form method="POST" action="{{ route('league-seasons.start', $season) }}">
+                                @csrf
+                                <button type="submit" class="admin-sidebar-link w-full text-left">▶️ Wystartuj sezon</button>
+                            </form>
+                        @else
+                            <span
+                                class="admin-sidebar-link admin-sidebar-link-disabled"
+                                aria-disabled="true"
+                                title="{{ $startBlockedReason }}"
+                            >▶️ Wystartuj sezon</span>
+                            <p class="text-text-muted text-xs px-1">{{ $startBlockedReason }}</p>
+                        @endif
                     @endif
                     @if($canAdvance)
                         <form method="POST" action="{{ route('league-seasons.advance', $season) }}">

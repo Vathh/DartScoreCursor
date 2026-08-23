@@ -340,7 +340,7 @@ Organizacja
 ### Cykl życia
 
 1. **Poza sezonem** — admin rusza strukturę, pulę ligi, składy szczebli.
-2. **Start sezonu** — zdjęcie składu i reguł, generacja meczów, zamrożenie piramidy.
+2. **Start sezonu** — zdjęcie składu i reguł, generacja meczów, zamrożenie piramidy. Start tylko gdy **wszystkie szczeble oprócz ostatniego** są zapełnione (ostatni może mieć wolne miejsca: po rezygnacji w wyższym szczeblu dziurę łata kolejka z dołu, a na samym dole może zabraknąć zgłoszenia).
 3. **W sezonie** — bez nowych szczebli i bez przesuwania ludzi. Wolno: rezygnacja; przy zaległym meczu: WO jednostronny / obustronny / przedłużenie. Admin może **anulować sezon** (hasło + wpisanie nazwy) — wraca skład sprzed startu, mecze giną.
 4. **Koniec** — tabele → auto awans/spadek/baraż → łatanie dziur z dołu → piramida zaktualizowana.
 

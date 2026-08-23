@@ -85,10 +85,10 @@ class LeaguePyramidTest extends TestCase
         $bottom = $league->divisions->firstWhere('position', 1);
         $leagueService = app(LeagueService::class);
 
-        foreach (array_slice($this->players, 0, 3) as $player) {
+        foreach (array_slice($this->players, 0, 4) as $player) {
             $leagueService->assignPlayer($league->id, $top->id, $player->id);
         }
-        foreach (array_slice($this->players, 3, 3) as $player) {
+        foreach (array_slice($this->players, 4, 2) as $player) {
             $leagueService->assignPlayer($league->id, $bottom->id, $player->id);
         }
 
@@ -119,7 +119,83 @@ class LeaguePyramidTest extends TestCase
 
         $league->refresh();
         $top->refresh();
-        $this->assertSame(4, $top->members()->count(), 'Dziura w ekstraklasie załatana z 1. ligi.');
+        $this->assertSame(4, $top->members()->count());
+    }
+
+    #[Test]
+    public function cannot_start_season_when_higher_division_is_not_full(): void
+    {
+        $this->actingAs($this->admin);
+        $league = $this->seedTwoDivisionLeagueWithRoster(3, 3);
+
+        $this->get(route('league-seasons.create', $league))
+            ->assertOk()
+            ->assertSee('Nie można wystartować sezonu')
+            ->assertDontSee('Wystartuj od razu');
+
+        $this->post(route('league-seasons.store', $league), [
+            'seasonName' => 'Sezon 1',
+            'calendar_mode' => 'deadline',
+            'rounds_each' => 1,
+            'startDate' => '2026-09-01',
+            'deadline_at' => '2026-12-01',
+            'start_now' => 1,
+        ])->assertRedirect()->assertSessionHas('error', function (string $message) {
+            return str_contains($message, 'Ekstraklasa (3/4)');
+        });
+
+        $this->assertNull(LeagueSeason::query()->where('league_id', $league->id)->first());
+    }
+
+    #[Test]
+    public function can_start_season_when_only_lowest_division_has_vacancies(): void
+    {
+        $this->actingAs($this->admin);
+        $league = $this->seedTwoDivisionLeagueWithRoster(4, 2);
+
+        $this->post(route('league-seasons.store', $league), [
+            'seasonName' => 'Sezon 1',
+            'calendar_mode' => 'deadline',
+            'rounds_each' => 1,
+            'startDate' => '2026-09-01',
+            'deadline_at' => '2026-12-01',
+            'start_now' => 1,
+        ])->assertRedirect()->assertSessionHas('success');
+
+        $season = LeagueSeason::query()->where('league_id', $league->id)->first();
+        $this->assertSame(LeagueSeasonStatus::IN_PROGRESS, $season->status);
+        $this->assertGreaterThan(0, $season->games()->count());
+    }
+
+    #[Test]
+    public function draft_start_is_blocked_until_higher_divisions_are_full(): void
+    {
+        $this->actingAs($this->admin);
+        $league = $this->seedTwoDivisionLeagueWithRoster(3, 3);
+
+        $this->post(route('league-seasons.store', $league), [
+            'seasonName' => 'Szkic',
+            'calendar_mode' => 'deadline',
+            'rounds_each' => 1,
+            'startDate' => '2026-09-01',
+            'deadline_at' => '2026-12-01',
+        ])->assertRedirect()->assertSessionHas('success');
+
+        $season = LeagueSeason::query()->where('league_id', $league->id)->first();
+        $this->assertSame(LeagueSeasonStatus::DRAFT, $season->status);
+
+        $this->get(route('league-seasons.show', $season))
+            ->assertOk()
+            ->assertSee('Nie można wystartować sezonu')
+            ->assertSee('Ekstraklasa (3/4)');
+
+        $this->post(route('league-seasons.start', $season))
+            ->assertRedirect()
+            ->assertSessionHas('error');
+
+        $season->refresh();
+        $this->assertSame(LeagueSeasonStatus::DRAFT, $season->status);
+        $this->assertSame(0, $season->games()->count());
     }
 
     #[Test]
@@ -368,6 +444,42 @@ class LeaguePyramidTest extends TestCase
             'player1DoubleTracked' => false,
             'player2DoubleTracked' => false,
         ])->assertOk();
+    }
+
+    private function seedTwoDivisionLeagueWithRoster(int $topCount, int $bottomCount): League
+    {
+        $leagueService = app(LeagueService::class);
+        $league = $leagueService->create($this->organization->id, 'Pucharowa', null, [
+            [
+                'name' => 'Ekstraklasa',
+                'capacity' => 4,
+                'startingScore' => 501,
+                'legsToWinSet' => 2,
+                'setsToWinMatch' => 1,
+                'promoteDirect' => 0,
+                'promotePlayoff' => 0,
+            ],
+            [
+                'name' => '1. liga',
+                'capacity' => 4,
+                'startingScore' => 501,
+                'legsToWinSet' => 2,
+                'setsToWinMatch' => 1,
+                'promoteDirect' => 1,
+                'promotePlayoff' => 0,
+            ],
+        ]);
+        $this->attachLeaguePool($league);
+        $top = $league->divisions->firstWhere('position', 0);
+        $bottom = $league->divisions->firstWhere('position', 1);
+        foreach (array_slice($this->players, 0, $topCount) as $player) {
+            $leagueService->assignPlayer($league->id, $top->id, $player->id);
+        }
+        foreach (array_slice($this->players, $topCount, $bottomCount) as $player) {
+            $leagueService->assignPlayer($league->id, $bottom->id, $player->id);
+        }
+
+        return $league;
     }
 
     private function attachLeaguePool(League $league): void

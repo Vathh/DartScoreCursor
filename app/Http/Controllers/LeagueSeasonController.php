@@ -44,6 +44,7 @@ class LeagueSeasonController extends Controller
                 21 => 'Trzy tygodnie (21 dni)',
                 28 => 'Cztery tygodnie (28 dni)',
             ],
+            'startReadiness' => $this->leagueSeasonService->startReadinessForLeague($league->id),
         ]);
     }
 

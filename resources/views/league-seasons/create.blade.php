@@ -129,10 +129,17 @@
                 Koniec sezonu zasadniczego ustawimy automatycznie: start + (liczba kolejek × długość kolejki).
             </p>
 
-            <label class="flex items-center gap-2 mb-6 text-sm">
-                <input type="checkbox" name="start_now" value="1" @checked(old('start_now'))>
-                Wystartuj od razu (zamrożenie składu i generacja meczów)
-            </label>
+            @if($startReadiness->canStart)
+                <label class="flex items-center gap-2 mb-6 text-sm">
+                    <input type="checkbox" name="start_now" value="1" @checked(old('start_now'))>
+                    Wystartuj od razu (zamrożenie składu i generacja meczów)
+                </label>
+            @else
+                <p class="text-text-muted text-sm mb-6">
+                    {{ $startReadiness->reason }}
+                    Szkic zapiszesz, a sezon wystartujesz po uzupełnieniu składu.
+                </p>
+            @endif
 
             <button class="btn btn-primary w-full" type="submit">Zapisz sezon</button>
             <a href="{{ route('leagues.show', $league) }}" class="btn btn-secondary mt-4 text-center">Powrót</a>

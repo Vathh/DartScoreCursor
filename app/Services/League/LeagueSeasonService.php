@@ -8,6 +8,7 @@ use App\Domain\League\LeagueMatchdayCalendar;
 use App\Domain\League\LeagueDivisionSnapshot;
 use App\Domain\League\LeaguePlayoffPairing;
 use App\Domain\League\LeaguePromotionResolver;
+use App\Domain\League\LeagueSeasonStartReadiness;
 use App\Domain\League\LeagueStandingCalculator;
 use App\Domain\League\LeagueStandingRow;
 use App\Domain\League\LeagueTieBreakBracket;
@@ -19,6 +20,7 @@ use App\Enums\LeagueGameStatus;
 use App\Enums\LeagueSeasonStatus;
 use App\Enums\LeagueWalkoverType;
 use App\Enums\MatchWinMode;
+use App\Models\League\League;
 use App\Models\League\LeagueGame;
 use App\Models\League\LeagueSeason;
 use App\Models\League\LeagueSeasonDivision;
@@ -111,29 +113,44 @@ class LeagueSeasonService
             throw ValidationException::withMessages(['win_length' => $e->getMessage()]);
         }
 
-        $season = $this->leagueSeasonRepository->create([
-            'league_id' => $leagueId,
-            'name' => $name,
-            'status' => LeagueSeasonStatus::DRAFT,
-            'calendar_mode' => $mode,
-            'rounds_each' => $roundsEach,
-            'allows_draws' => $allowsDraws,
-            'win_mode' => $winMode,
-            'win_length' => $winLength,
-            'matchday_length_days' => $lengthDays,
-            'matchday_planning' => $planning,
-            'start_date' => $startDate,
-            'end_date' => Carbon::parse($resolvedEnd)->toDateString(),
-            'deadline_at' => $mode === LeagueCalendarMode::DEADLINE
-                ? Carbon::parse($resolvedEnd)->endOfDay()
-                : null,
-        ]);
+        return DB::transaction(function () use (
+            $leagueId,
+            $name,
+            $mode,
+            $roundsEach,
+            $allowsDraws,
+            $winMode,
+            $winLength,
+            $lengthDays,
+            $planning,
+            $startDate,
+            $resolvedEnd,
+            $startNow,
+        ) {
+            $season = $this->leagueSeasonRepository->create([
+                'league_id' => $leagueId,
+                'name' => $name,
+                'status' => LeagueSeasonStatus::DRAFT,
+                'calendar_mode' => $mode,
+                'rounds_each' => $roundsEach,
+                'allows_draws' => $allowsDraws,
+                'win_mode' => $winMode,
+                'win_length' => $winLength,
+                'matchday_length_days' => $lengthDays,
+                'matchday_planning' => $planning,
+                'start_date' => $startDate,
+                'end_date' => Carbon::parse($resolvedEnd)->toDateString(),
+                'deadline_at' => $mode === LeagueCalendarMode::DEADLINE
+                    ? Carbon::parse($resolvedEnd)->endOfDay()
+                    : null,
+            ]);
 
-        if ($startNow) {
-            $this->start($season->id);
-        }
+            if ($startNow) {
+                $this->start($season->id);
+            }
 
-        return $season->fresh();
+            return $season->fresh();
+        });
     }
 
     /**
@@ -165,9 +182,7 @@ class LeagueSeasonService
             }
 
             $league = $this->leagueRepository->findWithRoster($season->league_id);
-            if ($league->divisions->isEmpty()) {
-                throw new DomainException('Liga nie ma szczebli.');
-            }
+            $this->startReadinessFromLeague($league)->assertCanStart();
 
             $divisionsPayload = [];
             $participantsPayload = [];
@@ -274,6 +289,10 @@ class LeagueSeasonService
         $playoffGames = $season->games->where('purpose', LeagueGamePurpose::PROMOTION_PLAYOFF)->values();
         $tiebreakGames = $season->games->where('purpose', LeagueGamePurpose::TIEBREAKER)->values();
 
+        $startReadiness = $season->status === LeagueSeasonStatus::DRAFT
+            ? $this->startReadinessForLeague($season->league_id)
+            : null;
+
         return [
             'season' => $season,
             'league' => $season->league,
@@ -283,7 +302,14 @@ class LeagueSeasonService
             'tiebreakGames' => $tiebreakGames,
             'withdrawnIds' => $withdrawnIds,
             'canAdvance' => $season->status->isOpen() && $this->regularPhaseComplete($season),
+            'canStartSeason' => $startReadiness?->canStart ?? false,
+            'startBlockedReason' => $startReadiness?->canStart ? null : $startReadiness?->reason,
         ];
+    }
+
+    public function startReadinessForLeague(int $leagueId): LeagueSeasonStartReadiness
+    {
+        return $this->startReadinessFromLeague($this->leagueRepository->findWithRoster($leagueId));
     }
 
     /**
@@ -639,6 +665,20 @@ class LeagueSeasonService
                 && $game->status !== LeagueGameStatus::VOIDED
                 && ! in_array($game->status, [LeagueGameStatus::LOBBY, LeagueGameStatus::IN_PROGRESS], true),
         ];
+    }
+
+    private function startReadinessFromLeague(League $league): LeagueSeasonStartReadiness
+    {
+        $rows = [];
+        foreach ($league->divisions as $division) {
+            $rows[] = [
+                'name' => (string) $division->name,
+                'capacity' => (int) $division->capacity,
+                'memberCount' => $division->members->count(),
+            ];
+        }
+
+        return LeagueSeasonStartReadiness::inspect($rows);
     }
 
     private function requireOpenGame(int $gameId): LeagueGame
