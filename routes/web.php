@@ -20,6 +20,11 @@ use App\Http\Controllers\TournamentTabletLoginLandingController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [PagesController::class, 'showHomePage'])->name('pages.home');
+
+if (app()->environment('local')) {
+    Route::get('/dev/checkout-wheel', [PagesController::class, 'showCheckoutWheelSandbox'])
+        ->name('dev.checkout-wheel');
+}
 Route::get('/join-tournament/{code}', [TournamentJoinLandingController::class, 'show'])
     ->where('code', '[A-Za-z0-9]+')
     ->name('tournaments.join-landing');
