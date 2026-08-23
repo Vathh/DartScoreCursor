@@ -61,31 +61,33 @@
                     </dl>
                 </div>
 
-                <h2 class="section-title mt-10">Piramida</h2>
+                <h2 class="section-title mt-10">Szczeble rozgrywek</h2>
                 <div class="space-y-3">
                     @foreach($divisions as $division)
-                        <div class="list-item">
-                            <div class="flex flex-wrap items-baseline justify-between gap-2">
-                                <span class="font-semibold">{{ $division->position + 1 }}. {{ $division->name }}</span>
-                                <span class="text-text-muted text-sm">
-                                    {{ $division->members->count() }}/{{ $division->capacity }}
-                                    · {{ $division->starting_score }} · do {{ $division->legs_to_win_set }} {{ $division->sets_to_win_match > 1 ? 'legów / '.$division->sets_to_win_match.' setów' : 'legów' }}
-                                </span>
+                        <a href="{{ route('leagues.divisions.show', [$league, $division]) }}">
+                            <div class="list-item mb-2">
+                                <div class="flex flex-wrap items-baseline justify-between gap-2">
+                                    <span class="font-semibold">{{ $division->position + 1 }}. {{ $division->name }}</span>
+                                    <span class="text-text-muted text-sm">
+                                        {{ $division->members->count() }}/{{ $division->capacity }}
+                                        · {{ $division->starting_score }} · do {{ $division->legs_to_win_set }} {{ $division->sets_to_win_match > 1 ? 'legów / '.$division->sets_to_win_match.' setów' : 'legów' }}
+                                    </span>
+                                </div>
+                                @if($division->position > 0)
+                                    <p class="text-text-muted text-sm mt-1">
+                                        Awans: {{ $division->promote_direct }} bezpośredni
+                                        @if($division->promote_playoff > 0)
+                                            + {{ $division->promote_playoff }} baraż
+                                        @endif
+                                    </p>
+                                @endif
+                                @if($division->members->isNotEmpty())
+                                    <p class="text-sm mt-2">
+                                        {{ $division->members->map(fn ($m) => $m->player?->name)->filter()->join(', ') }}
+                                    </p>
+                                @endif
                             </div>
-                            @if($division->position > 0)
-                                <p class="text-text-muted text-sm mt-1">
-                                    Awans: {{ $division->promote_direct }} bezpośredni
-                                    @if($division->promote_playoff > 0)
-                                        + {{ $division->promote_playoff }} baraż
-                                    @endif
-                                </p>
-                            @endif
-                            @if($division->members->isNotEmpty())
-                                <p class="text-sm mt-2">
-                                    {{ $division->members->map(fn ($m) => $m->player?->name)->filter()->join(', ') }}
-                                </p>
-                            @endif
-                        </div>
+                        </a>
                     @endforeach
                 </div>
 

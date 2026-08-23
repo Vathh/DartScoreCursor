@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             PointSchemeSeeder::class,
             DemoDataSeeder::class,
             DemoPlayersSeeder::class,
+            LeagueArchiveDemoSeeder::class,
         ]);
     }
 }

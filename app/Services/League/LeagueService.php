@@ -3,10 +3,13 @@
 namespace App\Services\League;
 
 use App\Domain\GameScoring\MatchFormat;
+use App\Domain\League\LeagueStandingRow;
 use App\Enums\AssignableEntityType;
 use App\Enums\LeagueSeasonStatus;
 use App\Models\League\League;
+use App\Repositories\Game\GameVisitRepository;
 use App\Repositories\League\LeagueRepository;
+use App\Repositories\League\LeagueSeasonRepository;
 use App\Repositories\Player\PlayerRepository;
 use App\Services\Player\PlayerService;
 use App\Services\User\UserService;
@@ -18,6 +21,9 @@ class LeagueService
 {
     public function __construct(
         private LeagueRepository $leagueRepository,
+        private LeagueSeasonRepository $leagueSeasonRepository,
+        private LeagueSeasonService $leagueSeasonService,
+        private GameVisitRepository $gameVisitRepository,
         private PlayerService $playerService,
         private PlayerRepository $playerRepository,
         private UserService $userService,
@@ -187,6 +193,171 @@ class LeagueService
                     'endDate' => $season->end_date?->format('Y-m-d'),
                 ];
             })->values()->all(),
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function divisionArchiveData(int $leagueId, int $divisionId): array
+    {
+        $league = $this->leagueRepository->findWithRoster($leagueId);
+        $division = $this->leagueRepository->findDivision($leagueId, $divisionId);
+        $seasons = $this->leagueSeasonRepository->listFinishedWithGraphForDivision($leagueId, $divisionId);
+        $tabs = [];
+
+        foreach ($seasons as $season) {
+            $block = $this->leagueSeasonService->archiveBlockForDivision($season, $divisionId);
+            if ($block === null) {
+                continue;
+            }
+
+            $highlights = $this->mapHighlights(
+                $this->gameVisitRepository->highlightsForLeagueGames($block['games']->pluck('id')->all()),
+                $block['players'],
+            );
+            $champion = $this->championFromStandings($block['standings'], $block['players']);
+
+            $tabs[] = [
+                'season' => $season,
+                'standings' => $block['standings'],
+                'players' => $block['players'],
+                'highlights' => $highlights,
+                'champion' => $champion,
+                'allowsDraws' => (bool) $season->allows_draws,
+            ];
+        }
+
+        return [
+            'league' => $league,
+            'organization' => $league->organization,
+            'division' => $division,
+            'seasons' => $tabs,
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function divisionArchiveForApi(int $leagueId, int $divisionId): array
+    {
+        $data = $this->divisionArchiveData($leagueId, $divisionId);
+        $league = $data['league'];
+        $organization = $data['organization'];
+        $division = $data['division'];
+
+        return [
+            'league' => [
+                'id' => $league->id,
+                'name' => $league->name,
+            ],
+            'organization' => [
+                'id' => $organization->id,
+                'name' => $organization->name,
+            ],
+            'division' => [
+                'id' => $division->id,
+                'position' => (int) $division->position,
+                'name' => $division->name,
+                'capacity' => (int) $division->capacity,
+                'memberCount' => $division->members->count(),
+                'startingScore' => (int) $division->starting_score,
+                'legsToWinSet' => (int) $division->legs_to_win_set,
+                'setsToWinMatch' => (int) $division->sets_to_win_match,
+                'promoteDirect' => (int) $division->promote_direct,
+                'promotePlayoff' => (int) $division->promote_playoff,
+            ],
+            'activeSeason' => ($open = $league->seasons->first(fn ($season) => $season->status->isOpen())) === null ? null : [
+                'id' => $open->id,
+                'name' => $open->name,
+                'status' => $open->status->value,
+                'statusLabel' => $open->status->label(),
+            ],
+            'seasons' => collect($data['seasons'])->map(function (array $tab) {
+                $season = $tab['season'];
+                $standings = [];
+                foreach ($tab['standings'] as $row) {
+                    /** @var LeagueStandingRow $row */
+                    $participant = $tab['players']->get($row->playerId);
+                    $standings[] = [
+                        'place' => $row->place,
+                        'playerId' => $row->playerId,
+                        'playerName' => $participant?->player?->name ?? ('#'.$row->playerId),
+                        'userId' => $participant?->player?->user_id,
+                        'played' => $row->played,
+                        'wins' => $row->wins,
+                        'draws' => $row->draws,
+                        'losses' => $row->losses,
+                        'points' => $row->points,
+                        'unitDiff' => $row->unitDiff,
+                        'needsTiebreak' => $row->needsTiebreak,
+                    ];
+                }
+
+                return [
+                    'id' => $season->id,
+                    'name' => $season->name,
+                    'finishedAt' => $season->finished_at?->format('Y-m-d'),
+                    'allowsDraws' => (bool) $tab['allowsDraws'],
+                    'champion' => $tab['champion'],
+                    'standings' => $standings,
+                    'highlights' => $tab['highlights'],
+                ];
+            })->values()->all(),
+        ];
+    }
+
+    /**
+     * @param  Collection<int, object>  $raw
+     * @param  Collection<int, mixed>  $players
+     * @return list<array<string, mixed>>
+     */
+    private function mapHighlights(Collection $raw, Collection $players): array
+    {
+        $rows = [];
+        foreach ($raw as $playerId => $stats) {
+            $count180 = (int) $stats->count_180;
+            $count170Plus = (int) $stats->count_170_plus;
+            $bestCheckout = $stats->best_checkout !== null ? (int) $stats->best_checkout : null;
+            if ($count180 === 0 && $count170Plus === 0 && $bestCheckout === null) {
+                continue;
+            }
+            $participant = $players->get((int) $playerId);
+            $rows[] = [
+                'playerId' => (int) $playerId,
+                'playerName' => $participant?->player?->name ?? ('#'.$playerId),
+                'userId' => $participant?->player?->user_id,
+                'count180' => $count180,
+                'count170Plus' => $count170Plus,
+                'bestCheckout' => $bestCheckout,
+            ];
+        }
+
+        usort($rows, static function (array $a, array $b): int {
+            return [$b['count180'], $b['count170Plus'], $b['bestCheckout'] ?? 0]
+                <=> [$a['count180'], $a['count170Plus'], $a['bestCheckout'] ?? 0];
+        });
+
+        return $rows;
+    }
+
+    /**
+     * @param  list<LeagueStandingRow>  $standings
+     * @param  Collection<int, mixed>  $players
+     * @return array{playerId: int, playerName: string, userId: ?int}|null
+     */
+    private function championFromStandings(array $standings, Collection $players): ?array
+    {
+        $row = $standings[0] ?? null;
+        if ($row === null) {
+            return null;
+        }
+        $participant = $players->get($row->playerId);
+
+        return [
+            'playerId' => $row->playerId,
+            'playerName' => $participant?->player?->name ?? ('#'.$row->playerId),
+            'userId' => $participant?->player?->user_id,
         ];
     }
 

@@ -5,6 +5,7 @@ namespace App\Repositories\Game;
 use App\DTO\GameScoring\RecordVisitDTO;
 use App\Models\Game\GameVisit;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class GameVisitRepository
 {
@@ -112,5 +113,29 @@ class GameVisitRepository
             ->max('visit_number');
 
         return ($max ?? 0) + 1;
+    }
+
+    /**
+     * @param  list<int>  $leagueGameIds
+     * @return Collection<int, object{player_id: int, count_180: int, count_170_plus: int, best_checkout: ?int}>
+     */
+    public function highlightsForLeagueGames(array $leagueGameIds): Collection
+    {
+        if ($leagueGameIds === []) {
+            return collect();
+        }
+
+        return DB::table('game_visits as gv')
+            ->join('game_legs as gl', 'gl.id', '=', 'gv.game_leg_id')
+            ->whereIn('gl.league_game_id', $leagueGameIds)
+            ->where('gv.is_voided', false)
+            ->where('gv.bust', false)
+            ->groupBy('gv.player_id')
+            ->selectRaw('gv.player_id as player_id')
+            ->selectRaw('SUM(CASE WHEN gv.score = 180 THEN 1 ELSE 0 END) as count_180')
+            ->selectRaw('SUM(CASE WHEN gv.closed_leg = 1 AND gv.score >= 170 THEN 1 ELSE 0 END) as count_170_plus')
+            ->selectRaw('MAX(CASE WHEN gv.closed_leg = 1 THEN gv.score ELSE NULL END) as best_checkout')
+            ->get()
+            ->keyBy(fn ($row) => (int) $row->player_id);
     }
 }

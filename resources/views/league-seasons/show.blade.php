@@ -9,9 +9,12 @@
             $participant = $season->participants->firstWhere('player_id', $id);
             return $participant?->player?->name ?? ('#'.$id);
         };
+        $defaultDivisionId = $divisions[0]['division']->id ?? null;
     @endphp
-
-    <div x-data="{ cancelOpen: {{ ($errors->has('current_password') || $errors->has('season_name_confirmation')) ? 'true' : 'false' }} }">
+    <div x-data="{
+        cancelOpen: {{ ($errors->has('current_password') || $errors->has('season_name_confirmation')) ? 'true' : 'false' }},
+        activeDivision: {{ $defaultDivisionId !== null ? (int) $defaultDivisionId : 'null' }}
+    }">
     <div class="detail-layout">
         @if($isAdmin)
             <aside class="admin-sidebar">
@@ -59,9 +62,39 @@
                     · {{ $season->start_date->format('Y-m-d') }} – {{ $season->end_date->format('Y-m-d') }}
                 </p>
 
+                @if(count($divisions) > 1)
+                    <div class="overflow-x-auto -mx-1 px-1 mb-6 mt-10" role="tablist" aria-label="Szczeble">
+                        <div class="flex border-b border-border min-w-max">
+                            @foreach($divisions as $block)
+                                <button
+                                    type="button"
+                                    role="tab"
+                                    @click="activeDivision = {{ $block['division']->id }}"
+                                    :aria-selected="activeDivision === {{ $block['division']->id }}"
+                                    :class="activeDivision === {{ $block['division']->id }}
+                                        ? 'border-accent text-accent'
+                                        : 'border-transparent text-text-muted hover:text-accent'"
+                                    class="px-4 sm:px-5 py-3 text-sm font-semibold transition border-b-2 -mb-px whitespace-nowrap"
+                                >
+                                    {{ $block['division']->name }}
+                                </button>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+
                 @foreach($divisions as $block)
                     @php $division = $block['division']; @endphp
+                    <div
+                        @if(count($divisions) > 1)
+                            x-show="activeDivision === {{ $division->id }}"
+                            x-cloak
+                            role="tabpanel"
+                        @endif
+                    >
+                    @if(count($divisions) <= 1)
                     <h2 class="section-title mt-10">{{ $division->name }}</h2>
+                    @endif
                     <div class="table-wrap mb-6">
                         <table class="table-surface">
                             <thead>
@@ -154,25 +187,34 @@
                                     </details>
                                 @endif
                             @endforeach
-                        @else
-                            @foreach($block['games'] as $game)
-                                <a href="{{ route('league-games.show', $game) }}" class="block">
-                                    <div class="list-item">
-                                        {{ $game->player1?->name }}
-                                        <span class="score-num mx-2">
-                                            @if($game->status->value === 'finished')
-                                                {{ $game->player1_score }} : {{ $game->player2_score }}
-                                            @elseif($game->status->value === 'voided')
-                                                anulowany
-                                            @else
-                                                vs
-                                            @endif
-                                        </span>
-                                        {{ $game->player2?->name }}
-                                    </div>
-                                </a>
-                            @endforeach
+                        @elseif($block['games']->isNotEmpty())
+                            <details class="group">
+                                <summary class="cursor-pointer list-none flex items-center justify-between gap-3 text-sm text-text-muted hover:text-text transition mt-4 mb-1 py-1 [&::-webkit-details-marker]:hidden">
+                                    <span>Lista meczów</span>
+                                    <span class="shrink-0 text-xs transition group-open:rotate-180" aria-hidden="true">▼</span>
+                                </summary>
+                                <div class="space-y-2">
+                                    @foreach($block['games'] as $game)
+                                        <a href="{{ route('league-games.show', $game) }}" class="block">
+                                            <div class="list-item">
+                                                {{ $game->player1?->name }}
+                                                <span class="score-num mx-2">
+                                                    @if($game->status->value === 'finished')
+                                                        {{ $game->player1_score }} : {{ $game->player2_score }}
+                                                    @elseif($game->status->value === 'voided')
+                                                        anulowany
+                                                    @else
+                                                        vs
+                                                    @endif
+                                                </span>
+                                                {{ $game->player2?->name }}
+                                            </div>
+                                        </a>
+                                    @endforeach
+                                </div>
+                            </details>
                         @endif
+                    </div>
                     </div>
                 @endforeach
 

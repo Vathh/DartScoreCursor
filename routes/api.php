@@ -111,6 +111,9 @@ Route::middleware(['auth:sanctum', 'not.banned'])->group(function () {
     Route::get('/organizations', [OrganizationController::class, 'index']);
     Route::get('/organizations/{organization}', [OrganizationController::class, 'show'])->whereNumber('organization');
     Route::get('/leagues/{league}', [LeagueCatalogController::class, 'show'])->whereNumber('league');
+    Route::get('/leagues/{league}/divisions/{division}', [LeagueCatalogController::class, 'showDivision'])
+        ->whereNumber('league')
+        ->whereNumber('division');
     Route::get('/league-seasons/{leagueSeason}', [LeagueSeasonCatalogController::class, 'show'])->whereNumber('leagueSeason');
     Route::get('/seasons', [SeasonController::class, 'index']);
     Route::get('/seasons/{season}', [SeasonController::class, 'show'])->whereNumber('season');

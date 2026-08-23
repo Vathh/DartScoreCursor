@@ -269,6 +269,28 @@ class LeagueSeasonService
     {
         $season = $this->leagueSeasonRepository->findWithGraph($seasonId);
         $withdrawnIds = $season->participants->whereNotNull('withdrawn_at')->pluck('player_id')->all();
+        $divisions = $this->divisionBlocks($season);
+
+        $playoffGames = $season->games->where('purpose', LeagueGamePurpose::PROMOTION_PLAYOFF)->values();
+        $tiebreakGames = $season->games->where('purpose', LeagueGamePurpose::TIEBREAKER)->values();
+
+        return [
+            'season' => $season,
+            'league' => $season->league,
+            'organization' => $season->league->organization,
+            'divisions' => $divisions,
+            'playoffGames' => $playoffGames,
+            'tiebreakGames' => $tiebreakGames,
+            'withdrawnIds' => $withdrawnIds,
+            'canAdvance' => $season->status->isOpen() && $this->regularPhaseComplete($season),
+        ];
+    }
+
+    /**
+     * @return list<array{division: LeagueSeasonDivision, standings: list<LeagueStandingRow>, games: \Illuminate\Support\Collection<int, LeagueGame>, players: \Illuminate\Support\Collection}>
+     */
+    public function divisionBlocks(LeagueSeason $season): array
+    {
         $divisions = [];
 
         foreach ($season->divisions as $division) {
@@ -294,19 +316,21 @@ class LeagueSeasonService
             ];
         }
 
-        $playoffGames = $season->games->where('purpose', LeagueGamePurpose::PROMOTION_PLAYOFF)->values();
-        $tiebreakGames = $season->games->where('purpose', LeagueGamePurpose::TIEBREAKER)->values();
+        return $divisions;
+    }
 
-        return [
-            'season' => $season,
-            'league' => $season->league,
-            'organization' => $season->league->organization,
-            'divisions' => $divisions,
-            'playoffGames' => $playoffGames,
-            'tiebreakGames' => $tiebreakGames,
-            'withdrawnIds' => $withdrawnIds,
-            'canAdvance' => $season->status->isOpen() && $this->regularPhaseComplete($season),
-        ];
+    /**
+     * @return array{division: LeagueSeasonDivision, standings: list<LeagueStandingRow>, games: \Illuminate\Support\Collection<int, LeagueGame>, players: \Illuminate\Support\Collection}|null
+     */
+    public function archiveBlockForDivision(LeagueSeason $season, int $leagueDivisionId): ?array
+    {
+        foreach ($this->divisionBlocks($season) as $block) {
+            if ((int) $block['division']->league_division_id === $leagueDivisionId) {
+                return $block;
+            }
+        }
+
+        return null;
     }
 
     /**

@@ -3,6 +3,7 @@
 namespace App\Repositories\League;
 
 use App\Enums\LeagueGameStatus;
+use App\Enums\LeagueSeasonStatus;
 use App\Enums\LeagueWalkoverType;
 use App\Models\League\LeagueGame;
 use App\Models\League\LeagueSeason;
@@ -33,6 +34,30 @@ class LeagueSeasonRepository
                 'games.winner',
             ])
             ->findOrFail($seasonId);
+    }
+
+    /**
+     * @return \Illuminate\Support\Collection<int, LeagueSeason>
+     */
+    public function listFinishedWithGraphForDivision(int $leagueId, int $leagueDivisionId): \Illuminate\Support\Collection
+    {
+        return LeagueSeason::query()
+            ->where('league_id', $leagueId)
+            ->where('status', LeagueSeasonStatus::FINISHED)
+            ->whereHas('divisions', fn ($query) => $query->where('league_division_id', $leagueDivisionId))
+            ->with([
+                'league.organization.admins',
+                'league.divisions',
+                'divisions.participants.player',
+                'participants.player',
+                'matchdays',
+                'games.player1',
+                'games.player2',
+                'games.winner',
+            ])
+            ->orderByDesc('finished_at')
+            ->orderByDesc('id')
+            ->get();
     }
 
     /**

@@ -125,6 +125,7 @@ Route::prefix('organizations/{organization}')->group(function () {
 });
 
 Route::get('/leagues/{league}', [LeagueController::class, 'show'])->name('leagues.show');
+Route::get('/leagues/{league}/divisions/{division}', [LeagueController::class, 'showDivision'])->name('leagues.divisions.show');
 Route::get('/leagues/{league}/edit', [LeagueController::class, 'edit'])->name('leagues.edit')->middleware('auth');
 Route::put('/leagues/{league}', [LeagueController::class, 'update'])->name('leagues.update')->middleware('auth');
 Route::get('/leagues/{league}/roster', [LeagueController::class, 'roster'])->name('leagues.roster')->middleware('auth');

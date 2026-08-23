@@ -38,6 +38,14 @@ class LeagueRepository
             ->findOrFail($leagueId);
     }
 
+    public function findDivision(int $leagueId, int $divisionId): LeagueDivision
+    {
+        return LeagueDivision::query()
+            ->where('league_id', $leagueId)
+            ->with('members.player')
+            ->findOrFail($divisionId);
+    }
+
     /**
      * @return Collection<int, League>
      */

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\League\League;
+use App\Models\League\LeagueDivision;
 use App\Models\Organization\Organization;
 use App\Services\League\LeagueService;
 use DomainException;
@@ -70,6 +71,13 @@ class LeagueController extends Controller
         $this->authorize('view', $league);
 
         return view('leagues.show', $this->leagueService->showData($league->id));
+    }
+
+    public function showDivision(League $league, LeagueDivision $division): Factory|View
+    {
+        $this->authorize('view', $league);
+
+        return view('leagues.division', $this->leagueService->divisionArchiveData($league->id, $division->id));
     }
 
     public function edit(League $league): Factory|View
