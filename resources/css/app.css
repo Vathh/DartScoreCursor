@@ -8,6 +8,7 @@
  */
 /* @import './themes/purple-night.css'; */
 @import './themes/arena-dark.css';
+@import './checkout-wheel.css';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';

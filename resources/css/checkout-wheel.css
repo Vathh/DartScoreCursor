@@ -1,0 +1,148 @@
+.checkout-wheel {
+    isolation: isolate;
+}
+
+.checkout-wheel__stage {
+    background:
+        radial-gradient(circle at 50% 48%, rgba(122, 84, 38, 0.22) 0%, rgba(12, 12, 15, 0) 62%),
+        radial-gradient(circle at 50% 50%, rgba(12, 12, 15, 0.2) 38%, #0c0c0f 72%);
+}
+
+.checkout-wheel__stage svg {
+    display: block;
+    width: min(720px, 100%);
+    height: auto;
+    margin-inline: auto;
+    overflow: visible;
+}
+
+.checkout-wheel [data-checkout] .checkout-segment,
+.checkout-wheel [data-checkout] circle.checkout-shape {
+    fill: var(--cw-fill, #25252d);
+    stroke: var(--cw-stroke, #2e2e38);
+    stroke-width: var(--cw-stroke-width, 1px);
+    stroke-linejoin: round;
+}
+
+.checkout-wheel [data-checkout] .checkout-shape {
+    filter: var(--cw-shape-filter, none);
+}
+
+.checkout-wheel [data-checkout] .checkout-sheen {
+    pointer-events: none;
+    stroke: none !important;
+    mix-blend-mode: var(--cw-sheen-blend, overlay);
+    opacity: var(--cw-sheen, 0.6);
+}
+
+.checkout-wheel [data-checkout] .checkout-cracks {
+    pointer-events: none;
+    fill: none;
+    mix-blend-mode: overlay;
+}
+
+.checkout-wheel [data-checkout] .checkout-cracks path {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.checkout-wheel [data-checkout] .checkout-cracks path.is-inclusion {
+    mix-blend-mode: multiply;
+}
+
+.checkout-wheel [data-checkout] .checkout-molten {
+    pointer-events: none;
+}
+
+.checkout-wheel [data-checkout] .checkout-molten path {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.checkout-wheel [data-checkout] .checkout-molten .is-pour {
+    mix-blend-mode: overlay;
+}
+
+.checkout-wheel [data-checkout] .checkout-molten .is-pool {
+    mix-blend-mode: overlay;
+    stroke: none;
+}
+
+.checkout-wheel [data-checkout] .checkout-molten .is-shadow {
+    mix-blend-mode: multiply;
+}
+
+.checkout-wheel [data-checkout] .checkout-sparkle {
+    pointer-events: none;
+    fill: #ecfeff;
+    animation: cw-sparkle 3.6s ease-in-out infinite;
+}
+
+.checkout-wheel [data-checkout] .checkout-sparkle.is-halo {
+    fill: #ffffff;
+}
+
+.checkout-wheel [data-checkout] .checkout-halo {
+    pointer-events: none;
+    stroke: none !important;
+}
+
+.checkout-wheel [data-checkout] .checkout-inner-stroke {
+    fill: none !important;
+    pointer-events: none;
+    filter: none;
+    stroke-linejoin: round;
+}
+
+.checkout-wheel [data-checkout] .checkout-label {
+    fill: var(--cw-label, #f4f4f5);
+    pointer-events: none;
+}
+
+.checkout-wheel .cw-life {
+    pointer-events: none;
+    transform-box: view-box;
+    transform-origin: 450px 450px;
+    animation: cw-spin 42s linear infinite;
+    will-change: transform;
+}
+
+.checkout-wheel .cw-life-disc {
+    mix-blend-mode: screen;
+    opacity: 0.16;
+}
+
+.checkout-wheel .cw-fog-pulse {
+    pointer-events: none;
+    animation: cw-breathe 10s ease-in-out infinite;
+}
+
+@keyframes cw-spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes cw-breathe {
+    0%, 100% { opacity: 0.08; }
+    50% { opacity: 0.2; }
+}
+
+@keyframes cw-sparkle {
+    0%, 100% { opacity: 0.05; }
+    42% { opacity: 0.95; }
+    58% { opacity: 0.15; }
+    72% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .checkout-wheel .cw-life,
+    .checkout-wheel .checkout-sparkle,
+    .checkout-wheel .cw-fog-pulse {
+        animation: none !important;
+    }
+
+    .checkout-wheel .cw-life {
+        opacity: 0;
+    }
+}

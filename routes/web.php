@@ -22,7 +22,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [PagesController::class, 'showHomePage'])->name('pages.home');
 
 if (app()->environment('local')) {
-    Route::get('/dev/checkout-wheel', [PagesController::class, 'showCheckoutWheelSandbox'])
+    Route::get('/dev/checkout-wheel', [PagesController::class, 'showCheckoutWheel'])
         ->name('dev.checkout-wheel');
 }
 Route::get('/join-tournament/{code}', [TournamentJoinLandingController::class, 'show'])

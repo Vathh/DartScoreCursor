@@ -41,14 +41,11 @@ class PagesController extends Controller
         return view('tournament.tournaments');
     }
 
-    public function showCheckoutWheelSandbox(): Factory|View
+    public function showCheckoutWheel(): Factory|View
     {
         abort_unless(app()->environment('local'), 404);
 
-        $svg = file_get_contents(public_path('images/checkout_wheel.svg')) ?: '';
-        $svg = preg_replace('/^<\?xml.*?\?>\s*/', '', $svg) ?? $svg;
-
-        return view('dev.checkout-wheel', ['svg' => $svg]);
+        return view('dev.checkout-wheel');
     }
 }
 
