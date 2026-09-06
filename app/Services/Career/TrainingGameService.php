@@ -2,7 +2,7 @@
 
 namespace App\Services\Career;
 
-use App\Domain\Career\CareerSnapshotMetrics;
+use App\Domain\Career\CareerCollectorRegistry;
 use App\Domain\GameScoring\MatchFormat;
 use App\Models\Career\TrainingGame;
 use App\Models\Users\User;
@@ -76,32 +76,6 @@ class TrainingGameService
      */
     private function normalizeMetrics(string $gameType, array $raw): ?array
     {
-        $doubleTracked = (bool) ($raw['double_tracked'] ?? false);
-        $attempts = isset($raw['double_attempts']) ? (int) $raw['double_attempts'] : null;
-        $successes = isset($raw['double_successes']) ? (int) $raw['double_successes'] : null;
-        $darts = (int) ($raw['darts_thrown'] ?? 0);
-        $points = (int) ($raw['points'] ?? 0);
-        $average = $darts > 0 && ($gameType === 'x01' || $gameType === MatchFormat::DEFAULT_GAME_TYPE)
-            ? round(($points / $darts) * 3, 2)
-            : null;
-
-        if ($darts <= 0 && ! $doubleTracked) {
-            return null;
-        }
-
-        $extra = [];
-        if ($gameType === MatchFormat::GAME_TYPE_BOB27 && is_array($raw['per_double'] ?? null)) {
-            $extra['per_double'] = $raw['per_double'];
-        }
-
-        return CareerSnapshotMetrics::pack(
-            average: $average,
-            dartsThrown: max(0, $darts),
-            points: max(0, $points),
-            doubleTracked: $doubleTracked,
-            doubleAttempts: $doubleTracked ? (int) ($attempts ?? 0) : null,
-            doubleSuccesses: $doubleTracked ? (int) ($successes ?? 0) : null,
-            extra: $extra,
-        );
+        return CareerCollectorRegistry::normalizeClient($gameType, $raw);
     }
 }

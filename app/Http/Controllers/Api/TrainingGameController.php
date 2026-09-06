@@ -22,12 +22,6 @@ class TrainingGameController
             'completedAt' => 'required|date',
             'format' => 'nullable|array',
             'metrics' => 'required|array',
-            'metrics.darts_thrown' => 'nullable|integer|min:0',
-            'metrics.points' => 'nullable|integer|min:0',
-            'metrics.double_tracked' => 'nullable|boolean',
-            'metrics.double_attempts' => 'nullable|integer|min:0',
-            'metrics.double_successes' => 'nullable|integer|min:0',
-            'metrics.per_double' => 'nullable|array',
         ]);
 
         try {

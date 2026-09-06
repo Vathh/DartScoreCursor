@@ -2,10 +2,14 @@
 
 namespace App\DTO\QuickGameFfa;
 
+use App\Domain\GameScoring\VisitDartPayload;
 use App\Domain\GameScoring\VisitRecorder;
 
 class RecordFfaVisitDTO
 {
+    /**
+     * @param  list<array{sector: int, points: int, label: string|null, remainingBefore: int|null, bust: bool}>|null  $darts
+     */
     public function __construct(
         public int $playerId,
         public int $score,
@@ -15,6 +19,7 @@ class RecordFfaVisitDTO
         public bool $closedLeg,
         public bool $bust,
         public string $clientVisitId,
+        public ?array $darts = null,
     ) {
     }
 
@@ -31,6 +36,7 @@ class RecordFfaVisitDTO
             closedLeg: (bool) ($data['closedLeg'] ?? false),
             bust: (bool) ($data['bust'] ?? false),
             clientVisitId: (string) $data['clientVisitId'],
+            darts: VisitDartPayload::normalize($data['darts'] ?? null),
         );
     }
 }

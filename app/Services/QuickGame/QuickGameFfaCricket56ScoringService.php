@@ -5,6 +5,7 @@ namespace App\Services\QuickGame;
 use App\DTO\QuickGame\PlayerResultDTO;
 use App\Domain\GameScoring\MatchFormat;
 use App\Domain\QuickGame\Cricket56Rules;
+use App\Domain\QuickGame\FfaMatchLog;
 use App\Domain\QuickGame\FfaTurnRotationDomain;
 use App\Events\QuickGameFfaStateUpdated;
 use App\Models\QuickGame\QuickGameFfaSession;
@@ -53,8 +54,9 @@ class QuickGameFfaCricket56ScoringService
         int $playerId,
         int $points,
         string $clientVisitId,
+        ?array $marks = null,
     ): array {
-        return DB::transaction(function () use ($lobbyId, $userId, $playerId, $points, $clientVisitId) {
+        return DB::transaction(function () use ($lobbyId, $userId, $playerId, $points, $clientVisitId, $marks) {
             $session = $this->sessionRepository->findOrFailForLobby($lobbyId);
             $session->loadMissing('lobby');
             $this->assertCricket56Session($session);
@@ -67,7 +69,16 @@ class QuickGameFfaCricket56ScoringService
             $leftIds = $this->presenceRepository->getLeftPlayerIds($session);
             $state = $this->normalizeState($session, $playerIds);
             $skipIds = $leftIds;
-            $points = Cricket56Rules::clampPoints($points, (int) $state['currentRoundIndex']);
+            $roundIndex = (int) $state['currentRoundIndex'];
+            $storedMarks = null;
+            if (is_array($marks) && count($marks) === 3) {
+                $storedMarks = [];
+                foreach ($marks as $mark) {
+                    $storedMarks[] = Cricket56Rules::clampMark((int) $mark, $roundIndex);
+                }
+                $points = array_sum($storedMarks);
+            }
+            $points = Cricket56Rules::clampPoints($points, $roundIndex);
 
             if (! in_array($playerId, $playerIds, true)) {
                 throw new DomainException('Gracz nie należy do tego meczu.');
@@ -97,6 +108,7 @@ class QuickGameFfaCricket56ScoringService
                 'playerId' => $playerId,
                 'kind' => 'visit',
                 'points' => $points,
+                'marks' => $storedMarks,
                 'clientDartId' => $clientVisitId,
                 'clientVisitId' => $clientVisitId,
                 'legNumber' => (int) $session->current_leg_number,
@@ -251,13 +263,13 @@ class QuickGameFfaCricket56ScoringService
         ));
         if ((int) $legsWon[$winnerId] >= $format->legsToWinSet) {
             $this->finishMatch($session, $legsWon, $format, $state);
-            $state['dartLog'] = [];
+            FfaMatchLog::archive($state);
 
             return;
         }
 
         $this->resetBoard($state, $playerIds);
-        $state['dartLog'] = [];
+        FfaMatchLog::archive($state);
         $session->leg_opener_index = FfaTurnRotationDomain::nextIndexAfter(
             (int) $session->leg_opener_index,
             $playerIds,
@@ -496,6 +508,7 @@ class QuickGameFfaCricket56ScoringService
             'thrownThisRound' => is_array($raw['thrownThisRound'] ?? null) ? $raw['thrownThisRound'] : [],
             'boards' => $boards,
             'dartLog' => is_array($raw['dartLog'] ?? null) ? $raw['dartLog'] : [],
+            'matchLog' => is_array($raw['matchLog'] ?? null) ? $raw['matchLog'] : [],
         ];
     }
 

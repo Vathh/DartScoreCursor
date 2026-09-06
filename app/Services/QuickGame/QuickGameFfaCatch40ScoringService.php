@@ -6,6 +6,7 @@ use App\DTO\QuickGame\PlayerResultDTO;
 use App\Domain\GameScoring\MatchFormat;
 use App\Domain\GameScoring\VisitRecorder;
 use App\Domain\QuickGame\Catch40Rules;
+use App\Domain\QuickGame\FfaMatchLog;
 use App\Domain\QuickGame\FfaTurnRotationDomain;
 use App\Events\QuickGameFfaStateUpdated;
 use App\Models\QuickGame\QuickGameFfaSession;
@@ -59,6 +60,7 @@ class QuickGameFfaCatch40ScoringService
         bool $bust,
         bool $checkout,
         string $clientVisitId,
+        ?array $darts = null,
     ): array {
         return DB::transaction(function () use (
             $lobbyId,
@@ -71,6 +73,7 @@ class QuickGameFfaCatch40ScoringService
             $bust,
             $checkout,
             $clientVisitId,
+            $darts,
         ) {
             $session = $this->sessionRepository->findOrFailForLobby($lobbyId);
             $session->loadMissing('lobby');
@@ -134,6 +137,7 @@ class QuickGameFfaCatch40ScoringService
                 'dartsInVisit' => $dartsInVisit,
                 'bust' => $bust,
                 'checkout' => $checkout,
+                'darts' => $darts,
                 'clientDartId' => $clientVisitId,
                 'clientVisitId' => $clientVisitId,
                 'legNumber' => (int) $session->current_leg_number,
@@ -244,13 +248,13 @@ class QuickGameFfaCatch40ScoringService
         ));
         if ((int) $legsWon[$winnerId] >= $format->legsToWinSet) {
             $this->finishMatch($session, $legsWon, $format, $state);
-            $state['dartLog'] = [];
+            FfaMatchLog::archive($state);
 
             return;
         }
 
         $this->resetBoard($state, $playerIds);
-        $state['dartLog'] = [];
+        FfaMatchLog::archive($state);
         $session->leg_opener_index = FfaTurnRotationDomain::nextIndexAfter(
             (int) $session->leg_opener_index,
             $playerIds,
@@ -494,6 +498,7 @@ class QuickGameFfaCatch40ScoringService
         return [
             'boards' => $boards,
             'dartLog' => is_array($raw['dartLog'] ?? null) ? $raw['dartLog'] : [],
+            'matchLog' => is_array($raw['matchLog'] ?? null) ? $raw['matchLog'] : [],
         ];
     }
 

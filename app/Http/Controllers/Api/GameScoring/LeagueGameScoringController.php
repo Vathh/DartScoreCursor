@@ -45,16 +45,7 @@ class LeagueGameScoringController extends Controller
 
     public function recordVisit(Request $request, int $leagueGame, int $leg): JsonResponse
     {
-        $validated = $request->validate([
-            'playerId' => 'required|integer|exists:players,id',
-            'score' => 'required|integer|min:0|max:180',
-            'remainingBefore' => 'required|integer|min:0|max:1001',
-            'remainingAfter' => 'required|integer|min:0|max:1001',
-            'dartsInVisit' => 'required|integer|min:1|max:3',
-            'closedLeg' => 'boolean',
-            'bust' => 'boolean',
-            'clientVisitId' => 'required|uuid',
-        ]);
+        $validated = $request->validate(RecordVisitDTO::validationRules());
 
         return $this->respond($request, $leagueGame, mutate: true, run: function ($context, $game) use ($validated, $leg) {
             return $this->gameScoringService->recordVisit(

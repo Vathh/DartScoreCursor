@@ -28,6 +28,7 @@ class GameVisitRepository
             'bust' => $dto->bust,
             'is_voided' => false,
             'client_visit_id' => $dto->clientVisitId,
+            'darts' => $dto->darts,
         ]);
     }
 
@@ -40,6 +41,7 @@ class GameVisitRepository
             'darts_in_visit' => $dto->dartsInVisit,
             'closed_leg' => $dto->closedLeg,
             'bust' => $dto->bust,
+            'darts' => $dto->darts,
         ]);
 
         return $visit->fresh();

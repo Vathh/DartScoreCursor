@@ -12,8 +12,9 @@ use App\Repositories\QuickGame\QuickGameFfaSessionRepository;
 use App\Repositories\QuickGame\QuickGameLobbyRepository;
 use App\Repositories\QuickGame\QuickGameRepository;
 use App\Services\Career\PlayerCareerSnapshotService;
-use App\Domain\GameScoring\MatchFormat;
 use App\Support\QuickGameFfa\CricketRules;
+use App\Domain\GameScoring\MatchFormat;
+use App\Domain\QuickGame\FfaMatchLog;
 use DomainException;
 use Illuminate\Support\Facades\DB;
 
@@ -226,7 +227,7 @@ class QuickGameFfaCricketScoringService
             if ((int) $legsWon[$winnerId] >= $format->legsToWinSet) {
                 $this->finishMatch($session, $legsWon, $format, $state);
                 $state['dartsInVisit'] = 0;
-                $state['dartLog'] = [];
+                FfaMatchLog::archive($state);
 
                 return;
             }
@@ -234,7 +235,7 @@ class QuickGameFfaCricketScoringService
             // Nowy leg — reset tablic, rotacja openera
             $state['boards'] = CricketRules::initialState($playerIds)['boards'];
             $state['dartsInVisit'] = 0;
-            $state['dartLog'] = [];
+            FfaMatchLog::archive($state);
             $session->leg_opener_index = FfaTurnRotationDomain::nextIndexAfter(
                 (int) $session->leg_opener_index,
                 $playerIds,
@@ -479,6 +480,7 @@ class QuickGameFfaCricketScoringService
             'boards' => $boards,
             'dartsInVisit' => (int) ($raw['dartsInVisit'] ?? 0),
             'dartLog' => is_array($raw['dartLog'] ?? null) ? $raw['dartLog'] : [],
+            'matchLog' => is_array($raw['matchLog'] ?? null) ? $raw['matchLog'] : [],
         ];
     }
 

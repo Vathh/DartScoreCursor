@@ -5,6 +5,7 @@ namespace App\Services\QuickGame;
 use App\DTO\QuickGame\PlayerResultDTO;
 use App\Domain\GameScoring\MatchFormat;
 use App\Domain\QuickGame\Bob27Rules;
+use App\Domain\QuickGame\FfaMatchLog;
 use App\Domain\QuickGame\FfaTurnRotationDomain;
 use App\Events\QuickGameFfaStateUpdated;
 use App\Models\QuickGame\QuickGameFfaSession;
@@ -215,7 +216,7 @@ class QuickGameFfaBob27ScoringService
             $this->finishMatch($session, $session->legs_won_in_set ?? [], MatchFormat::fromRecord($session), $state);
             $state['dartsInVisit'] = 0;
             $state['hitsInVisit'] = 0;
-            $state['dartLog'] = [];
+            FfaMatchLog::archive($state);
 
             return;
         }
@@ -281,13 +282,13 @@ class QuickGameFfaBob27ScoringService
             $this->finishMatch($session, $legsWon, $format, $state);
             $state['dartsInVisit'] = 0;
             $state['hitsInVisit'] = 0;
-            $state['dartLog'] = [];
+            FfaMatchLog::archive($state);
 
             return;
         }
 
         $this->resetBoard($state, $playerIds);
-        $state['dartLog'] = [];
+        FfaMatchLog::archive($state);
         $skipIds = $this->skipIds($playerIds, $leftIds, $state);
         $session->leg_opener_index = FfaTurnRotationDomain::nextIndexAfter(
             (int) $session->leg_opener_index,
@@ -545,6 +546,7 @@ class QuickGameFfaBob27ScoringService
             'thrownThisTarget' => is_array($raw['thrownThisTarget'] ?? null) ? $raw['thrownThisTarget'] : [],
             'boards' => $boards,
             'dartLog' => is_array($raw['dartLog'] ?? null) ? $raw['dartLog'] : [],
+            'matchLog' => is_array($raw['matchLog'] ?? null) ? $raw['matchLog'] : [],
         ];
     }
 

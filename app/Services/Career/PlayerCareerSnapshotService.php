@@ -2,8 +2,15 @@
 
 namespace App\Services\Career;
 
+use App\Domain\Career\AtcCareerCollector;
+use App\Domain\Career\Bob27CareerCollector;
 use App\Domain\Career\CareerSnapshotMetrics;
+use App\Domain\Career\Catch40CareerCollector;
+use App\Domain\Career\Cricket56CareerCollector;
+use App\Domain\Career\CricketCareerCollector;
+use App\Domain\Career\X01CareerCollector;
 use App\Domain\GameScoring\MatchFormat;
+use App\Domain\QuickGame\FfaMatchLog;
 use App\Enums\CareerSource;
 use App\Enums\GameKind;
 use App\Models\Career\TrainingGame;
@@ -65,7 +72,13 @@ class PlayerCareerSnapshotService
             $successes = $doubleTracked ? (int) $trackedRows->sum('double_successes') : null;
 
             $metrics = $this->isX01GameType($gameType)
-                ? CareerSnapshotMetrics::fromX01Visits($playerVisits, $doubleTracked, $attempts, $successes)
+                ? X01CareerCollector::fromVisits(
+                    $playerVisits,
+                    [],
+                    $doubleTracked,
+                    $attempts,
+                    $successes,
+                )
                 : CareerSnapshotMetrics::fromNonX01((int) $playerVisits->sum('darts_in_visit'));
 
             if ($metrics === null) {
@@ -107,16 +120,42 @@ class PlayerCareerSnapshotService
             ? $this->ffaVisitRepository->getActiveForSession($session)
             : collect();
 
-        $dartLog = is_array($gameState['dartLog'] ?? null) ? $gameState['dartLog'] : [];
+        $state = $gameState ?? [];
+        $log = FfaMatchLog::merged($state);
+        $boards = is_array($state['boards'] ?? null) ? $state['boards'] : [];
+        $winnerId = $this->ffaWinnerId($session, $resultsByPlayer);
 
         foreach ($registeredIds as $playerId) {
+            $pidKey = (string) $playerId;
+            $board = is_array($boards[$pidKey] ?? null) ? $boards[$pidKey] : [];
             $metrics = match (true) {
-                $gameType === MatchFormat::GAME_TYPE_BOB27 => CareerSnapshotMetrics::fromBob27DartLog($dartLog, $playerId),
-                $this->isX01GameType($gameType) => CareerSnapshotMetrics::fromX01Visits(
+                $gameType === MatchFormat::GAME_TYPE_BOB27 => Bob27CareerCollector::fromDartLog(
+                    $log,
+                    $playerId,
+                    $board,
+                    (string) ($state['mode'] ?? MatchFormat::fromRecord($session)->bob27Mode),
+                    array_key_exists('includeBull', $state)
+                        ? (bool) $state['includeBull']
+                        : MatchFormat::fromRecord($session)->includesBob27Bull(),
+                ),
+                $gameType === MatchFormat::GAME_TYPE_CRICKET => CricketCareerCollector::fromDartLog(
+                    $log,
+                    $playerId,
+                    $winnerId !== null && $playerId === $winnerId,
+                ),
+                $gameType === MatchFormat::GAME_TYPE_ATC => AtcCareerCollector::fromDartLog($log, $playerId),
+                $gameType === MatchFormat::GAME_TYPE_CATCH40 => Catch40CareerCollector::fromDartLog(
+                    $log,
+                    $playerId,
+                    $board,
+                ),
+                $gameType === MatchFormat::GAME_TYPE_CRICKET56 => Cricket56CareerCollector::fromDartLog(
+                    $log,
+                    $playerId,
+                    $board,
+                ),
+                $this->isX01GameType($gameType) => X01CareerCollector::fromVisits(
                     $visits->where('player_id', $playerId)->values(),
-                    false,
-                    null,
-                    null,
                 ),
                 default => CareerSnapshotMetrics::fromNonX01(
                     $resultsByPlayer->get($playerId)?->darts_thrown,
@@ -178,5 +217,27 @@ class PlayerCareerSnapshotService
     private function storedGameType(string $gameType): string
     {
         return $this->isX01GameType($gameType) ? MatchFormat::DEFAULT_GAME_TYPE : $gameType;
+    }
+
+    /**
+     * @param  \Illuminate\Support\Collection<int, mixed>  $resultsByPlayer
+     */
+    private function ffaWinnerId(QuickGameFfaSession $session, $resultsByPlayer): ?int
+    {
+        $first = $resultsByPlayer->first(fn ($row) => (int) ($row->place ?? 0) === 1);
+        if ($first !== null) {
+            return (int) $first->player_id;
+        }
+        $legs = $session->legs_won_in_set ?? [];
+        $bestId = null;
+        $best = -1;
+        foreach ($legs as $pid => $won) {
+            if ((int) $won > $best) {
+                $best = (int) $won;
+                $bestId = (int) $pid;
+            }
+        }
+
+        return $bestId;
     }
 }

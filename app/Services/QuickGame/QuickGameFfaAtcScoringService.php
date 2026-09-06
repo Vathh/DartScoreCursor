@@ -5,6 +5,7 @@ namespace App\Services\QuickGame;
 use App\DTO\QuickGame\PlayerResultDTO;
 use App\Domain\GameScoring\MatchFormat;
 use App\Domain\QuickGame\AroundTheClockRules;
+use App\Domain\QuickGame\FfaMatchLog;
 use App\Domain\QuickGame\FfaTurnRotationDomain;
 use App\Events\QuickGameFfaStateUpdated;
 use App\Models\QuickGame\QuickGameFfaSession;
@@ -194,13 +195,13 @@ class QuickGameFfaAtcScoringService
         ));
         if ((int) $legsWon[$winnerId] >= $format->legsToWinSet) {
             $this->finishMatch($session, $legsWon, $format, $state);
-            $state['dartLog'] = [];
+            FfaMatchLog::archive($state);
 
             return;
         }
 
         $this->resetBoard($state, $playerIds);
-        $state['dartLog'] = [];
+        FfaMatchLog::archive($state);
         $session->leg_opener_index = FfaTurnRotationDomain::nextIndexAfter(
             (int) $session->leg_opener_index,
             $playerIds,
@@ -440,6 +441,7 @@ class QuickGameFfaAtcScoringService
         return [
             'boards' => $boards,
             'dartLog' => is_array($raw['dartLog'] ?? null) ? $raw['dartLog'] : [],
+            'matchLog' => is_array($raw['matchLog'] ?? null) ? $raw['matchLog'] : [],
         ];
     }
 

@@ -7,6 +7,8 @@ namespace App\Domain\Career;
  */
 final class CareerSnapshotMetrics
 {
+    public const SCHEMA_VERSION = 2;
+
     /** @var list<string> */
     public const NON_X01_GAME_TYPES = [
         'cricket',
@@ -158,6 +160,7 @@ final class CareerSnapshotMetrics
         array $extra = [],
     ): array {
         return array_merge([
+            'schema_version' => self::SCHEMA_VERSION,
             'average' => $average,
             'darts_thrown' => $dartsThrown,
             'points' => $points,

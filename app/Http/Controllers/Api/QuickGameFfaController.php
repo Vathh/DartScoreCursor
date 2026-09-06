@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\DTO\QuickGameFfa\RecordFfaVisitDTO;
+use App\Domain\GameScoring\VisitDartPayload;
 use App\Services\QuickGame\QuickGameFfaAtcScoringService;
 use App\Services\QuickGame\QuickGameFfaBob27ScoringService;
 use App\Services\QuickGame\QuickGameFfaCatch40ScoringService;
@@ -74,7 +75,7 @@ class QuickGameFfaController
 
     public function recordVisit(Request $request, string $lobbyId): JsonResponse
     {
-        $validated = $request->validate([
+        $validated = $request->validate(array_merge([
             'playerId' => 'required|integer|exists:players,id',
             'score' => 'required|integer|min:0|max:180',
             'remainingBefore' => 'required|integer|min:0|max:1001',
@@ -83,7 +84,7 @@ class QuickGameFfaController
             'closedLeg' => 'boolean',
             'bust' => 'boolean',
             'clientVisitId' => 'required|uuid',
-        ]);
+        ], VisitDartPayload::validationRules()));
 
         try {
             $this->assertLobbyParticipant((int) $lobbyId, $request->user()->id);
@@ -240,7 +241,7 @@ class QuickGameFfaController
 
     public function recordCatch40Visit(Request $request, string $lobbyId): JsonResponse
     {
-        $validated = $request->validate([
+        $validated = $request->validate(array_merge([
             'playerId' => 'required|integer|exists:players,id',
             'score' => 'required|integer|min:0|max:180',
             'remainingBefore' => 'required|integer|min:0|max:100',
@@ -250,7 +251,7 @@ class QuickGameFfaController
             'bust' => 'boolean',
             'clientVisitId' => 'required_without:clientDartId|nullable|uuid',
             'clientDartId' => 'required_without:clientVisitId|nullable|uuid',
-        ]);
+        ], VisitDartPayload::validationRules()));
 
         try {
             $this->assertLobbyParticipant((int) $lobbyId, $request->user()->id);
@@ -267,6 +268,7 @@ class QuickGameFfaController
                     (bool) ($validated['bust'] ?? false),
                     (bool) ($validated['checkout'] ?? false),
                     (string) ($validated['clientVisitId'] ?? $validated['clientDartId']),
+                    VisitDartPayload::normalize($validated['darts'] ?? null),
                 )
             );
         } catch (DomainException $e) {
@@ -291,7 +293,9 @@ class QuickGameFfaController
     {
         $validated = $request->validate([
             'playerId' => 'required|integer|exists:players,id',
-            'points' => 'required|integer|min:0|max:9',
+            'points' => 'nullable|integer|min:0|max:9',
+            'marks' => 'nullable|array|size:3',
+            'marks.*' => 'integer|min:0|max:3',
             'clientVisitId' => 'required_without:clientDartId|nullable|uuid',
             'clientDartId' => 'required_without:clientVisitId|nullable|uuid',
         ]);
@@ -304,8 +308,11 @@ class QuickGameFfaController
                     (int) $lobbyId,
                     $request->user()->id,
                     (int) $validated['playerId'],
-                    (int) $validated['points'],
+                    (int) ($validated['points'] ?? 0),
                     (string) ($validated['clientVisitId'] ?? $validated['clientDartId']),
+                    isset($validated['marks']) && is_array($validated['marks'])
+                        ? array_map('intval', $validated['marks'])
+                        : null,
                 )
             );
         } catch (DomainException $e) {

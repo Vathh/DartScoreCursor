@@ -20,12 +20,14 @@ class GameVisit extends Model
         'bust',
         'is_voided',
         'client_visit_id',
+        'darts',
     ];
 
     protected $casts = [
         'closed_leg' => 'boolean',
         'bust' => 'boolean',
         'is_voided' => 'boolean',
+        'darts' => 'array',
     ];
 
     public function gameLeg(): BelongsTo
