@@ -65,6 +65,46 @@ class VisitRecorderTest extends TestCase
         $this->addToAssertionCount(1);
     }
 
+    public function test_normalize_bust_darts_to_three(): void
+    {
+        $this->assertSame(3, VisitRecorder::normalizeDartsInVisit(true, 1));
+        $this->assertSame(3, VisitRecorder::normalizeDartsInVisit(true, 2));
+        $this->assertSame(2, VisitRecorder::normalizeDartsInVisit(false, 2));
+        $this->assertSame(1, VisitRecorder::normalizeDartsInVisit(false, 1));
+    }
+
+    public function test_validate_dto_forces_bust_darts_to_three(): void
+    {
+        $dto = (object) [
+            'remainingBefore' => 16,
+            'score' => 0,
+            'remainingAfter' => 16,
+            'dartsInVisit' => 1,
+            'closedLeg' => false,
+            'bust' => true,
+        ];
+
+        VisitRecorder::validateDto($dto);
+
+        $this->assertSame(3, $dto->dartsInVisit);
+    }
+
+    public function test_record_visit_dto_from_array_normalizes_bust_darts(): void
+    {
+        $dto = \App\DTO\GameScoring\RecordVisitDTO::fromArray([
+            'playerId' => 1,
+            'score' => 0,
+            'remainingBefore' => 16,
+            'remainingAfter' => 16,
+            'dartsInVisit' => 1,
+            'closedLeg' => false,
+            'bust' => true,
+            'clientVisitId' => 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
+        ]);
+
+        $this->assertSame(3, $dto->dartsInVisit);
+    }
+
     public function test_validate_rejects_inconsistent_remaining(): void
     {
         $this->expectException(DomainException::class);

@@ -230,4 +230,17 @@ class PlayoffGameRepository
             ->get()
             ->map(fn (PlayoffGame $game) => PlayoffGameDomain::fromEloquent($game));
     }
+
+    /**
+     * @return Collection<int, PlayoffGame>
+     */
+    public function listFinished(): Collection
+    {
+        return PlayoffGame::query()
+            ->where('status', GameStatus::FINISHED)
+            ->whereNotNull('player1_id')
+            ->whereNotNull('player2_id')
+            ->orderBy('id')
+            ->get();
+    }
 }

@@ -2,8 +2,14 @@
 
 namespace App\Providers;
 
+use App\Models\Career\TrainingGame;
+use App\Models\Game\Game;
+use App\Models\League\LeagueGame;
+use App\Models\PlayoffGame\PlayoffGame;
+use App\Models\QuickGame\QuickGame;
 use App\Services\Friends\FriendshipService;
 use Illuminate\Auth\Middleware\Authenticate;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
@@ -27,6 +33,14 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Carbon::setLocale((string) config('app.locale'));
+
+        Relation::morphMap([
+            'game' => Game::class,
+            'playoff_game' => PlayoffGame::class,
+            'quick_game' => QuickGame::class,
+            'league_game' => LeagueGame::class,
+            'training_game' => TrainingGame::class,
+        ]);
 
         // Tylko Sanctum (Bearer z telefonu), bez `web`/sesji. Musi być jedyne wywołanie Broadcast::routes —
         // patrz bootstrap/app.php (brak `channels:` w withRouting).

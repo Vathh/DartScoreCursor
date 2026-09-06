@@ -114,7 +114,7 @@ Wizyta należy do **lega** (`game_leg_id`), nie bezpośrednio do meczu.
 | `score` | Suma punktów wizyty (0–180) |
 | `remaining_before` | Wynik przed wizytą |
 | `remaining_after` | Wynik po wizycie |
-| `darts_in_visit` | Ile lotek w tej wizycie (1–3); także **która lotka zamknęła lega** (wartość 1–3 przy checkoutcie) |
+| `darts_in_visit` | Ile lotek w tej wizycie (1–3). **Bust / overthrow: zawsze 3** (całe podejście), nawet gdy fizycznie rzucono 1–2 lotki. Checkout na 1. lub 2. lotce: tyle, ile rzucono. |
 | `closed_leg` | Czy ta wizyta zamknęła lega |
 | `bust` | Bust w tej wizycie |
 | `is_voided` | Cofnięta wizyta (undo) |
@@ -123,6 +123,7 @@ Wizyta należy do **lega** (`game_leg_id`), nie bezpośrednio do meczu.
 - Duble **nie** są w `game_visits`.
 - Na koniec meczu **nie** wysyłamy bulk tablicy `visits` — są już w bazie.
 - **Undo (v1):** w **otwartym** legu wizyta dostaje `is_voided = true`; backend przelicza stan i broadcast (Pusher).
+- **Bust (overthrow):** `score = 0`, remaining bez zmian, `darts_in_visit = 3`. Checkout bez paddingu fantomowych lotek.
 - **Undo po zamknięciu lega (v1.1):** cofnięcie ostatniej wizyty **ostatniego** lega otwiera leg ponownie i cofa licznik legów w meczu (gdy mecz trwa). Po **zakończeniu meczu turniejowego** — użyj korekty wyniku na webie (cofanie nie cofa tabel/playoff).
 
 ### Tabela `game_leg_player_stats` (opcja B — cache per gracz per leg)

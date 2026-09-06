@@ -11,6 +11,20 @@ use Illuminate\Support\Collection;
  */
 final class VisitRecorder
 {
+    public const BUST_DARTS_IN_VISIT = 3;
+
+    /**
+     * Bust zużywa całe podejście (3 lotki). Checkout zostaje przy fizycznie rzuconych.
+     */
+    public static function normalizeDartsInVisit(bool $bust, int $dartsInVisit): int
+    {
+        if ($bust) {
+            return self::BUST_DARTS_IN_VISIT;
+        }
+
+        return $dartsInVisit;
+    }
+
     public static function isVisitComplete(bool $bust, bool $closedLeg, int $dartsInVisit): bool
     {
         return $bust || $closedLeg || $dartsInVisit >= 3;
@@ -100,13 +114,16 @@ final class VisitRecorder
      */
     public static function validateDto(object $dto, int $startingScore = 501): void
     {
+        $bust = (bool) $dto->bust;
+        $dto->dartsInVisit = self::normalizeDartsInVisit($bust, (int) $dto->dartsInVisit);
+
         self::validate(
             remainingBefore: (int) $dto->remainingBefore,
             score: (int) $dto->score,
             remainingAfter: (int) $dto->remainingAfter,
             dartsInVisit: (int) $dto->dartsInVisit,
             closedLeg: (bool) $dto->closedLeg,
-            bust: (bool) $dto->bust,
+            bust: $bust,
             startingScore: $startingScore,
         );
     }

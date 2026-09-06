@@ -14,10 +14,10 @@ class PlayerGameHistoryRepository
      *
      * @return array{items: array<int, array{type: string, id: int|null, date: string, date_formatted: string, opponents: string, result: string, score: string|null, tournament_name: string|null}>, has_more: bool}
      */
-    public function getHistoryPage(int $playerId, int $page): array
+    public function getHistoryPage(int $playerId, int $page, bool $includeTraining = false): array
     {
         $offset = ($page - 1) * self::PER_PAGE;
-        $stubs = $this->fetchAllStubs($playerId);
+        $stubs = $this->fetchAllStubs($playerId, $includeTraining);
         $total = count($stubs);
         $slice = array_slice($stubs, $offset, self::PER_PAGE);
         $items = $this->resolveDetails($playerId, $slice);
@@ -34,7 +34,7 @@ class PlayerGameHistoryRepository
      *
      * @return list<array{type: string, date: string, source_id: int, source_type: string}>
      */
-    private function fetchAllStubs(int $playerId): array
+    private function fetchAllStubs(int $playerId, bool $includeTraining): array
     {
         $quick = DB::table('quick_game_results')
             ->join('quick_games', 'quick_games.id', '=', 'quick_game_results.quick_game_id')
@@ -65,7 +65,28 @@ class PlayerGameHistoryRepository
             ->map(fn ($r) => ['type' => 'playoff', 'date' => $r->date, 'source_id' => (int) $r->source_id, 'source_type' => 'playoff'])
             ->all();
 
-        $merged = array_merge($quick, $games, $playoff);
+        $league = DB::table('league_games')
+            ->where(function ($q) use ($playerId) {
+                $q->where('player1_id', $playerId)->orWhere('player2_id', $playerId);
+            })
+            ->where('status', 'finished')
+            ->selectRaw("'league' as type, league_games.updated_at as date, league_games.id as source_id, 'league' as source_type")
+            ->get()
+            ->map(fn ($r) => ['type' => 'league', 'date' => $r->date, 'source_id' => (int) $r->source_id, 'source_type' => 'league'])
+            ->all();
+
+        $training = [];
+        if ($includeTraining) {
+            $training = DB::table('player_game_snapshots')
+                ->where('player_id', $playerId)
+                ->where('source', 'training')
+                ->selectRaw("'training' as type, occurred_at as date, id as source_id, 'training' as source_type")
+                ->get()
+                ->map(fn ($r) => ['type' => 'training', 'date' => $r->date, 'source_id' => (int) $r->source_id, 'source_type' => 'training'])
+                ->all();
+        }
+
+        $merged = array_merge($quick, $games, $playoff, $league, $training);
         usort($merged, fn ($a, $b) => strcmp($b['date'], $a['date']));
         return array_slice($merged, 0, self::MAX_STUBS);
     }
@@ -84,6 +105,10 @@ class PlayerGameHistoryRepository
                 $items[] = $this->resolveQuickGame($playerId, $stub['source_id'], $stub['date']);
             } elseif ($stub['source_type'] === 'game') {
                 $items[] = $this->resolveGroupGame($playerId, $stub['source_id'], $stub['date']);
+            } elseif ($stub['source_type'] === 'league') {
+                $items[] = $this->resolveLeagueGame($playerId, $stub['source_id'], $stub['date']);
+            } elseif ($stub['source_type'] === 'training') {
+                $items[] = $this->resolveTraining($stub['source_id'], $stub['date']);
             } else {
                 $items[] = $this->resolvePlayoffGame($playerId, $stub['source_id'], $stub['date']);
             }
@@ -202,6 +227,60 @@ class PlayerGameHistoryRepository
             'result' => $won ? 'wygrana' : 'porażka',
             'score' => $score,
             'tournament_name' => $row->tournament_name,
+        ];
+    }
+
+    private function resolveLeagueGame(int $playerId, int $leagueGameId, string $date): array
+    {
+        $row = DB::table('league_games')
+            ->join('players as p1', 'p1.id', '=', 'league_games.player1_id')
+            ->join('players as p2', 'p2.id', '=', 'league_games.player2_id')
+            ->leftJoin('league_seasons', 'league_seasons.id', '=', 'league_games.league_season_id')
+            ->leftJoin('leagues', 'leagues.id', '=', 'league_seasons.league_id')
+            ->where('league_games.id', $leagueGameId)
+            ->select(
+                'league_games.player1_id',
+                'league_games.player2_id',
+                'league_games.player1_score',
+                'league_games.player2_score',
+                'league_games.winner_id',
+                'p1.name as player1_name',
+                'p2.name as player2_name',
+                'leagues.name as league_name'
+            )
+            ->first();
+        if (! $row) {
+            return $this->emptyItem($date);
+        }
+        $opponentName = (int) $row->player1_id === $playerId ? $row->player2_name : $row->player1_name;
+        $won = (int) $row->winner_id === $playerId;
+        $score = $row->player1_score !== null && $row->player2_score !== null
+            ? $row->player1_score.' : '.$row->player2_score
+            : null;
+
+        return [
+            'type' => 'league',
+            'id' => $leagueGameId,
+            'date' => $date,
+            'date_formatted' => date('d.m.Y H:i', strtotime($date)),
+            'opponents' => $opponentName,
+            'result' => $won ? 'wygrana' : 'porażka',
+            'score' => $score,
+            'tournament_name' => $row->league_name,
+        ];
+    }
+
+    private function resolveTraining(int $snapshotId, string $date): array
+    {
+        return [
+            'type' => 'training',
+            'id' => null,
+            'date' => $date,
+            'date_formatted' => date('d.m.Y H:i', strtotime($date)),
+            'opponents' => 'Trening',
+            'result' => '–',
+            'score' => null,
+            'tournament_name' => null,
         ];
     }
 

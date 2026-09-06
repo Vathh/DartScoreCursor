@@ -92,4 +92,15 @@ class LeagueGameRepository
 
         return $query->exists();
     }
+
+    /**
+     * @return Collection<int, LeagueGame>
+     */
+    public function listFinished(): Collection
+    {
+        return LeagueGame::query()
+            ->where('status', LeagueGameStatus::FINISHED)
+            ->orderBy('id')
+            ->get();
+    }
 }

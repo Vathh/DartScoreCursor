@@ -2,11 +2,13 @@
 
 namespace App\Services\Player;
 
+use App\Domain\Career\CareerWindow;
 use App\Domain\FriendshipInvitationDomain;
 use App\Domain\PlayerDomain;
 use App\Models\Player\Player;
 use App\Models\Users\User;
 use App\Repositories\Player\PlayerRepository;
+use App\Services\Career\PlayerCareerStatsService;
 use App\Services\Friends\FriendshipService;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -19,6 +21,7 @@ class PlayerProfileService
         private FriendshipService $friendshipService,
         private PlayerLiveGameService $playerLiveGameService,
         private PlayerRepository $playerRepository,
+        private PlayerCareerStatsService $playerCareerStatsService,
     ) {
     }
 
@@ -41,7 +44,8 @@ class PlayerProfileService
      */
     public function buildProfile(Player $player, ?User $viewer): array
     {
-        $core = $this->prepareRegisteredProfile($player);
+        $isSelf = $this->isSelf($player, $viewer);
+        $core = $this->prepareRegisteredProfile($player, $isSelf);
         $friendship = $this->resolveFriendshipState($player, $viewer);
 
         return [
@@ -59,6 +63,7 @@ class PlayerProfileService
                 'items' => $core['historyItems'],
                 'hasMore' => $core['historyHasMore'],
             ],
+            'career' => $this->playerCareerStatsService->build($player, $viewer, CareerWindow::DEFAULT_KEY, 'all'),
         ];
     }
 
@@ -92,13 +97,25 @@ class PlayerProfileService
     /**
      * @return array{items: array, has_more: bool}
      */
-    public function buildGameHistoryPage(Player $player, int $page): array
+    public function buildGameHistoryPage(Player $player, int $page, ?User $viewer = null): array
     {
         if (! $player->user_id) {
             abort(404, 'Profil dostępny tylko dla graczy zarejestrowanych.');
         }
 
-        return $this->playerGameHistoryService->getHistoryPage($player->id, $page);
+        return $this->playerGameHistoryService->getHistoryPage(
+            $player->id,
+            $page,
+            $this->isSelf($player, $viewer),
+        );
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function buildCareer(Player $player, ?User $viewer, ?string $window, ?string $source): array
+    {
+        return $this->playerCareerStatsService->build($player, $viewer, $window, $source);
     }
 
     /**
@@ -120,7 +137,8 @@ class PlayerProfileService
      */
     public function buildWebShow(Player $player, ?User $viewer): array
     {
-        $core = $this->prepareRegisteredProfile($player);
+        $isSelf = $this->isSelf($player, $viewer);
+        $core = $this->prepareRegisteredProfile($player, $isSelf);
         $friendship = $this->resolveFriendshipState($player, $viewer);
 
         return [
@@ -135,6 +153,7 @@ class PlayerProfileService
             'gameHistoryItems' => $core['historyItems'],
             'gameHistoryHasMore' => $core['historyHasMore'],
             'liveGames' => $this->playerLiveGameService->findLiveGamesForPlayer((int) $player->id),
+            'career' => $this->playerCareerStatsService->build($player, $viewer, CareerWindow::DEFAULT_KEY, 'all'),
         ];
     }
 
@@ -146,7 +165,7 @@ class PlayerProfileService
      *     historyHasMore: bool
      * }
      */
-    private function prepareRegisteredProfile(Player $player): array
+    private function prepareRegisteredProfile(Player $player, bool $includeTraining): array
     {
         if (! $player->user_id) {
             abort(404, 'Profil dostępny tylko dla graczy zarejestrowanych.');
@@ -155,7 +174,7 @@ class PlayerProfileService
         $player->loadMissing('user');
         $this->playerStatsService->recalculateAndSave($player->id);
 
-        $historyFirstPage = $this->playerGameHistoryService->getHistoryPage($player->id, 1);
+        $historyFirstPage = $this->playerGameHistoryService->getHistoryPage($player->id, 1, $includeTraining);
 
         return [
             'quickStats' => $this->playerStatsService->getStoredQuickStats($player),
@@ -163,6 +182,11 @@ class PlayerProfileService
             'historyItems' => $historyFirstPage['items'],
             'historyHasMore' => (bool) $historyFirstPage['has_more'],
         ];
+    }
+
+    private function isSelf(Player $player, ?User $viewer): bool
+    {
+        return $viewer?->player !== null && (int) $viewer->player->id === (int) $player->id;
     }
 
     /**

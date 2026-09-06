@@ -31,7 +31,8 @@
 
 | Temat | Stan |
 |-------|------|
-| **Liga piramidowa** | Web: ligi, składy, sezon, tabela (W/P albo W/R/P + punkty), WO/rezygnacja. Mobile: lista meczów, lobby 1v1, scoring H2H na jednym telefonie. Później: `each_own`, katalog piramidy w Rozgrywkach |
+| **Kariera gracza (statystyki)** | Dashboard **web** jest. Mobile (Faza 3) później. Design: [`design_player_career_stats.md`](design_player_career_stats.md) |
+| **Trener osobisty** | Kontrakt w kodzie (digest + plan + fallback), **bez UI i bez LLM**. Design: [`design_player_coach.md`](design_player_coach.md) |
 | **Awatary graczy** | Zaplanowane (jeszcze bez planu) — upload + profil/listy; limity + fallback inicjałów; później crop/CDN |
 | **Live drabinka / playoff (web WS)** | Później — zakładka Playoff dziś SSR (F5); live WS jest dla macierzy grup + pojedynczego meczu. Wzorzec: `TournamentGroupMatrixLiveService` |
 | **Prowadzenie organizacji typu Apagon** | Później — zakres UX do ustalenia przy planie |

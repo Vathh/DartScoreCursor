@@ -104,6 +104,7 @@ Route::get('/players/{player}/edit', [PlayerController::class, 'edit'])->middlew
 Route::put('/players/{player}', [PlayerController::class, 'update'])->middleware('auth')->name('players.update');
 Route::get('/players/{player}', [PlayerController::class, 'show'])->name('players.show');
 Route::get('/players/{player}/games', [PlayerController::class, 'gameHistory'])->name('players.games');
+Route::get('/players/{player}/career', [PlayerController::class, 'career'])->name('players.career');
 Route::post('/players/{player}/add-friend', [PlayerController::class, 'addFriend'])->name('players.add-friend')->middleware('auth');
 Route::post('/friends/invitations/{invitation}/accept', [FriendInvitationController::class, 'accept'])->name('friends.invitations.accept')->middleware('auth');
 Route::post('/friends/invitations/{invitation}/reject', [FriendInvitationController::class, 'reject'])->name('friends.invitations.reject')->middleware('auth');

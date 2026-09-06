@@ -25,6 +25,7 @@ use App\Support\QuickGameFfa\CricketRules;
 use App\Domain\GameScoring\MatchFormatScoring;
 use App\Domain\GameScoring\VisitRecorder;
 use App\Support\QuickGameLobbyPlayerOrder;
+use App\Services\Career\PlayerCareerSnapshotService;
 use DomainException;
 use Illuminate\Support\Facades\DB;
 
@@ -43,6 +44,7 @@ class QuickGameFfaScoringService
         private QuickGameFfaAtcScoringService $atcScoringService,
         private QuickGameFfaCatch40ScoringService $catch40ScoringService,
         private QuickGameFfaCricket56ScoringService $cricket56ScoringService,
+        private PlayerCareerSnapshotService $careerSnapshotService,
     ) {
     }
 
@@ -588,6 +590,8 @@ class QuickGameFfaScoringService
         if ($lobby !== null) {
             $this->lobbyRepository->markFinished($lobby->id, $quickGameId);
         }
+
+        $this->careerSnapshotService->recordFinishedQuickGame($quickGameId, $session);
     }
 
     private function recomputeIndicesFromVisits(\App\Models\QuickGame\QuickGameFfaSession $session): void

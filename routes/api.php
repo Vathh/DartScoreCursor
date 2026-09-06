@@ -5,7 +5,9 @@ use App\Http\Controllers\Api\FriendshipController;
 use App\Http\Controllers\Api\GameController;
 use App\Http\Controllers\Api\OrganizationController;
 use App\Http\Controllers\Api\OrganizationInvitationController;
+use App\Http\Controllers\Api\PlayerCareerController;
 use App\Http\Controllers\Api\PlayerProfileController;
+use App\Http\Controllers\Api\TrainingGameController;
 use App\Http\Controllers\Api\PushTokenController;
 use App\Http\Controllers\Api\QuickGameController;
 use App\Http\Controllers\Api\QuickGameFfaController;
@@ -102,7 +104,10 @@ Route::middleware(['auth:sanctum', 'not.banned'])->group(function () {
         Route::get('/{player}', [PlayerProfileController::class, 'show'])->whereNumber('player');
         Route::put('/{player}', [PlayerProfileController::class, 'update'])->whereNumber('player');
         Route::get('/{player}/games', [PlayerProfileController::class, 'games'])->whereNumber('player');
+        Route::get('/{player}/career', [PlayerCareerController::class, 'show'])->whereNumber('player');
     });
+
+    Route::post('/training/games', [TrainingGameController::class, 'store']);
 
     Route::prefix('quick-game')->group(function () {
         Route::post('/update', [QuickGameController::class, 'update']);

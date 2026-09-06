@@ -11,6 +11,7 @@ use App\Repositories\QuickGame\QuickGameFfaPresenceRepository;
 use App\Repositories\QuickGame\QuickGameFfaSessionRepository;
 use App\Repositories\QuickGame\QuickGameLobbyRepository;
 use App\Repositories\QuickGame\QuickGameRepository;
+use App\Services\Career\PlayerCareerSnapshotService;
 use App\Domain\GameScoring\MatchFormat;
 use App\Support\QuickGameFfa\CricketRules;
 use DomainException;
@@ -27,6 +28,7 @@ class QuickGameFfaCricketScoringService
         private PlayerRepository $playerRepository,
         private QuickGameRepository $quickGameRepository,
         private QuickGameLobbyRepository $lobbyRepository,
+        private PlayerCareerSnapshotService $careerSnapshotService,
     ) {
     }
 
@@ -336,6 +338,8 @@ class QuickGameFfaCricketScoringService
         if ($lobby !== null) {
             $this->lobbyRepository->markFinished($lobby->id, $quickGameId);
         }
+
+        $this->careerSnapshotService->recordFinishedQuickGame($quickGameId, $session, $state);
     }
 
     /**

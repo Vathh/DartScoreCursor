@@ -32,7 +32,7 @@ class PlayerProfileController
         $page = max(1, (int) $request->query('page', 1));
 
         return response()->json(
-            $this->playerProfileService->buildGameHistoryPage($player, $page),
+            $this->playerProfileService->buildGameHistoryPage($player, $page, $request->user()),
         );
     }
 

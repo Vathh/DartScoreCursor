@@ -41,8 +41,8 @@ W n01 gracze turniejowi są tymczasowymi nazwami bez przypisanych osiągnięć i
 
 - Wszystko, co gość na webie.
 - Znajomi (zaproszenie + akceptacja — **mobile**; podstawowy invite/accept także na **webie** od lipca 2026).
-- Własne statystyki i historia (turnieje + quick game online).
-- **Mobile:** lobby quick game online, akceptacja zaproszeń (turniej, lobby, znajomi), tablet turniejowy, **mecz treningowy** (lokalny, bez zapisu).
+- Własne statystyki i historia: turnieje, liga, quick oraz trening slotu JA (trening tylko na własnym profilu). **Trener osobisty** — w kodzie na później, **nie** w aplikacji.
+- **Mobile:** lobby quick game online, akceptacja zaproszeń (turniej, lobby, znajomi), tablet turniejowy, **mecz treningowy** (lokalny; zalogowany ze slotem JA zapisuje sesję na konto).
 - Docelowo: komunikator na webie, odznaczenia, link live quick game.
 
 ### Premium (docelowo)
@@ -557,7 +557,20 @@ Wspólne dla **quick game online**, **treningu** i (tam gdzie dotyczy) **turniej
 | `dartsPerLeg[]` | Liczba lotek gracza w legu, który **wygrał** (checkout). | Tylko wygrane legi — pod „najlepszy leg” w osiągach. |
 | Osiągi 60+, 80+, 100+, 140+, 180 | Liczba wizyt w przedziałach punktowych w meczu. | Wszystkie wizyty gracza (`legByLegScores` + bieżący leg). |
 
+**Liczenie lotek (średnia 3-dartowa):**
+
+- Pełna wizyta bez busta: 3 lotki.
+- **Overthrow / bust** (wynik < 0 albo pozostałe 1): 0 punktów, remaining bez zmian, **zawsze 3 lotki** — nawet gdy w per-dart rzucono 1. lotkę.
+- **Checkout** na 1. lub 2. lotce: tyle lotek, ile naprawdę rzucono (bez fantomów).
+- Cofnięcie 3. lotki i wpisanie innej: licznik wraca do stanu sprzed pomyłki; lektor mówi **sumę wizyty po poprawce** (20+15+10 → forty five; undo 10, wpisz 15 → fifty).
+
 **Implementacja (skrót):** quick game FFA — `QuickGameFfaStateBuilder` + wspólny `VisitRecorder` (backend); mobile: `applyGameScoringState` + `useGameScoring` → reducer `SYNC_FROM_SERVER`. Turniej H2H — ten sam kontrakt API (`format`, `turn`, `revision`, `meta`).
+
+### Kariera na profilu (web)
+
+Zarejestrowany gracz ma **jedną karierę** ze snapshotów (turniej, liga, quick, trening JA). Okna toczące się, filtry źródeł, średnia X01 i duble. Szczegóły: [`design_player_career_stats.md`](design_player_career_stats.md). Dashboard mobile — później.
+
+**Trener osobisty** (karty 30/60/90 min z katalogu trybów) jest w backendzie jako kontrakt digest→plan, **nigdzie nie pokazujemy go w UI**. Wdrożenie w aplikacji: później. [`design_player_coach.md`](design_player_coach.md).
 
 ## Reguły meczu (MVP)
 

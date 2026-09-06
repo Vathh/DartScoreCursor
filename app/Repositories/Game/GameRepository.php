@@ -149,6 +149,17 @@ class GameRepository
     {
         $game->save();
     }
+
+    /**
+     * @return Collection<int, Game>
+     */
+    public function listFinished(): Collection
+    {
+        return Game::query()
+            ->where('status', GameStatus::FINISHED)
+            ->orderBy('id')
+            ->get();
+    }
 }
 
 

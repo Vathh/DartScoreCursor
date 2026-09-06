@@ -175,6 +175,12 @@ class QuickGameFfaScoringApiTest extends TestCase
             'score' => 1,
             'place' => 1,
         ]);
+
+        $this->assertDatabaseHas('player_game_snapshots', [
+            'player_id' => $this->hostPlayer->id,
+            'source' => 'quick',
+            'sourceable_id' => $session->quick_game_id,
+        ]);
     }
 
     private function startTwoPlayerLobby(): int

@@ -16,9 +16,9 @@ class PlayerGameHistoryService
      *
      * @return array{items: array, has_more: bool}
      */
-    public function getHistoryPage(int $playerId, int $page): array
+    public function getHistoryPage(int $playerId, int $page, bool $includeTraining = false): array
     {
-        return $this->playerGameHistoryRepository->getHistoryPage($playerId, max(1, $page));
+        return $this->playerGameHistoryRepository->getHistoryPage($playerId, max(1, $page), $includeTraining);
     }
 }
 

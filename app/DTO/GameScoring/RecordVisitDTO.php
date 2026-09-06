@@ -2,6 +2,8 @@
 
 namespace App\DTO\GameScoring;
 
+use App\Domain\GameScoring\VisitRecorder;
+
 class RecordVisitDTO
 {
     public function __construct(
@@ -23,7 +25,9 @@ class RecordVisitDTO
             score: (int) $data['score'],
             remainingBefore: (int) $data['remainingBefore'],
             remainingAfter: (int) $data['remainingAfter'],
-            dartsInVisit: (int) ($data['dartsInVisit'] ?? 3),
+            dartsInVisit: ! empty($data['bust'])
+                ? VisitRecorder::BUST_DARTS_IN_VISIT
+                : (int) ($data['dartsInVisit'] ?? 3),
             closedLeg: (bool) ($data['closedLeg'] ?? false),
             bust: (bool) ($data['bust'] ?? false),
             clientVisitId: (string) $data['clientVisitId'],

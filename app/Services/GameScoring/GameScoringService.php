@@ -20,6 +20,7 @@ use App\Repositories\Game\GameVisitRepository;
 use App\Repositories\League\LeagueGameRepository;
 use App\Repositories\PlayoffGame\PlayoffGameRepository;
 use App\Repositories\QuickGame\QuickGameRepository;
+use App\Services\Career\PlayerCareerSnapshotService;
 use App\Services\Game\GameService;
 use App\Services\Tournament\TournamentGroupMatrixLiveService;
 use App\Support\GameScoring\GameScoringContext;
@@ -43,6 +44,7 @@ class GameScoringService
         private GameScoringStateBuilder $gameScoringStateBuilder,
         private GameService $gameService,
         private TournamentGroupMatrixLiveService $groupMatrixLiveService,
+        private PlayerCareerSnapshotService $careerSnapshotService,
     ) {
     }
 
@@ -209,6 +211,7 @@ class GameScoringService
                 $this->revertLegWinOnGame($game, $legWinnerId, $context);
 
                 if ($this->isFinished($game)) {
+                    $this->careerSnapshotService->deleteForSourceable($game);
                     $this->markInProgress($game);
                     $game->winner_id = null;
                     $this->persistGame($game);
@@ -284,6 +287,10 @@ class GameScoringService
             $this->persistGame($game);
 
             $freshGame = $game->fresh(['player1', 'player2']);
+
+            if ($this->isFinished($freshGame)) {
+                $this->careerSnapshotService->recordFinishedH2h($context, $freshGame);
+            }
 
             if (
                 $this->isFinished($freshGame)

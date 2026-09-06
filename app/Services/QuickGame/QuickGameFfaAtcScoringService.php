@@ -13,6 +13,7 @@ use App\Repositories\QuickGame\QuickGameFfaPresenceRepository;
 use App\Repositories\QuickGame\QuickGameFfaSessionRepository;
 use App\Repositories\QuickGame\QuickGameLobbyRepository;
 use App\Repositories\QuickGame\QuickGameRepository;
+use App\Services\Career\PlayerCareerSnapshotService;
 use DomainException;
 use Illuminate\Support\Facades\DB;
 
@@ -27,6 +28,7 @@ class QuickGameFfaAtcScoringService
         private PlayerRepository $playerRepository,
         private QuickGameRepository $quickGameRepository,
         private QuickGameLobbyRepository $lobbyRepository,
+        private PlayerCareerSnapshotService $careerSnapshotService,
     ) {
     }
 
@@ -292,6 +294,8 @@ class QuickGameFfaAtcScoringService
         if ($lobby !== null) {
             $this->lobbyRepository->markFinished($lobby->id, $quickGameId);
         }
+
+        $this->careerSnapshotService->recordFinishedQuickGame($quickGameId, $session, $state);
     }
 
     /**

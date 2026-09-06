@@ -11,6 +11,7 @@ import { registerRefereeScoring } from './referee/refereeScoring.js';
 import { registerLeagueRosterBoard } from './leagueRosterBoard.js';
 import { registerRelatedUserSearch } from './relatedUserSearch.js';
 import { registerCheckoutWheels } from './checkoutWheel.js';
+import { registerPlayerCareer } from './playerCareer.js';
 
 registerGameLiveViewer(alpine);
 registerFfaLiveViewer(alpine);
@@ -23,6 +24,7 @@ registerRefereeScoring(alpine);
 registerLeagueRosterBoard(alpine);
 registerRelatedUserSearch(alpine);
 registerCheckoutWheels();
+registerPlayerCareer(alpine);
 
 window.Alpine = alpine;
 alpine.start();

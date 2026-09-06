@@ -28,6 +28,13 @@ class QuickGameFfaSessionRepository
         return QuickGameFfaSession::where('lobby_id', $lobbyId)->firstOrFail();
     }
 
+    public function findByQuickGameId(int $quickGameId): ?QuickGameFfaSession
+    {
+        return QuickGameFfaSession::query()
+            ->where('quick_game_id', $quickGameId)
+            ->first();
+    }
+
     public function save(QuickGameFfaSession $session): void
     {
         $session->save();

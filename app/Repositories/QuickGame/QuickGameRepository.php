@@ -98,4 +98,25 @@ class QuickGameRepository
     {
         QuickGame::where('id', $quickGameId)->update($fields);
     }
+
+    /**
+     * @return Collection<int, \App\Models\QuickGame\QuickGameResult>
+     */
+    public function getResultsForGame(int $quickGameId): Collection
+    {
+        return \App\Models\QuickGame\QuickGameResult::query()
+            ->where('quick_game_id', $quickGameId)
+            ->get();
+    }
+
+    /**
+     * @return Collection<int, QuickGame>
+     */
+    public function listFinished(): Collection
+    {
+        return QuickGame::query()
+            ->where('status', GameStatus::FINISHED)
+            ->orderBy('id')
+            ->get();
+    }
 }

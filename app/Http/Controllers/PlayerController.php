@@ -78,9 +78,29 @@ class PlayerController extends Controller
             abort(404, 'Profil dostępny tylko dla graczy zarejestrowanych.');
         }
         $page = max(1, (int) $request->query('page', 1));
-        $data = $this->playerGameHistoryService->getHistoryPage($player->id, $page);
+        $data = $this->playerGameHistoryService->getHistoryPage(
+            $player->id,
+            $page,
+            Auth::user()?->player !== null && (int) Auth::user()->player->id === (int) $player->id,
+        );
 
         return response()->json($data);
+    }
+
+    public function career(Request $request, Player $player): JsonResponse
+    {
+        try {
+            return response()->json(
+                $this->playerProfileService->buildCareer(
+                    $player,
+                    Auth::user(),
+                    $request->query('window'),
+                    $request->query('source'),
+                ),
+            );
+        } catch (\InvalidArgumentException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
     }
 
     public function addFriend(Request $request, Player $player): RedirectResponse

@@ -246,6 +246,26 @@ class PlayerRepository
     }
 
     /**
+     * ID zarejestrowanych graczy (user_id != null) spośród podanych ID.
+     *
+     * @param  list<int>  $ids
+     * @return list<int>
+     */
+    public function getRegisteredIds(array $ids): array
+    {
+        if ($ids === []) {
+            return [];
+        }
+
+        return Player::query()
+            ->whereIn('id', $ids)
+            ->whereNotNull('user_id')
+            ->pluck('id')
+            ->map(static fn ($id) => (int) $id)
+            ->all();
+    }
+
+    /**
      * @return Collection<int, Player>
      */
     public function searchRegisteredByName(string $nameQuery, int $limit = 50): Collection

@@ -31,9 +31,14 @@ document.addEventListener('alpine:init', () => {
             if (type === 'quick') return 'Szybki mecz';
             if (type === 'group') return 'Grupa';
             if (type === 'playoff') return 'Play-off';
+            if (type === 'league') return 'Liga';
+            if (type === 'training') return 'Trening';
             return type;
         },
         gameUrl(m) {
+            if (m?.type === 'league' && m?.id) {
+                return '{{ url('/league-games') }}/' + m.id;
+            }
             if (!m?.id || !['quick', 'group', 'playoff'].includes(m.type)) {
                 return null;
             }
@@ -147,6 +152,90 @@ document.addEventListener('alpine:init', () => {
 
         {{-- Zakładka: Przegląd --}}
         <div x-show="activeTab === 'overview'" class="space-y-8">
+            @php
+                $career = $career ?? ['window' => '90d', 'source' => 'all', 'isSelf' => $isOwnProfile, 'hero' => [], 'series' => ['x01_average' => [], 'double_pct' => []]];
+            @endphp
+            <section
+                x-data="playerCareerDashboard({
+                    window: @js($career['window'] ?? '90d'),
+                    source: @js($career['source'] ?? 'all'),
+                    isSelf: @js($career['isSelf'] ?? $isOwnProfile),
+                    hero: @js($career['hero'] ?? []),
+                    series: @js($career['series'] ?? ['x01_average' => [], 'double_pct' => []]),
+                    fetchUrl: @js(route('players.career', $player)),
+                })"
+                class="space-y-4"
+            >
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <h2 class="text-xl font-bold text-accent">Kariera</h2>
+                    <p class="text-xs text-text-muted" x-show="loading">Aktualizuję…</p>
+                </div>
+
+                <div class="flex flex-wrap gap-2">
+                    <template x-for="s in sources()" :key="s.key">
+                        <button type="button"
+                                @click="setSource(s.key)"
+                                class="px-3 py-1.5 rounded-full text-sm border transition"
+                                :class="source === s.key ? 'bg-accent text-on-accent border-accent' : 'border-border text-text-secondary hover:bg-bg-elevated'">
+                            <span x-text="s.label"></span>
+                        </button>
+                    </template>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <template x-for="w in windows" :key="w.key">
+                        <button type="button"
+                                @click="setWindow(w.key)"
+                                class="px-3 py-1.5 rounded-full text-sm border transition"
+                                :class="window === w.key ? 'bg-success-muted text-success-bright border-border' : 'border-border text-text-secondary hover:bg-bg-elevated'">
+                            <span x-text="w.label"></span>
+                        </button>
+                    </template>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="bg-bg-elevated rounded-lg p-4 border border-border">
+                        <p class="text-xs uppercase tracking-wide text-text-muted">Mecze</p>
+                        <p class="text-2xl font-bold text-text mt-1" x-text="hero.games ?? 0"></p>
+                    </div>
+                    <div class="bg-bg-elevated rounded-lg p-4 border border-border">
+                        <p class="text-xs uppercase tracking-wide text-text-muted">Średnia 3-dartowa (X01)</p>
+                        <p class="text-2xl font-bold text-text mt-1" x-text="hero.hasX01 ? hero.x01Average : '–'"></p>
+                        <p class="text-xs mt-1" x-show="formatDelta(hero.x01AverageDelta)"
+                           :class="hero.x01AverageDelta > 0 ? 'text-success-bright' : 'text-text-muted'"
+                           x-text="formatDelta(hero.x01AverageDelta) ? ('vs poprz. okno ' + formatDelta(hero.x01AverageDelta)) : ''"></p>
+                    </div>
+                    <div class="bg-bg-elevated rounded-lg p-4 border border-border">
+                        <p class="text-xs uppercase tracking-wide text-text-muted">Double %</p>
+                        <p class="text-2xl font-bold text-text mt-1" x-text="hero.hasDoubles && hero.doublePct != null ? (hero.doublePct + '%') : '–'"></p>
+                        <p class="text-xs text-text-muted mt-1" x-text="hero.doubleLabel || ''"></p>
+                        <p class="text-xs mt-1" x-show="formatDelta(hero.doublePctDelta)"
+                           :class="hero.doublePctDelta > 0 ? 'text-success-bright' : 'text-text-muted'"
+                           x-text="formatDelta(hero.doublePctDelta) ? ('vs poprz. okno ' + formatDelta(hero.doublePctDelta)) : ''"></p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div class="bg-bg-elevated rounded-lg p-4 border border-border">
+                        <h3 class="font-semibold text-text mb-3">Trend średniej X01</h3>
+                        <template x-if="sparkline(series.x01_average)">
+                            <svg :viewBox="'0 0 ' + sparkline(series.x01_average).w + ' ' + sparkline(series.x01_average).h" class="w-full h-24 text-accent" aria-hidden="true">
+                                <path fill="none" stroke="currentColor" stroke-width="2" :d="sparkline(series.x01_average).d"></path>
+                            </svg>
+                        </template>
+                        <p class="text-sm text-text-muted" x-show="!sparkline(series.x01_average)">Za mało gier X01 w tym oknie, żeby narysować wykres.</p>
+                    </div>
+                    <div class="bg-bg-elevated rounded-lg p-4 border border-border">
+                        <h3 class="font-semibold text-text mb-3">Trend double %</h3>
+                        <template x-if="sparkline(series.double_pct)">
+                            <svg :viewBox="'0 0 ' + sparkline(series.double_pct).w + ' ' + sparkline(series.double_pct).h" class="w-full h-24 text-accent" aria-hidden="true">
+                                <path fill="none" stroke="currentColor" stroke-width="2" :d="sparkline(series.double_pct).d"></path>
+                            </svg>
+                        </template>
+                        <p class="text-sm text-text-muted" x-show="!sparkline(series.double_pct)">Brak śledzonych dubli w tym oknie (nie pokazujemy 0%).</p>
+                    </div>
+                </div>
+            </section>
+
             {{-- Statystyki: mecze szybkie --}}
             <section>
                 <h2 class="text-xl font-bold text-accent mb-4">Statystyki – mecze szybkie</h2>
