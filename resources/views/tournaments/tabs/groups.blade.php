@@ -98,8 +98,8 @@
                                     X
                                 </td>
                             @else
-                                @php($cellGame = $games[$number][$rowPlayer->id][$columnPlayer->id])
                                 @php
+                                    $cellGame = $games[$number][$rowPlayer->id][$columnPlayer->id];
                                     $isFinished = $cellGame->isFinished();
                                     $isLive = $cellGame->status === \App\Enums\GameStatus::IN_PROGRESS;
                                     $rowIsP1 = $rowPlayer->id === $cellGame->player1->id;
@@ -114,7 +114,7 @@
                                     $linkClass = ($isFinished || $isLive)
                                         ? 'text-accent hover:underline'
                                         : 'text-text-muted hover:text-accent hover:underline';
-                                    $title = $isLive ? 'Podgląd na żywo' : ($isFinished ? null : 'Ustaw wynik / walkover');
+                                    $title = $isLive ? 'Podgląd na żywo' : ($isFinished ? null : 'Ustaw wynik / walkower');
                                 @endphp
                                 <td
                                     class="px-2 py-2 text-center {{ (! $isFinished && ! $isLive && $advances) ? 'bg-success-muted/70' : '' }}"

@@ -233,6 +233,73 @@
         @apply sticky top-0 z-40 bg-bg-deep/90 backdrop-blur-md text-text-secondary py-3 sm:py-4 border-b border-border;
     }
 
+    .career-section-head {
+        @apply flex items-center justify-between gap-3 mb-2;
+    }
+
+    .career-filter-anchor {
+        min-height: 2.25rem;
+    }
+
+    .career-filter-bar {
+        @apply py-1;
+    }
+
+    .career-filter-bar.is-stuck {
+        position: fixed;
+        z-index: 30;
+        @apply py-1 px-4;
+        background: transparent;
+    }
+
+    .career-filter-controls {
+        @apply flex flex-nowrap items-center justify-center gap-2 min-w-0 overflow-x-auto;
+        scrollbar-width: none;
+    }
+
+    .career-filter-controls::-webkit-scrollbar {
+        display: none;
+    }
+
+    .career-seg {
+        @apply inline-flex shrink-0 p-0.5 rounded-lg;
+        background-color: color-mix(in srgb, var(--color-bg) 50%, transparent);
+        border: 1px solid color-mix(in srgb, var(--color-text-muted) 55%, var(--color-border));
+        transition: background-color 280ms ease, border-color 280ms ease;
+    }
+
+    .career-seg-btn {
+        @apply px-2.5 py-1 text-xs sm:text-sm font-medium rounded-md text-text-secondary whitespace-nowrap;
+        background-color: transparent;
+        transition: background-color 280ms ease, color 280ms ease;
+    }
+
+    .career-seg-btn:hover:not(.is-on) {
+        @apply text-text;
+        background-color: var(--color-bg-elevated);
+    }
+
+    .career-seg-btn.is-on {
+        @apply text-on-accent;
+        background-color: var(--color-accent);
+    }
+
+    .career-seg-btn.is-on:hover {
+        background-color: var(--color-accent-hover);
+    }
+
+    .career-filter-bar.is-stuck .career-seg {
+        background-color: var(--color-bg);
+    }
+
+    .career-filter-bar.is-stuck .career-seg-btn:not(.is-on) {
+        background-color: var(--color-bg-elevated);
+    }
+
+    .career-filter-bar.is-stuck .career-seg-btn:not(.is-on):hover {
+        background-color: var(--color-bg-elevated-hover);
+    }
+
     .admin-sidebar {
         @apply w-full lg:w-72 shrink-0 border-b lg:border-b-0 lg:border-r border-border-subtle
             p-4 sm:p-6 flex flex-col bg-bg-deep/25 backdrop-blur-sm;

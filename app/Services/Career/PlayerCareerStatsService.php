@@ -85,6 +85,37 @@ class PlayerCareerStatsService
                 'x01_average' => $this->seriesX01($current),
                 'double_pct' => $this->seriesDoubles($current),
             ],
+            'table' => $this->tableStats($current),
+        ];
+    }
+
+    /**
+     * Przegląd: turnieje vs szybkie, bez treningów, domyślnie 3 miesiące.
+     *
+     * @return array{window: string, quick: array<string, mixed>, tournament: array<string, mixed>}
+     */
+    public function buildOverviewSplit(Player $player, ?string $windowKey = null): array
+    {
+        $window = CareerWindow::fromQuery($windowKey ?: CareerWindow::DEFAULT_KEY);
+        $current = $this->snapshotRepository->listForPlayer(
+            (int) $player->id,
+            [CareerSource::Quick, CareerSource::Tournament, CareerSource::League],
+            $window->startUtc(),
+            $window->endExclusiveUtc(),
+        );
+
+        return [
+            'window' => $window->key,
+            'quick' => $this->tableStats($current->filter(
+                fn (PlayerGameSnapshot $row) => $row->source === CareerSource::Quick,
+            )),
+            'tournament' => $this->tableStats($current->filter(
+                fn (PlayerGameSnapshot $row) => in_array(
+                    $row->source,
+                    [CareerSource::Tournament, CareerSource::League],
+                    true,
+                ),
+            )),
         ];
     }
 
@@ -189,6 +220,87 @@ class PlayerCareerStatsService
         }
 
         return $points;
+    }
+
+    /**
+     * @param  Collection<int, PlayerGameSnapshot>  $snapshots
+     * @return array{
+     *     games: int,
+     *     avg_three_darts: float|null,
+     *     highest_hf: int|null,
+     *     fastest_qf: int|null,
+     *     count_max: int,
+     *     count_170_plus: int,
+     *     count_hf: int,
+     *     count_qf: int
+     * }
+     */
+    private function tableStats(Collection $snapshots): array
+    {
+        $games = $snapshots->count();
+        $darts = 0;
+        $points = 0;
+        $hasX01 = false;
+        $countMax = 0;
+        $count170 = 0;
+        $countHf = 0;
+        $countQf = 0;
+        $highestHf = null;
+        $fastestQf = null;
+
+        foreach ($snapshots as $snapshot) {
+            $m = is_array($snapshot->metrics) ? $snapshot->metrics : [];
+            $gameDarts = (int) ($m['darts_thrown'] ?? 0);
+            if (CareerSnapshotMetrics::isX01((string) $snapshot->game_type) && $gameDarts > 0) {
+                $hasX01 = true;
+                $darts += $gameDarts;
+                $points += (int) ($m['points'] ?? 0);
+            }
+
+            $buckets = is_array($m['visit_scores'] ?? null) ? $m['visit_scores'] : [];
+            $countMax += (int) ($buckets['180'] ?? 0);
+            $count170 += (int) ($buckets['170'] ?? 0);
+
+            foreach (is_array($m['checkouts'] ?? null) ? $m['checkouts'] : [] as $row) {
+                if (! is_array($row)) {
+                    continue;
+                }
+                $score = (int) ($row['score'] ?? 0);
+                if ($score < 100) {
+                    continue;
+                }
+                $countHf++;
+                if ($highestHf === null || $score > $highestHf) {
+                    $highestHf = $score;
+                }
+            }
+
+            $closed = is_array($m['closed_legs'] ?? null) ? $m['closed_legs'] : [];
+            foreach ($closed as $row) {
+                if (! is_array($row)) {
+                    continue;
+                }
+                $legDarts = (int) ($row['darts'] ?? 0);
+                if ($legDarts <= 0 || $legDarts >= 20) {
+                    continue;
+                }
+                $countQf++;
+                if ($fastestQf === null || $legDarts < $fastestQf) {
+                    $fastestQf = $legDarts;
+                }
+            }
+        }
+
+        return [
+            'games' => $games,
+            'avg_three_darts' => $hasX01 && $darts > 0 ? round(($points / $darts) * 3, 2) : null,
+            'highest_hf' => $highestHf,
+            'fastest_qf' => $fastestQf,
+            'count_max' => $countMax,
+            'count_170_plus' => $count170,
+            'count_hf' => $countHf,
+            'count_qf' => $countQf,
+        ];
     }
 
     private function delta(?float $current, ?float $previous): ?float

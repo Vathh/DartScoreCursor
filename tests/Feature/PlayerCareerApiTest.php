@@ -117,16 +117,157 @@ class PlayerCareerApiTest extends TestCase
             ->assertJsonPath('series.double_pct', []);
     }
 
+    public function test_tables_follow_source_and_window_filters(): void
+    {
+        $this->insertSnapshot(CareerSource::Quick, 'x01', [
+            'average' => 60.0,
+            'darts_thrown' => 3,
+            'points' => 60,
+            'visit_scores' => ['180' => 1, '170' => 0, '140' => 0, '100' => 0, '80' => 0, '60' => 0],
+            'checkouts' => [['score' => 120, 'darts' => 2]],
+            'closed_legs' => [['darts' => 12]],
+            'double_tracked' => false,
+        ]);
+        $this->insertSnapshot(CareerSource::Tournament, 'x01', [
+            'average' => 90.0,
+            'darts_thrown' => 3,
+            'points' => 90,
+            'visit_scores' => ['180' => 0, '170' => 1, '140' => 0, '100' => 0, '80' => 0, '60' => 0],
+            'checkouts' => [['score' => 40, 'darts' => 1]],
+            'closed_legs' => [['darts' => 18]],
+            'double_tracked' => false,
+        ]);
+        $this->insertSnapshot(CareerSource::League, 'x01', [
+            'average' => 75.0,
+            'darts_thrown' => 3,
+            'points' => 75,
+            'visit_scores' => ['180' => 0, '170' => 0, '140' => 0, '100' => 0, '80' => 0, '60' => 0],
+            'checkouts' => [],
+            'closed_legs' => [['darts' => 15]],
+            'double_tracked' => false,
+        ]);
+        $this->insertSnapshot(CareerSource::Training, 'x01', [
+            'average' => 99.0,
+            'darts_thrown' => 3,
+            'points' => 99,
+            'visit_scores' => ['180' => 2, '170' => 0, '140' => 0, '100' => 0, '80' => 0, '60' => 0],
+            'checkouts' => [['score' => 170, 'darts' => 3]],
+            'closed_legs' => [['darts' => 9]],
+            'double_tracked' => false,
+        ]);
+        $this->insertSnapshot(CareerSource::Quick, 'x01', [
+            'average' => 40.0,
+            'darts_thrown' => 3,
+            'points' => 40,
+            'visit_scores' => ['180' => 0, '170' => 1, '140' => 0, '100' => 0, '80' => 0, '60' => 0],
+            'checkouts' => [],
+            'closed_legs' => [],
+            'double_tracked' => false,
+        ], now()->subDays(200));
+
+        Sanctum::actingAs($this->owner);
+
+        $all = $this->getJson('/api/players/'.$this->ownerPlayer->id.'/career?window=all&source=all')
+            ->assertOk();
+        $this->assertSame(5, $all->json('table.games'));
+        $this->assertSame(3, $all->json('table.count_max'));
+        $this->assertSame(170, $all->json('table.highest_hf'));
+        $this->assertSame(9, $all->json('table.fastest_qf'));
+        $this->assertSame(2, $all->json('table.count_170_plus'));
+        $this->assertSame(2, $all->json('table.count_hf'));
+        $this->assertSame(4, $all->json('table.count_qf'));
+
+        $quick = $this->getJson('/api/players/'.$this->ownerPlayer->id.'/career?window=all&source=quick')
+            ->assertOk();
+        $this->assertSame(2, $quick->json('table.games'));
+        $this->assertSame(1, $quick->json('table.count_max'));
+        $this->assertSame(120, $quick->json('table.highest_hf'));
+
+        $tournament = $this->getJson('/api/players/'.$this->ownerPlayer->id.'/career?window=all&source=tournament')
+            ->assertOk();
+        $this->assertSame(2, $tournament->json('table.games'));
+        $this->assertSame(1, $tournament->json('table.count_170_plus'));
+        $this->assertSame(15, $tournament->json('table.fastest_qf'));
+        $this->assertSame(2, $tournament->json('table.count_qf'));
+
+        $training = $this->getJson('/api/players/'.$this->ownerPlayer->id.'/career?window=all&source=training')
+            ->assertOk();
+        $this->assertSame(1, $training->json('table.games'));
+        $this->assertSame(2, $training->json('table.count_max'));
+        $this->assertSame(170, $training->json('table.highest_hf'));
+        $this->assertSame(1, $training->json('hero.games'));
+
+        $windowed = $this->getJson('/api/players/'.$this->ownerPlayer->id.'/career?window=90d&source=quick')
+            ->assertOk();
+        $this->assertSame(1, $windowed->json('table.games'));
+        $this->assertSame(1, $windowed->json('table.count_max'));
+    }
+
+    public function test_overview_split_is_90d_without_training(): void
+    {
+        $this->insertSnapshot(CareerSource::Quick, 'x01', [
+            'average' => 60.0,
+            'darts_thrown' => 3,
+            'points' => 60,
+            'visit_scores' => ['180' => 1, '170' => 0, '140' => 0, '100' => 0, '80' => 0, '60' => 0],
+            'checkouts' => [['score' => 120, 'darts' => 2]],
+            'closed_legs' => [['darts' => 12]],
+            'double_tracked' => false,
+        ]);
+        $this->insertSnapshot(CareerSource::Tournament, 'x01', [
+            'average' => 90.0,
+            'darts_thrown' => 3,
+            'points' => 90,
+            'visit_scores' => ['180' => 0, '170' => 1, '140' => 0, '100' => 0, '80' => 0, '60' => 0],
+            'checkouts' => [],
+            'closed_legs' => [['darts' => 15]],
+            'double_tracked' => false,
+        ]);
+        $this->insertSnapshot(CareerSource::Training, 'x01', [
+            'average' => 99.0,
+            'darts_thrown' => 3,
+            'points' => 99,
+            'visit_scores' => ['180' => 2, '170' => 0, '140' => 0, '100' => 0, '80' => 0, '60' => 0],
+            'checkouts' => [['score' => 170, 'darts' => 3]],
+            'closed_legs' => [['darts' => 9]],
+            'double_tracked' => false,
+        ]);
+        $this->insertSnapshot(CareerSource::Quick, 'x01', [
+            'average' => 40.0,
+            'darts_thrown' => 3,
+            'points' => 40,
+            'visit_scores' => ['180' => 0, '170' => 1, '140' => 0, '100' => 0, '80' => 0, '60' => 0],
+            'checkouts' => [],
+            'closed_legs' => [],
+            'double_tracked' => false,
+        ], now()->subDays(200));
+
+        $split = app(\App\Services\Career\PlayerCareerStatsService::class)
+            ->buildOverviewSplit($this->ownerPlayer);
+
+        $this->assertSame('90d', $split['window']);
+        $this->assertSame(1, $split['quick']['games']);
+        $this->assertSame(1, $split['quick']['count_max']);
+        $this->assertSame(120, $split['quick']['highest_hf']);
+        $this->assertSame(1, $split['tournament']['games']);
+        $this->assertSame(1, $split['tournament']['count_170_plus']);
+        $this->assertSame(15, $split['tournament']['fastest_qf']);
+    }
+
     /**
      * @param  array<string, mixed>  $metrics
      */
-    private function insertSnapshot(CareerSource $source, string $gameType, array $metrics): void
-    {
+    private function insertSnapshot(
+        CareerSource $source,
+        string $gameType,
+        array $metrics,
+        ?\DateTimeInterface $occurredAt = null,
+    ): void {
         PlayerGameSnapshot::create([
             'player_id' => $this->ownerPlayer->id,
             'source' => $source,
             'game_type' => $gameType,
-            'occurred_at' => now(),
+            'occurred_at' => $occurredAt ?? now(),
             'client_uuid' => $source === CareerSource::Training ? (string) \Illuminate\Support\Str::uuid() : null,
             'sourceable_type' => null,
             'sourceable_id' => null,

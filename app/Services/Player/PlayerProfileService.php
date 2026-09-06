@@ -132,7 +132,8 @@ class PlayerProfileService
      *     pendingReceivedInvitation: FriendshipInvitationDomain|null,
      *     gameHistoryItems: array,
      *     gameHistoryHasMore: bool,
-     *     liveGames: array
+     *     liveGames: array,
+     *     overviewSplit: array{window: string, quick: array<string, mixed>, tournament: array<string, mixed>}
      * }
      */
     public function buildWebShow(Player $player, ?User $viewer): array
@@ -154,6 +155,7 @@ class PlayerProfileService
             'gameHistoryHasMore' => $core['historyHasMore'],
             'liveGames' => $this->playerLiveGameService->findLiveGamesForPlayer((int) $player->id),
             'career' => $this->playerCareerStatsService->build($player, $viewer, CareerWindow::DEFAULT_KEY, 'all'),
+            'overviewSplit' => $this->playerCareerStatsService->buildOverviewSplit($player),
         ];
     }
 

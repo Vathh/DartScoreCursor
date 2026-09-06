@@ -148,143 +148,130 @@ document.addEventListener('alpine:init', () => {
                     class="px-4 py-2 rounded-t border font-medium transition whitespace-nowrap shrink-0">
                 Historia meczów
             </button>
+            <button type="button"
+                    @click="activeTab = 'stats'"
+                    :class="activeTab === 'stats' ? 'bg-success-muted text-success-bright border-border' : 'border-border text-text-secondary hover:bg-bg-elevated'"
+                    class="px-4 py-2 rounded-t border font-medium transition whitespace-nowrap shrink-0">
+                Statystyki
+            </button>
+            <button type="button"
+                    @click="activeTab = 'badges'"
+                    :class="activeTab === 'badges' ? 'bg-success-muted text-success-bright border-border' : 'border-border text-text-secondary hover:bg-bg-elevated'"
+                    class="px-4 py-2 rounded-t border font-medium transition whitespace-nowrap shrink-0">
+                Odznaczenia
+            </button>
         </div>
 
         {{-- Zakładka: Przegląd --}}
-        <div x-show="activeTab === 'overview'" class="space-y-8">
+        <div x-show="activeTab === 'overview'" x-cloak class="space-y-8">
+            @include('players.partials.stats-tables')
+        </div>
+
+        {{-- Zakładka: Statystyki --}}
+        <div x-show="activeTab === 'stats'" x-cloak>
             @php
-                $career = $career ?? ['window' => '90d', 'source' => 'all', 'isSelf' => $isOwnProfile, 'hero' => [], 'series' => ['x01_average' => [], 'double_pct' => []]];
+                $career = $career ?? ['window' => '90d', 'source' => 'all', 'isSelf' => $isOwnProfile, 'hero' => [], 'series' => ['x01_average' => [], 'double_pct' => []], 'table' => null];
             @endphp
-            <section
+            <div
                 x-data="playerCareerDashboard({
                     window: @js($career['window'] ?? '90d'),
                     source: @js($career['source'] ?? 'all'),
                     isSelf: @js($career['isSelf'] ?? $isOwnProfile),
                     hero: @js($career['hero'] ?? []),
                     series: @js($career['series'] ?? ['x01_average' => [], 'double_pct' => []]),
+                    table: @js($career['table'] ?? null),
                     fetchUrl: @js(route('players.career', $player)),
                 })"
-                class="space-y-4"
+                class="space-y-8"
             >
-                <div class="flex flex-wrap items-center justify-between gap-3">
-                    <h2 class="text-xl font-bold text-accent">Kariera</h2>
-                    <p class="text-xs text-text-muted" x-show="loading">Aktualizuję…</p>
-                </div>
-
-                <div class="flex flex-wrap gap-2">
-                    <template x-for="s in sources()" :key="s.key">
-                        <button type="button"
-                                @click="setSource(s.key)"
-                                class="px-3 py-1.5 rounded-full text-sm border transition"
-                                :class="source === s.key ? 'bg-accent text-on-accent border-accent' : 'border-border text-text-secondary hover:bg-bg-elevated'">
-                            <span x-text="s.label"></span>
-                        </button>
-                    </template>
-                </div>
-                <div class="flex flex-wrap gap-2">
-                    <template x-for="w in windows" :key="w.key">
-                        <button type="button"
-                                @click="setWindow(w.key)"
-                                class="px-3 py-1.5 rounded-full text-sm border transition"
-                                :class="window === w.key ? 'bg-success-muted text-success-bright border-border' : 'border-border text-text-secondary hover:bg-bg-elevated'">
-                            <span x-text="w.label"></span>
-                        </button>
-                    </template>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div class="bg-bg-elevated rounded-lg p-4 border border-border">
-                        <p class="text-xs uppercase tracking-wide text-text-muted">Mecze</p>
-                        <p class="text-2xl font-bold text-text mt-1" x-text="hero.games ?? 0"></p>
+                <div>
+                    <div class="career-section-head">
+                        <h2 class="text-xl font-bold text-accent">Kariera</h2>
+                        <p class="text-xs text-text-muted" x-show="loading">Aktualizuję…</p>
                     </div>
-                    <div class="bg-bg-elevated rounded-lg p-4 border border-border">
-                        <p class="text-xs uppercase tracking-wide text-text-muted">Średnia 3-dartowa (X01)</p>
-                        <p class="text-2xl font-bold text-text mt-1" x-text="hero.hasX01 ? hero.x01Average : '–'"></p>
-                        <p class="text-xs mt-1" x-show="formatDelta(hero.x01AverageDelta)"
-                           :class="hero.x01AverageDelta > 0 ? 'text-success-bright' : 'text-text-muted'"
-                           x-text="formatDelta(hero.x01AverageDelta) ? ('vs poprz. okno ' + formatDelta(hero.x01AverageDelta)) : ''"></p>
-                    </div>
-                    <div class="bg-bg-elevated rounded-lg p-4 border border-border">
-                        <p class="text-xs uppercase tracking-wide text-text-muted">Double %</p>
-                        <p class="text-2xl font-bold text-text mt-1" x-text="hero.hasDoubles && hero.doublePct != null ? (hero.doublePct + '%') : '–'"></p>
-                        <p class="text-xs text-text-muted mt-1" x-text="hero.doubleLabel || ''"></p>
-                        <p class="text-xs mt-1" x-show="formatDelta(hero.doublePctDelta)"
-                           :class="hero.doublePctDelta > 0 ? 'text-success-bright' : 'text-text-muted'"
-                           x-text="formatDelta(hero.doublePctDelta) ? ('vs poprz. okno ' + formatDelta(hero.doublePctDelta)) : ''"></p>
+                    <div
+                        class="career-filter-anchor"
+                        x-ref="filterAnchor"
+                        :style="filterStuck ? { height: filterBarH + 'px' } : null"
+                    >
+                        <div
+                            class="career-filter-bar"
+                            x-ref="filterBar"
+                            :class="{ 'is-stuck': filterStuck }"
+                        >
+                            <div class="career-filter-controls">
+                                <div class="career-seg" role="group" aria-label="Źródło">
+                                    <template x-for="s in sources()" :key="s.key">
+                                        <button type="button"
+                                                class="career-seg-btn"
+                                                :class="{ 'is-on': source === s.key }"
+                                                :aria-pressed="(source === s.key).toString()"
+                                                @click="setSource(s.key)">
+                                            <span x-text="s.label"></span>
+                                        </button>
+                                    </template>
+                                </div>
+                                <div class="career-seg" role="group" aria-label="Okres">
+                                    <template x-for="w in windows" :key="w.key">
+                                        <button type="button"
+                                                class="career-seg-btn"
+                                                :class="{ 'is-on': window === w.key }"
+                                                :aria-pressed="(window === w.key).toString()"
+                                                @click="setWindow(w.key)">
+                                            <span x-text="w.label"></span>
+                                        </button>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                    <div class="bg-bg-elevated rounded-lg p-4 border border-border">
-                        <h3 class="font-semibold text-text mb-3">Trend średniej X01</h3>
-                        <template x-if="sparkline(series.x01_average)">
-                            <svg :viewBox="'0 0 ' + sparkline(series.x01_average).w + ' ' + sparkline(series.x01_average).h" class="w-full h-24 text-accent" aria-hidden="true">
-                                <path fill="none" stroke="currentColor" stroke-width="2" :d="sparkline(series.x01_average).d"></path>
-                            </svg>
-                        </template>
-                        <p class="text-sm text-text-muted" x-show="!sparkline(series.x01_average)">Za mało gier X01 w tym oknie, żeby narysować wykres.</p>
+                <div class="space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div class="bg-bg-elevated rounded-lg p-4 border border-border">
+                            <p class="text-xs uppercase tracking-wide text-text-muted">Mecze</p>
+                            <p class="text-2xl font-bold text-text mt-1" x-text="hero.games ?? 0"></p>
+                        </div>
+                        <div class="bg-bg-elevated rounded-lg p-4 border border-border">
+                            <p class="text-xs uppercase tracking-wide text-text-muted">Średnia 3-dartowa (X01)</p>
+                            <p class="text-2xl font-bold text-text mt-1" x-text="hero.hasX01 ? hero.x01Average : '–'"></p>
+                            <p class="text-xs mt-1" x-show="formatDelta(hero.x01AverageDelta)"
+                               :class="hero.x01AverageDelta > 0 ? 'text-success-bright' : 'text-text-muted'"
+                               x-text="formatDelta(hero.x01AverageDelta) ? ('vs poprz. okno ' + formatDelta(hero.x01AverageDelta)) : ''"></p>
+                        </div>
+                        <div class="bg-bg-elevated rounded-lg p-4 border border-border">
+                            <p class="text-xs uppercase tracking-wide text-text-muted">Double %</p>
+                            <p class="text-2xl font-bold text-text mt-1" x-text="hero.hasDoubles && hero.doublePct != null ? (hero.doublePct + '%') : '–'"></p>
+                            <p class="text-xs text-text-muted mt-1" x-text="hero.doubleLabel || ''"></p>
+                            <p class="text-xs mt-1" x-show="formatDelta(hero.doublePctDelta)"
+                               :class="hero.doublePctDelta > 0 ? 'text-success-bright' : 'text-text-muted'"
+                               x-text="formatDelta(hero.doublePctDelta) ? ('vs poprz. okno ' + formatDelta(hero.doublePctDelta)) : ''"></p>
+                        </div>
                     </div>
-                    <div class="bg-bg-elevated rounded-lg p-4 border border-border">
-                        <h3 class="font-semibold text-text mb-3">Trend double %</h3>
-                        <template x-if="sparkline(series.double_pct)">
-                            <svg :viewBox="'0 0 ' + sparkline(series.double_pct).w + ' ' + sparkline(series.double_pct).h" class="w-full h-24 text-accent" aria-hidden="true">
-                                <path fill="none" stroke="currentColor" stroke-width="2" :d="sparkline(series.double_pct).d"></path>
-                            </svg>
-                        </template>
-                        <p class="text-sm text-text-muted" x-show="!sparkline(series.double_pct)">Brak śledzonych dubli w tym oknie (nie pokazujemy 0%).</p>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div class="bg-bg-elevated rounded-lg p-4 border border-border">
+                            <h3 class="font-semibold text-text mb-3">Trend średniej X01</h3>
+                            @include('players.partials.career-trend-chart', [
+                                'chartVar' => 'x01Chart',
+                                'htmlVar' => 'x01ChartHtml',
+                                'emptyText' => 'Za mało gier X01 w tym oknie, żeby narysować wykres.',
+                            ])
+                        </div>
+                        <div class="bg-bg-elevated rounded-lg p-4 border border-border">
+                            <h3 class="font-semibold text-text mb-3">Trend double %</h3>
+                            @include('players.partials.career-trend-chart', [
+                                'chartVar' => 'doubleChart',
+                                'htmlVar' => 'doubleChartHtml',
+                                'emptyText' => 'Brak śledzonych dubli w tym oknie (nie pokazujemy 0%).',
+                            ])
+                        </div>
                     </div>
                 </div>
-            </section>
 
-            {{-- Statystyki: mecze szybkie --}}
-            <section>
-                <h2 class="text-xl font-bold text-accent mb-4">Statystyki – mecze szybkie</h2>
-                <div class="bg-bg-elevated rounded-lg p-6 border border-border overflow-x-auto">
-                    <table class="w-full text-left text-text-secondary">
-                        <thead>
-                            <tr class="border-b border-border">
-                                <th class="pb-2 pr-4">Metryka</th>
-                                <th class="pb-2">Wartość</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr class="border-b border-border/50"><td class="py-2 pr-4">Rozegrane mecze</td><td>{{ $quickStats['games'] }}</td></tr>
-                            <tr class="border-b border-border/50"><td class="py-2 pr-4">Średnia (3 lotki)</td><td>{{ $quickStats['avg_three_darts'] ?? '–' }}</td></tr>
-                            <tr class="border-b border-border/50"><td class="py-2 pr-4">Najwyższy finish (HF)</td><td>{{ $quickStats['highest_hf'] ?? '–' }}</td></tr>
-                            <tr class="border-b border-border/50"><td class="py-2 pr-4">Najszybsza lotka (QF)</td><td>{{ $quickStats['fastest_qf'] !== null ? $quickStats['fastest_qf'] . ' lotek' : '–' }}</td></tr>
-                            <tr class="border-b border-border/50"><td class="py-2 pr-4">Ilość 180 (max)</td><td>{{ $quickStats['count_max'] }}</td></tr>
-                            <tr class="border-b border-border/50"><td class="py-2 pr-4">Ilość 170+ (bez 180)</td><td>{{ $quickStats['count_170_plus'] }}</td></tr>
-                            <tr class="border-b border-border/50"><td class="py-2 pr-4">Ilość finishów 100+ (HF)</td><td>{{ $quickStats['count_hf'] }}</td></tr>
-                            <tr class="border-b border-border/50"><td class="py-2 pr-4">Ilość szybkich lotek (QF)</td><td>{{ $quickStats['count_qf'] }}</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-            {{-- Statystyki: turnieje --}}
-            <section>
-                <h2 class="text-xl font-bold text-accent mb-4">Statystyki – turnieje</h2>
-                <div class="bg-bg-elevated rounded-lg p-6 border border-border overflow-x-auto">
-                    <table class="w-full text-left text-text-secondary">
-                        <thead>
-                            <tr class="border-b border-border">
-                                <th class="pb-2 pr-4">Metryka</th>
-                                <th class="pb-2">Wartość</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr class="border-b border-border/50"><td class="py-2 pr-4">Rozegrane mecze</td><td>{{ $tournamentStats['games'] }}</td></tr>
-                            <tr class="border-b border-border/50"><td class="py-2 pr-4">Średnia (3 lotki)</td><td>{{ $tournamentStats['avg_three_darts'] ?? '–' }}</td></tr>
-                            <tr class="border-b border-border/50"><td class="py-2 pr-4">Najwyższy finish (HF)</td><td>{{ $tournamentStats['highest_hf'] ?? '–' }}</td></tr>
-                            <tr class="border-b border-border/50"><td class="py-2 pr-4">Najszybsza lotka (QF)</td><td>{{ $tournamentStats['fastest_qf'] !== null ? $tournamentStats['fastest_qf'] . ' lotek' : '–' }}</td></tr>
-                            <tr class="border-b border-border/50"><td class="py-2 pr-4">Ilość 180 (max)</td><td>{{ $tournamentStats['count_max'] }}</td></tr>
-                            <tr class="border-b border-border/50"><td class="py-2 pr-4">Ilość 170+ (bez 180)</td><td>{{ $tournamentStats['count_170_plus'] }}</td></tr>
-                            <tr class="border-b border-border/50"><td class="py-2 pr-4">Ilość finishów 100+ (HF)</td><td>{{ $tournamentStats['count_hf'] }}</td></tr>
-                            <tr class="border-b border-border/50"><td class="py-2 pr-4">Ilość szybkich lotek (QF)</td><td>{{ $tournamentStats['count_qf'] }}</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
+                @include('players.partials.career-filter-tables')
+            </div>
         </div>
 
         {{-- Zakładka: Historia meczów --}}
@@ -344,5 +331,8 @@ document.addEventListener('alpine:init', () => {
                 </div>
             </section>
         </div>
+
+        {{-- Zakładka: Odznaczenia --}}
+        <div x-show="activeTab === 'badges'" x-cloak></div>
     </div>
 @endsection

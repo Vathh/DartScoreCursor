@@ -2,10 +2,12 @@
 
 namespace Database\Seeders\Support;
 
+use App\Enums\LeagueGameStatus;
 use App\Models\Game\Game;
 use App\Models\Game\GameLeg;
 use App\Models\Game\GameLegPlayerStat;
 use App\Models\Game\GameVisit;
+use App\Models\League\LeagueGame;
 use App\Models\PlayoffGame\PlayoffGame;
 use Illuminate\Support\Str;
 
@@ -36,6 +38,25 @@ class DemoGameScoringFactory
         }
     }
 
+    public static function seedForLeagueGame(LeagueGame $game): void
+    {
+        if ($game->status !== LeagueGameStatus::FINISHED || ! $game->winner_id) {
+            return;
+        }
+
+        $p1 = (int) $game->player1_id;
+        $p2 = (int) $game->player2_id;
+        $winnerId = (int) $game->winner_id;
+        $loserId = $winnerId === $p1 ? $p2 : $p1;
+        $winnerLegs = $winnerId === $p1 ? (int) $game->player1_score : (int) $game->player2_score;
+        $totalLegs = (int) $game->player1_score + (int) $game->player2_score;
+
+        for ($legNum = 1; $legNum <= max(1, $totalLegs); $legNum++) {
+            $legWinner = $legNum <= $winnerLegs ? $winnerId : $loserId;
+            self::seedLeg(null, null, $legNum, $p1, $p2, $legWinner, $game->id * 1000 + $legNum, $game->id);
+        }
+    }
+
     public static function seedForPlayoffGame(PlayoffGame $game): void
     {
         if ($game->status->value !== 'finished' || ! $game->winner_id) {
@@ -63,10 +84,12 @@ class DemoGameScoringFactory
         int $player2Id,
         int $legWinnerId,
         int $seed,
+        ?int $leagueGameId = null,
     ): void {
         $leg = GameLeg::create([
             'game_id' => $gameId,
             'playoff_game_id' => $playoffGameId,
+            'league_game_id' => $leagueGameId,
             'leg_number' => $legNumber,
             'player1_score' => 0,
             'player2_score' => 0,
