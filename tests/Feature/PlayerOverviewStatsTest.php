@@ -91,6 +91,9 @@ class PlayerOverviewStatsTest extends TestCase
 
         $this->assertSame(2, $row->games_tournament);
         $this->assertSame(1, $row->unique_opponents);
+        $this->assertSame([
+            ['player_id' => (int) $registeredOpp->id, 'games' => 1],
+        ], $row->top_opponents);
     }
 
     #[Test]
@@ -154,6 +157,10 @@ class PlayerOverviewStatsTest extends TestCase
         $this->assertSame('100.0%', $payload['record']['overall']['winRate']);
         $this->assertSame(1, $payload['social']['friends']);
         $this->assertSame(1, $payload['social']['uniqueOpponents']);
+        $this->assertSame($opp->id, $payload['social']['rivals'][0]['id']);
+        $this->assertSame(1, $payload['social']['rivals'][0]['games']);
+        $this->assertSame('1.0', $payload['activity']['gamesPerDay']);
+        $this->assertCount(7, $payload['activity']['recentDays']);
         $this->assertSame(1, $payload['activity']['gamesLast30']);
         $this->assertNotNull(PlayerOverviewStat::query()->where('player_id', $owner->id)->first());
     }
@@ -175,7 +182,9 @@ class PlayerOverviewStatsTest extends TestCase
             ->assertSee('Bilans')
             ->assertSee('Cała kariera')
             ->assertSee('Aktywność')
-            ->assertSee('Społeczność');
+            ->assertSee('Społeczność')
+            ->assertSee('Mecze / dzień')
+            ->assertSee('Ostatnie 7 dni');
     }
 
     #[Test]

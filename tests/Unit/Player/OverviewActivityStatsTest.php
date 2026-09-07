@@ -47,4 +47,19 @@ class OverviewActivityStatsTest extends TestCase
         $this->assertSame(2, $stats['current_streak']);
         $this->assertSame(3, $stats['longest_streak']);
     }
+
+    #[Test]
+    public function recent_days_marks_played_days_oldest_first(): void
+    {
+        $days = OverviewActivityStats::recentDays(['2026-09-07', '2026-09-05'], '2026-09-07', 7);
+
+        $this->assertCount(7, $days);
+        $this->assertSame('2026-09-01', $days[0]['date']);
+        $this->assertSame('2026-09-07', $days[6]['date']);
+        $this->assertFalse($days[0]['played']);
+        $this->assertTrue($days[4]['played']);
+        $this->assertFalse($days[5]['played']);
+        $this->assertTrue($days[6]['played']);
+        $this->assertSame('pn', $days[6]['label']);
+    }
 }

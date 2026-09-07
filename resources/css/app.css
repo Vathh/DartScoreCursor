@@ -526,6 +526,31 @@
         );
     }
 
+    .overview-pair--pack > .overview-panel {
+        @apply gap-4;
+    }
+
+    .overview-panel-body {
+        @apply grid grid-cols-2 gap-4 items-end flex-1;
+    }
+
+    .overview-panel--social .overview-panel-body {
+        align-items: start;
+    }
+
+    .overview-panel-meta {
+        @apply grid grid-cols-2 gap-3 pt-3;
+        border-top: 1px solid var(--color-border-subtle);
+    }
+
+    .overview-panel-meta dt {
+        @apply text-[10px] uppercase tracking-wide text-text-muted;
+    }
+
+    .overview-panel-meta dd {
+        @apply text-sm font-semibold tabular-nums text-text mt-0.5;
+    }
+
     .overview-summary-main {
         @apply flex flex-col gap-4 mb-4 mt-auto;
     }
@@ -582,6 +607,69 @@
 
     .overview-recent-meta:has(:only-child) {
         grid-template-columns: 1fr;
+    }
+
+    .overview-side-stat {
+        @apply mt-3;
+    }
+
+    .overview-side-stat-value {
+        @apply text-sm font-semibold tabular-nums text-text leading-none;
+    }
+
+    .overview-side-stat-label {
+        @apply text-[10px] uppercase tracking-wide text-text-muted mt-1;
+    }
+
+    .overview-week-wrap,
+    .overview-rivals-wrap {
+        @apply min-w-0 pl-4;
+        border-left: 1px solid var(--color-border-subtle);
+    }
+
+    .overview-week-caption {
+        @apply text-[10px] uppercase tracking-wide text-text-muted mb-2;
+    }
+
+    .overview-week {
+        @apply grid grid-cols-7 gap-1 list-none p-0 m-0;
+    }
+
+    .overview-week li {
+        @apply flex flex-col items-center gap-1;
+    }
+
+    .overview-week-dot {
+        @apply block h-2.5 w-2.5 rounded-full;
+        background: color-mix(in srgb, var(--color-text-muted) 28%, transparent);
+    }
+
+    .overview-week-dot.is-on {
+        background: var(--color-success);
+    }
+
+    .overview-week-label {
+        @apply text-[10px] uppercase tracking-wide text-text-muted;
+    }
+
+    .overview-rivals-wrap .overview-week-caption {
+        margin-bottom: 0.5rem;
+    }
+
+    .overview-rivals {
+        @apply space-y-1.5 list-none p-0 m-0;
+    }
+
+    .overview-rivals li {
+        @apply flex items-baseline justify-between gap-3 text-sm;
+    }
+
+    .overview-rival-name {
+        @apply font-semibold text-text hover:text-accent hover:underline min-w-0 truncate;
+    }
+
+    .overview-rival-games {
+        @apply tabular-nums text-text-secondary shrink-0;
     }
 
     .overview-form {

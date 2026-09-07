@@ -9,6 +9,7 @@ use Carbon\CarbonImmutable;
  */
 final class OverviewActivityStats
 {
+    private const WEEKDAY_LABELS = ['nd', 'pn', 'wt', 'śr', 'cz', 'pt', 'so'];
     /**
      * @param  list<string>  $isoDates
      * @return array{
@@ -85,5 +86,27 @@ final class OverviewActivityStats
         }
 
         return $streak;
+    }
+
+    /**
+     * @param  list<string>  $isoDates
+     * @return list<array{date: string, label: string, played: bool}>
+     */
+    public static function recentDays(array $isoDates, string $todayIso, int $days = 7): array
+    {
+        $played = array_fill_keys($isoDates, true);
+        $today = CarbonImmutable::parse($todayIso)->startOfDay();
+        $out = [];
+        for ($i = $days - 1; $i >= 0; $i--) {
+            $day = $today->subDays($i);
+            $iso = $day->toDateString();
+            $out[] = [
+                'date' => $iso,
+                'label' => self::WEEKDAY_LABELS[(int) $day->dayOfWeek],
+                'played' => isset($played[$iso]),
+            ];
+        }
+
+        return $out;
     }
 }

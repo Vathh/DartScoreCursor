@@ -88,13 +88,15 @@ class PlayerOverviewStatRepository
         $gamesTotal = $gamesTournament + $leaguePlayed + $quickPlayed;
         $winsTotal = $winsTournament + $leagueWins + $quickWins;
 
-        $opponentIds = array_values(array_unique(array_merge(
+        $opponentIds = array_merge(
             $tournamentOpponents,
             $playoffOpponents,
             $leagueOpponents,
             $quickOpponents,
-        )));
-        $uniqueOpponents = count($this->playerRepository->getRegisteredIds($opponentIds));
+        );
+        $registeredIds = $this->playerRepository->getRegisteredIds(array_values(array_unique($opponentIds)));
+        $uniqueOpponents = count($registeredIds);
+        $topOpponents = $this->topRegisteredOpponents($opponentIds, $registeredIds);
 
         $activity = OverviewActivityStats::fromDates(
             $this->activityDates($playerId),
@@ -118,6 +120,7 @@ class PlayerOverviewStatRepository
                 ->where('status', LeagueSeasonStatus::FINISHED)
                 ->count(),
             'unique_opponents' => $uniqueOpponents,
+            'top_opponents' => $topOpponents,
             'activity_days' => $activity['activity_days'],
             'current_streak' => $activity['current_streak'],
             'longest_streak' => $activity['longest_streak'],
@@ -128,6 +131,18 @@ class PlayerOverviewStatRepository
     public function countCompetitiveGamesBetween(int $playerId, CarbonInterface $startUtc, CarbonInterface $endExclusiveUtc): int
     {
         return $this->competitiveRecordBetween($playerId, $startUtc, $endExclusiveUtc)['played'];
+    }
+
+    /**
+     * @return list<array{date: string, label: string, played: bool}>
+     */
+    public function recentActivityDays(int $playerId, int $days = 7): array
+    {
+        return OverviewActivityStats::recentDays(
+            $this->activityDates($playerId),
+            CarbonImmutable::now(CareerWindow::TIMEZONE)->toDateString(),
+            $days,
+        );
     }
 
     /**
@@ -308,5 +323,37 @@ class PlayerOverviewStatRepository
         }
 
         return $dates;
+    }
+
+    /**
+     * @param  list<int>  $opponentIds
+     * @param  list<int>  $registeredIds
+     * @return list<array{player_id: int, games: int}>
+     */
+    private function topRegisteredOpponents(array $opponentIds, array $registeredIds, int $limit = 3): array
+    {
+        if ($opponentIds === [] || $registeredIds === []) {
+            return [];
+        }
+
+        $allowed = array_fill_keys($registeredIds, true);
+        $counts = [];
+        foreach ($opponentIds as $id) {
+            if (! isset($allowed[$id])) {
+                continue;
+            }
+            $counts[$id] = ($counts[$id] ?? 0) + 1;
+        }
+        arsort($counts);
+
+        $top = [];
+        foreach ($counts as $id => $games) {
+            $top[] = ['player_id' => (int) $id, 'games' => (int) $games];
+            if (count($top) >= $limit) {
+                break;
+            }
+        }
+
+        return $top;
     }
 }

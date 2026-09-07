@@ -24,6 +24,7 @@ class PlayerOverviewStat extends Model
         'tournament_place_3',
         'league_titles',
         'unique_opponents',
+        'top_opponents',
         'activity_days',
         'current_streak',
         'longest_streak',
@@ -32,6 +33,7 @@ class PlayerOverviewStat extends Model
 
     protected $casts = [
         'last_activity_on' => 'date',
+        'top_opponents' => 'array',
     ];
 
     public function player(): BelongsTo
