@@ -132,6 +132,14 @@ class FriendshipRepository
         })->filter()->values();
     }
 
+    public function countForUser(int $userId): int
+    {
+        $asUser = DB::table('friendships')->where('user_id', $userId)->pluck('friend_id');
+        $asFriend = DB::table('friendships')->where('friend_id', $userId)->pluck('user_id');
+
+        return $asUser->merge($asFriend)->unique()->count();
+    }
+
     /**
      * Sprawdza czy użytkownicy są znajomymi
      * @param int $userId

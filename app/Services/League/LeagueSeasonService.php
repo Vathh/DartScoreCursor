@@ -26,6 +26,7 @@ use App\Models\League\LeagueSeason;
 use App\Models\League\LeagueSeasonDivision;
 use App\Repositories\League\LeagueRepository;
 use App\Repositories\League\LeagueSeasonRepository;
+use App\Services\Player\PlayerOverviewService;
 use Carbon\Carbon;
 use DomainException;
 use Illuminate\Support\Facades\DB;
@@ -36,6 +37,7 @@ class LeagueSeasonService
     public function __construct(
         private LeagueRepository $leagueRepository,
         private LeagueSeasonRepository $leagueSeasonRepository,
+        private PlayerOverviewService $playerOverviewService,
     ) {
     }
 
@@ -521,6 +523,7 @@ class LeagueSeasonService
             'status' => LeagueGameStatus::FINISHED,
             'walkover_type' => LeagueWalkoverType::NONE,
         ]);
+        $this->playerOverviewService->rebuildRegistered([(int) $game->player1_id, (int) $game->player2_id]);
     }
 
     public function recordWalkover(int $gameId, string $type, ?int $winnerPlayerId): void
@@ -537,6 +540,7 @@ class LeagueSeasonService
                 'status' => LeagueGameStatus::FINISHED,
                 'walkover_type' => LeagueWalkoverType::BOTH,
             ]);
+            $this->playerOverviewService->rebuildRegistered([(int) $game->player1_id, (int) $game->player2_id]);
 
             return;
         }
@@ -553,6 +557,7 @@ class LeagueSeasonService
             'status' => LeagueGameStatus::FINISHED,
             'walkover_type' => LeagueWalkoverType::SINGLE,
         ]);
+        $this->playerOverviewService->rebuildRegistered([(int) $game->player1_id, (int) $game->player2_id]);
     }
 
     public function extendGame(int $gameId, string $deadlineAt): void
@@ -618,7 +623,7 @@ class LeagueSeasonService
                     return 'Faza zasadnicza zamknięta — wygenerowano baraże.';
                 }
 
-                $this->finalizeRoster($season, $plan['rosterByDivisionId']);
+                $this->finalizeRoster($season, $plan['rosterByDivisionId'], $standings);
 
                 return 'Sezon ligowy zakończony. Piramida zaktualizowana.';
             }
@@ -644,7 +649,7 @@ class LeagueSeasonService
                 ->all();
 
             $plan = $this->promotionPlan($season, $standings, $finishedPlayoffs);
-            $this->finalizeRoster($season, $plan['rosterByDivisionId']);
+            $this->finalizeRoster($season, $plan['rosterByDivisionId'], $standings);
 
             return 'Sezon ligowy zakończony. Piramida zaktualizowana.';
         });
@@ -1001,9 +1006,28 @@ class LeagueSeasonService
     }
 
     /**
-     * @param  array<int, list<int>>  $rosterBySeasonDivisionId
+     * Uzupełnia champion_player_id dla zakończonych sezonów bez mistrza.
      */
-    private function finalizeRoster(LeagueSeason $season, array $rosterBySeasonDivisionId): void
+    public function backfillFinishedSeasonChampions(): int
+    {
+        $count = 0;
+        foreach ($this->leagueSeasonRepository->listFinishedWithoutChampion() as $season) {
+            $championId = $this->championPlayerIdFromStandings($season, $this->uniqueStandingsByDivision($season));
+            if ($championId === null) {
+                continue;
+            }
+            $this->leagueSeasonRepository->update($season->id, ['champion_player_id' => $championId]);
+            $count++;
+        }
+
+        return $count;
+    }
+
+    /**
+     * @param  array<int, list<int>>  $rosterBySeasonDivisionId
+     * @param  array<int, list<\App\Domain\League\LeagueStandingRow>>  $standingsByDivisionId
+     */
+    private function finalizeRoster(LeagueSeason $season, array $rosterBySeasonDivisionId, array $standingsByDivisionId): void
     {
         $byLiveDivision = [];
         foreach ($season->divisions as $division) {
@@ -1017,7 +1041,36 @@ class LeagueSeasonService
         $this->leagueSeasonRepository->update($season->id, [
             'status' => LeagueSeasonStatus::FINISHED,
             'finished_at' => now(),
+            'champion_player_id' => $this->championPlayerIdFromStandings($season, $standingsByDivisionId),
         ]);
+        $playerIds = collect($rosterBySeasonDivisionId)
+            ->flatten()
+            ->map(static fn ($id) => (int) $id)
+            ->unique()
+            ->values()
+            ->all();
+        $this->playerOverviewService->rebuildRegistered($playerIds);
+    }
+
+    /**
+     * Mistrz sezonu: 1. miejsce najwyższego szczebla (position = 0).
+     *
+     * @param  array<int, list<\App\Domain\League\LeagueStandingRow>>  $standingsByDivisionId
+     */
+    private function championPlayerIdFromStandings(LeagueSeason $season, array $standingsByDivisionId): ?int
+    {
+        $top = $season->divisions->first(fn ($division) => (int) $division->position === 0);
+        if ($top === null) {
+            return null;
+        }
+
+        foreach ($standingsByDivisionId[$top->id] ?? [] as $row) {
+            if ((int) $row->place === 1) {
+                return (int) $row->playerId;
+            }
+        }
+
+        return null;
     }
 
     /**

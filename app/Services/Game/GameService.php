@@ -23,6 +23,7 @@ use App\Services\Game\GameLegService;
 use App\Services\Game\GameLockService;
 use App\Services\GroupStanding\GroupStandingService;
 use App\Services\Player\PlayerStatsService;
+use App\Services\Player\PlayerOverviewService;
 use App\Services\PlayoffGame\PlayoffService;
 use App\Services\QuickGame\QuickGameService;
 use App\Services\Tournament\TournamentFinishService;
@@ -47,6 +48,7 @@ class GameService
         private TournamentFinishService $tournamentFinishService,
         private GameLegService      $gameLegService,
         private PlayerStatsService   $playerStatsService,
+        private PlayerOverviewService $playerOverviewService,
         private GameLockService     $gameLockService,
         private TournamentGroupMatrixLiveService $groupMatrixLiveService,
     )
@@ -528,6 +530,7 @@ class GameService
                 $this->playerStatsService->recalculateAndSave($player->id);
             }
         }
+        $this->playerOverviewService->rebuildRegistered([$dto->player1Id, $dto->player2Id]);
     }
 
     private function handlePlayoffStart(int $tournamentId): void

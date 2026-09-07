@@ -1,24 +1,40 @@
-{{-- Jedna tabela w Statystykach: te same filtry źródła i okna co Kariera. --}}
+{{-- Szczegóły kariery: te same filtry źródła i okna co kafelki powyżej. --}}
 <section>
-    <h2 class="text-xl font-bold text-accent mb-4">Podsumowanie</h2>
-    <div class="bg-bg-elevated rounded-lg p-6 border border-border overflow-x-auto">
-        <table class="w-full text-left text-text-secondary">
-            <thead>
-                <tr class="border-b border-border">
-                    <th class="pb-2 pr-4">Metryka</th>
-                    <th class="pb-2">Wartość</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr class="border-b border-border/50"><td class="py-2 pr-4">Rozegrane mecze</td><td x-text="table.games ?? 0"></td></tr>
-                <tr class="border-b border-border/50"><td class="py-2 pr-4">Średnia (3 lotki)</td><td x-text="dash(table.avg_three_darts)"></td></tr>
-                <tr class="border-b border-border/50"><td class="py-2 pr-4">Najwyższy finish (HF)</td><td x-text="dash(table.highest_hf)"></td></tr>
-                <tr class="border-b border-border/50"><td class="py-2 pr-4">Najszybsza lotka (QF)</td><td x-text="qf(table.fastest_qf)"></td></tr>
-                <tr class="border-b border-border/50"><td class="py-2 pr-4">Ilość 180 (max)</td><td x-text="table.count_max ?? 0"></td></tr>
-                <tr class="border-b border-border/50"><td class="py-2 pr-4">Ilość 170+ (bez 180)</td><td x-text="table.count_170_plus ?? 0"></td></tr>
-                <tr class="border-b border-border/50"><td class="py-2 pr-4">Ilość finishów 100+ (HF)</td><td x-text="table.count_hf ?? 0"></td></tr>
-                <tr class="border-b border-border/50"><td class="py-2 pr-4">Ilość szybkich lotek (QF)</td><td x-text="table.count_qf ?? 0"></td></tr>
-            </tbody>
-        </table>
+    <h2 class="text-xl font-bold text-accent mb-4">Szczegóły</h2>
+    <div class="career-panel">
+        <dl class="career-highlight-grid">
+            <div class="overview-form-stat">
+                <dt>Mecze</dt>
+                <dd x-text="table.games ?? 0"></dd>
+            </div>
+            <div class="overview-form-stat">
+                <dt>Średnia 3 lotki</dt>
+                <dd x-text="dash(table.avg_three_darts)"></dd>
+            </div>
+            <div class="overview-form-stat">
+                <dt>Najwyższy checkout</dt>
+                <dd x-text="dash(table.highest_hf)"></dd>
+            </div>
+            <div class="overview-form-stat">
+                <dt>Najszybsza lotka</dt>
+                <dd x-text="qf(table.fastest_qf)"></dd>
+            </div>
+            <div class="overview-form-stat">
+                <dt>180</dt>
+                <dd x-text="table.count_max ?? 0"></dd>
+            </div>
+            <div class="overview-form-stat">
+                <dt>170+</dt>
+                <dd x-text="table.count_170_plus ?? 0"></dd>
+            </div>
+            <div class="overview-form-stat">
+                <dt>Checkout 100+</dt>
+                <dd x-text="table.count_hf ?? 0"></dd>
+            </div>
+            <div class="overview-form-stat">
+                <dt>Szybkie lotki</dt>
+                <dd x-text="table.count_qf ?? 0"></dd>
+            </div>
+        </dl>
     </div>
 </section>

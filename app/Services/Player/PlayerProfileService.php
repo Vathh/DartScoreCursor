@@ -22,6 +22,7 @@ class PlayerProfileService
         private PlayerLiveGameService $playerLiveGameService,
         private PlayerRepository $playerRepository,
         private PlayerCareerStatsService $playerCareerStatsService,
+        private PlayerOverviewService $playerOverviewService,
     ) {
     }
 
@@ -133,7 +134,8 @@ class PlayerProfileService
      *     gameHistoryItems: array,
      *     gameHistoryHasMore: bool,
      *     liveGames: array,
-     *     overviewSplit: array{window: string, quick: array<string, mixed>, tournament: array<string, mixed>}
+     *     overviewSplit: array{window: string, quick: array<string, mixed>, tournament: array<string, mixed>},
+     *     overview: array<string, mixed>
      * }
      */
     public function buildWebShow(Player $player, ?User $viewer): array
@@ -156,6 +158,7 @@ class PlayerProfileService
             'liveGames' => $this->playerLiveGameService->findLiveGamesForPlayer((int) $player->id),
             'career' => $this->playerCareerStatsService->build($player, $viewer, CareerWindow::DEFAULT_KEY, 'all'),
             'overviewSplit' => $this->playerCareerStatsService->buildOverviewSplit($player),
+            'overview' => $this->playerOverviewService->forProfile($player),
         ];
     }
 

@@ -15,6 +15,7 @@ use App\Services\Game\GameService;
 use App\Services\GroupStanding\GroupStandingService;
 use App\Services\PlayoffGame\PlayoffService;
 use App\Services\Player\PlayerStatsService;
+use App\Services\Player\PlayerOverviewService;
 use App\Services\Tournament\TournamentGroupMatrixLiveService;
 use App\Services\Tournament\TournamentResultService;
 use App\Domain\GameScoring\GameLegScoreValidator;
@@ -33,6 +34,7 @@ class GameResultCorrectionService
         private PlayoffService $playoffService,
         private PlayerRepository $playerRepository,
         private PlayerStatsService $playerStatsService,
+        private PlayerOverviewService $playerOverviewService,
         private TournamentResultService $tournamentResultService,
         private TournamentGroupMatrixLiveService $groupMatrixLiveService,
     ) {
@@ -273,6 +275,10 @@ class GameResultCorrectionService
                     $this->playerStatsService->recalculateAndSave($player->id);
                 }
             }
+            $this->playerOverviewService->rebuildRegistered([
+                $dto->gameResultDTO->player1Id,
+                $dto->gameResultDTO->player2Id,
+            ]);
         } catch (Throwable) {
             // Statystyki nie powinny blokować korekty wyniku.
         }

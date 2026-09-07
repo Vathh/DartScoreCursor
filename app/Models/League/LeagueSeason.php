@@ -6,6 +6,7 @@ use App\Enums\LeagueCalendarMode;
 use App\Enums\LeagueMatchdayPlanning;
 use App\Enums\LeagueSeasonStatus;
 use App\Enums\MatchWinMode;
+use App\Models\Player\Player;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -29,6 +30,7 @@ class LeagueSeason extends Model
         'random_seed',
         'started_at',
         'finished_at',
+        'champion_player_id',
     ];
 
     protected function casts(): array
@@ -74,5 +76,10 @@ class LeagueSeason extends Model
     public function games(): HasMany
     {
         return $this->hasMany(LeagueGame::class);
+    }
+
+    public function champion(): BelongsTo
+    {
+        return $this->belongsTo(Player::class, 'champion_player_id');
     }
 }

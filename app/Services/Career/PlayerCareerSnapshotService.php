@@ -27,6 +27,7 @@ use App\Repositories\Player\PlayerRepository;
 use App\Repositories\QuickGame\QuickGameFfaVisitRepository;
 use App\Repositories\QuickGame\QuickGameRepository;
 use App\Support\GameScoring\GameScoringContext;
+use App\Services\Player\PlayerOverviewService;
 use Illuminate\Database\Eloquent\Model;
 
 class PlayerCareerSnapshotService
@@ -39,6 +40,7 @@ class PlayerCareerSnapshotService
         private GameLegPlayerStatRepository $gameLegPlayerStatRepository,
         private QuickGameFfaVisitRepository $ffaVisitRepository,
         private QuickGameRepository $quickGameRepository,
+        private PlayerOverviewService $playerOverviewService,
     ) {
     }
 
@@ -175,6 +177,8 @@ class PlayerCareerSnapshotService
                 $metrics,
             );
         }
+
+        $this->playerOverviewService->rebuildRegistered($registeredIds);
     }
 
     /**
@@ -191,6 +195,7 @@ class PlayerCareerSnapshotService
             $metrics,
             (string) $trainingGame->client_uuid,
         );
+        $this->playerOverviewService->rebuildRegistered([(int) $trainingGame->player_id]);
     }
 
     public function deleteForSourceable(Model $sourceable): void

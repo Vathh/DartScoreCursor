@@ -51,6 +51,11 @@ class FriendshipService
         return $this->friendshipRepository->getFriends($userId);
     }
 
+    public function countFriends(int $userId): int
+    {
+        return $this->friendshipRepository->countForUser($userId);
+    }
+
     /**
      * Sprawdza czy użytkownicy są znajomymi
      * @param int $userId

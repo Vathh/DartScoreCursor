@@ -22,6 +22,7 @@ use App\Repositories\PlayoffGame\PlayoffGameRepository;
 use App\Repositories\QuickGame\QuickGameRepository;
 use App\Services\Career\PlayerCareerSnapshotService;
 use App\Services\Game\GameService;
+use App\Services\Player\PlayerOverviewService;
 use App\Services\Tournament\TournamentGroupMatrixLiveService;
 use App\Support\GameScoring\GameScoringContext;
 use App\Support\GameScoring\GameStatisticsCalculator;
@@ -45,6 +46,7 @@ class GameScoringService
         private GameService $gameService,
         private TournamentGroupMatrixLiveService $groupMatrixLiveService,
         private PlayerCareerSnapshotService $careerSnapshotService,
+        private PlayerOverviewService $playerOverviewService,
     ) {
     }
 
@@ -222,6 +224,10 @@ class GameScoringService
             $state = $this->broadcastState($context, $fresh);
             if ($wasClosed) {
                 $this->pushGroupMatrixLive($context, $fresh, includeStandings: false);
+                $this->playerOverviewService->rebuildRegistered([
+                    $context->player1Id,
+                    $context->player2Id,
+                ]);
             }
 
             return $state;
@@ -299,6 +305,13 @@ class GameScoringService
                 && $context->kind !== GameKind::LEAGUE
             ) {
                 $this->gameService->finalizeTournamentGameFromScoring($context, $freshGame);
+            }
+
+            if ($this->isFinished($freshGame)) {
+                $this->playerOverviewService->rebuildRegistered([
+                    $context->player1Id,
+                    $context->player2Id,
+                ]);
             }
 
             $state = $this->broadcastState($context, $freshGame);

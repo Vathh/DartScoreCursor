@@ -39,6 +39,18 @@ class LeagueSeasonRepository
     /**
      * @return \Illuminate\Support\Collection<int, LeagueSeason>
      */
+    public function listFinishedWithoutChampion(): \Illuminate\Support\Collection
+    {
+        return LeagueSeason::query()
+            ->where('status', LeagueSeasonStatus::FINISHED)
+            ->whereNull('champion_player_id')
+            ->with(['divisions.participants', 'games'])
+            ->get();
+    }
+
+    /**
+     * @return \Illuminate\Support\Collection<int, LeagueSeason>
+     */
     public function listFinishedWithGraphForDivision(int $leagueId, int $leagueDivisionId): \Illuminate\Support\Collection
     {
         return LeagueSeason::query()

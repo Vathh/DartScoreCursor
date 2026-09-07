@@ -135,6 +135,7 @@ class PlayerCareerProfileDemoSeeder extends Seeder
             $this->seedLeague($organization, $admin, $user, $player, $guests);
 
             app(PlayerStatsService::class)->recalculateAndSave((int) $player->id);
+            app(\App\Services\Player\PlayerOverviewService::class)->rebuild((int) $player->id);
         });
 
         $this->printReady($player->fresh());

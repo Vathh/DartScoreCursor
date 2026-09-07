@@ -237,6 +237,551 @@
         @apply flex items-center justify-between gap-3 mb-2;
     }
 
+    .career-hero {
+        @apply grid grid-cols-1 sm:grid-cols-3 gap-4;
+    }
+
+    .career-stat-card {
+        @apply rounded-xl border border-border px-5 py-4 sm:px-6 sm:py-5 flex flex-col;
+        box-shadow: inset 3px 0 0 var(--career-tone, var(--color-accent));
+        background: linear-gradient(
+            165deg,
+            color-mix(in srgb, var(--career-tone, var(--color-accent)) 8%, var(--color-bg-elevated)) 0%,
+            var(--color-bg-elevated) 48%
+        );
+    }
+
+    .career-stat-card--games {
+        --career-tone: var(--color-accent);
+    }
+
+    .career-stat-card--avg {
+        --career-tone: var(--color-info);
+    }
+
+    .career-stat-card--doubles {
+        --career-tone: var(--color-success);
+    }
+
+    .career-stat-card .overview-summary-rate {
+        @apply text-3xl sm:text-4xl;
+    }
+
+    .career-stat-delta {
+        @apply text-xs text-text-muted mt-3;
+    }
+
+    .career-stat-delta.is-up {
+        color: var(--color-success-bright);
+    }
+
+    .career-charts {
+        @apply grid grid-cols-1 lg:grid-cols-2 gap-4;
+    }
+
+    .career-chart,
+    .career-panel {
+        @apply rounded-xl border border-border p-5;
+        box-shadow: inset 3px 0 0 var(--color-accent);
+        background: linear-gradient(
+            165deg,
+            color-mix(in srgb, var(--color-accent) 8%, var(--color-bg-elevated)) 0%,
+            var(--color-bg-elevated) 48%
+        );
+    }
+
+    .career-chart-title {
+        @apply text-sm font-semibold text-text mb-3;
+    }
+
+    .career-highlight-grid {
+        @apply grid grid-cols-2 sm:grid-cols-4 gap-2;
+    }
+
+    .profile-hero {
+        @apply rounded-xl border border-border p-5 sm:p-6 mb-6 flex flex-col gap-4;
+        box-shadow: inset 3px 0 0 var(--color-accent);
+        background: linear-gradient(
+            165deg,
+            color-mix(in srgb, var(--color-accent) 8%, var(--color-bg-elevated)) 0%,
+            var(--color-bg-elevated) 48%
+        );
+    }
+
+    .profile-hero-top {
+        @apply flex flex-wrap items-start gap-4;
+    }
+
+    .profile-hero-mono {
+        @apply flex h-16 w-16 shrink-0 items-center justify-center rounded-xl text-lg font-bold tracking-wide;
+        color: var(--color-accent);
+        background: color-mix(in srgb, var(--color-accent) 16%, transparent);
+    }
+
+    .profile-hero-id {
+        @apply min-w-0 flex-1;
+    }
+
+    .profile-hero-name {
+        @apply text-2xl sm:text-3xl font-bold text-text break-words leading-tight;
+    }
+
+    .profile-hero-meta {
+        @apply mt-2 flex flex-wrap items-center gap-x-2 gap-y-1.5 text-sm text-text-secondary;
+    }
+
+    .profile-hero-actions {
+        @apply flex flex-wrap items-center gap-2 shrink-0;
+    }
+
+    .profile-hero-bio {
+        @apply text-text-secondary whitespace-pre-wrap break-words leading-relaxed;
+    }
+
+    .profile-hero-bio--empty {
+        @apply text-text-muted text-sm;
+    }
+
+    .profile-hero-live {
+        @apply flex flex-col gap-2 pt-4;
+        border-top: 1px solid var(--color-border-subtle);
+    }
+
+    .profile-hero-live-link {
+        @apply flex flex-wrap items-center justify-between gap-3 rounded-lg border border-accent/40 bg-accent/10 px-4 py-3 hover:bg-accent/15 transition no-underline;
+    }
+
+    .history-panel {
+        @apply rounded-xl border border-border overflow-hidden;
+        box-shadow: inset 3px 0 0 var(--color-accent);
+        background: linear-gradient(
+            165deg,
+            color-mix(in srgb, var(--color-accent) 8%, var(--color-bg-elevated)) 0%,
+            var(--color-bg-elevated) 48%
+        );
+    }
+
+    .history-table-wrap {
+        @apply overflow-x-auto;
+    }
+
+    .history-table {
+        @apply w-full min-w-[40rem] text-left border-collapse;
+    }
+
+    .history-table thead {
+        @apply text-[10px] uppercase tracking-wide text-text-muted;
+        background: color-mix(in srgb, var(--color-bg-deep) 55%, transparent);
+        border-bottom: 1px solid var(--color-border);
+    }
+
+    .history-table thead th {
+        @apply px-4 py-3 font-semibold whitespace-nowrap;
+    }
+
+    .history-table tbody tr {
+        border-bottom: 1px solid var(--color-border-subtle);
+        transition: background-color 150ms;
+    }
+
+    .history-table tbody tr:last-child {
+        border-bottom: 0;
+    }
+
+    .history-table tbody td {
+        @apply px-4 py-3.5 align-middle;
+    }
+
+    .history-row--link {
+        @apply cursor-pointer;
+    }
+
+    .history-row--link:hover,
+    .history-row--link:focus-visible {
+        background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+        outline: none;
+    }
+
+    .history-cell-date {
+        @apply whitespace-nowrap;
+    }
+
+    .history-date {
+        @apply block text-sm font-semibold tabular-nums text-text;
+    }
+
+    .history-time {
+        @apply block text-xs tabular-nums text-text-muted mt-0.5;
+    }
+
+    .history-type {
+        @apply inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide;
+        color: var(--color-text-muted);
+        background: color-mix(in srgb, var(--color-text-muted) 14%, transparent);
+    }
+
+    .history-type--tournament {
+        color: var(--color-accent);
+        background: color-mix(in srgb, var(--color-accent) 14%, transparent);
+    }
+
+    .history-type--league {
+        color: var(--color-success);
+        background: color-mix(in srgb, var(--color-success) 16%, transparent);
+    }
+
+    .history-type--quick {
+        color: var(--color-info);
+        background: color-mix(in srgb, var(--color-info) 16%, transparent);
+    }
+
+    .history-type--training {
+        color: var(--color-warning);
+        background: color-mix(in srgb, var(--color-warning) 16%, transparent);
+    }
+
+    .history-opponents {
+        @apply text-sm font-semibold text-text;
+    }
+
+    .history-outcome {
+        @apply flex flex-col gap-0.5;
+    }
+
+    .history-result {
+        @apply inline-flex w-fit items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-text-muted;
+        background: color-mix(in srgb, var(--color-text-muted) 14%, transparent);
+    }
+
+    .history-result--win {
+        color: var(--color-accent);
+        background: color-mix(in srgb, var(--color-accent) 14%, transparent);
+    }
+
+    .history-result--loss {
+        color: var(--color-text-muted);
+        background: color-mix(in srgb, var(--color-text-muted) 14%, transparent);
+    }
+
+    .history-score {
+        @apply text-sm font-semibold tabular-nums text-text;
+    }
+
+    .history-event {
+        @apply text-sm text-text-secondary;
+    }
+
+    .history-empty {
+        @apply px-4 py-10 text-center text-text-muted;
+    }
+
+    .history-more {
+        @apply flex justify-center px-4 py-3;
+        border-top: 1px solid var(--color-border);
+    }
+
+    .overview-pair {
+        @apply grid grid-cols-1 lg:grid-cols-2 gap-4 mb-5;
+    }
+
+    section > .overview-pair:last-child {
+        margin-bottom: 0;
+    }
+
+    .overview-summary,
+    .overview-recent,
+    .overview-panel {
+        @apply rounded-xl border border-border px-5 py-4 sm:px-6 sm:py-5 h-full flex flex-col;
+    }
+
+    .overview-summary {
+        background: linear-gradient(
+            165deg,
+            color-mix(in srgb, var(--color-accent) 7%, var(--color-bg-elevated)) 0%,
+            var(--color-bg-elevated) 48%
+        );
+    }
+
+    .overview-recent {
+        background: linear-gradient(
+            165deg,
+            color-mix(in srgb, var(--color-info) 8%, var(--color-bg-elevated)) 0%,
+            var(--color-bg-elevated) 48%
+        );
+    }
+
+    .overview-panel--activity {
+        background: linear-gradient(
+            165deg,
+            color-mix(in srgb, var(--color-success) 8%, var(--color-bg-elevated)) 0%,
+            var(--color-bg-elevated) 48%
+        );
+    }
+
+    .overview-panel--social {
+        background: linear-gradient(
+            165deg,
+            color-mix(in srgb, var(--color-warning) 9%, var(--color-bg-elevated)) 0%,
+            var(--color-bg-elevated) 48%
+        );
+    }
+
+    .overview-summary-main {
+        @apply flex flex-col gap-4 mb-4 mt-auto;
+    }
+
+    .overview-summary-kicker {
+        @apply text-[10px] uppercase tracking-wider text-text-muted mb-1;
+    }
+
+    .overview-summary-rate {
+        @apply text-4xl font-bold text-text tabular-nums leading-none;
+    }
+
+    .overview-summary-rate-label {
+        @apply text-xs uppercase tracking-wide text-text-muted mt-1.5;
+    }
+
+    .overview-summary-counts {
+        @apply flex flex-wrap items-baseline gap-x-2 gap-y-1 text-sm text-text-secondary;
+    }
+
+    .overview-summary-counts strong {
+        @apply font-semibold tabular-nums text-text;
+    }
+
+    .overview-summary-dot {
+        @apply text-text-disabled;
+    }
+
+    .overview-summary-bar {
+        @apply h-1.5 rounded-full overflow-hidden mt-auto;
+        background: color-mix(in srgb, var(--color-text-muted) 22%, var(--color-bg));
+    }
+
+    .overview-summary-bar-fill {
+        display: block;
+        height: 100%;
+        width: var(--win-pct, 0%);
+        border-radius: 999px;
+        background: var(--color-accent);
+    }
+
+    .overview-recent-meta {
+        @apply grid grid-cols-2 gap-3 mt-auto pt-4;
+        border-top: 1px solid var(--color-border-subtle);
+    }
+
+    .overview-recent-meta dt {
+        @apply text-[10px] uppercase tracking-wide text-text-muted;
+    }
+
+    .overview-recent-meta dd {
+        @apply text-sm font-semibold tabular-nums text-text mt-0.5;
+    }
+
+    .overview-recent-meta:has(:only-child) {
+        grid-template-columns: 1fr;
+    }
+
+    .overview-form {
+        @apply rounded-xl border border-border p-5 flex flex-col gap-5 h-full;
+        box-shadow: inset 3px 0 0 var(--overview-tone, var(--color-accent));
+        background: linear-gradient(
+            165deg,
+            color-mix(in srgb, var(--overview-tone) 8%, var(--color-bg-elevated)) 0%,
+            var(--color-bg-elevated) 48%
+        );
+    }
+
+    .overview-form--tournament {
+        --overview-tone: var(--color-accent);
+    }
+
+    .overview-form--quick {
+        --overview-tone: var(--color-info);
+    }
+
+    .overview-form-head {
+        @apply flex items-start justify-between gap-3;
+    }
+
+    .overview-form-sources {
+        @apply flex flex-wrap items-center gap-2;
+    }
+
+    .overview-form-source {
+        @apply inline-flex items-center gap-2 text-sm font-semibold text-text;
+    }
+
+    .overview-form-source .overview-source-icon {
+        @apply h-9 w-9;
+    }
+
+    .overview-form-source--league .overview-source-icon {
+        color: var(--color-success);
+        background: color-mix(in srgb, var(--color-success) 16%, transparent);
+    }
+
+    .overview-form-games {
+        @apply text-right text-sm text-text-secondary;
+    }
+
+    .overview-form-games strong {
+        @apply block text-2xl font-bold tabular-nums text-text leading-none;
+    }
+
+    .overview-form-grid {
+        @apply grid grid-cols-2 sm:grid-cols-3 gap-2 mt-auto;
+    }
+
+    .overview-form-stat {
+        @apply rounded-lg px-2.5 py-2;
+        background: color-mix(in srgb, var(--color-bg) 55%, transparent);
+        border: 1px solid var(--color-border-subtle);
+    }
+
+    .overview-form-stat dt {
+        @apply text-[10px] uppercase tracking-wide text-text-muted;
+    }
+
+    .overview-form-stat dd {
+        @apply text-sm font-semibold tabular-nums text-text mt-0.5;
+    }
+
+    .overview-sources {
+        @apply grid grid-cols-1 md:grid-cols-3 gap-4;
+    }
+
+    .overview-source {
+        @apply rounded-xl border border-border bg-bg-elevated p-5 flex flex-col gap-4;
+        box-shadow: inset 3px 0 0 var(--overview-tone, var(--color-accent));
+    }
+
+    .overview-source--tournament {
+        --overview-tone: var(--color-accent);
+    }
+
+    .overview-source--league {
+        --overview-tone: var(--color-success);
+    }
+
+    .overview-source--quick {
+        --overview-tone: var(--color-info);
+    }
+
+    .overview-card-head {
+        @apply flex items-center justify-between gap-2 mb-3;
+    }
+
+    .overview-card-head .overview-summary-kicker {
+        margin-bottom: 0;
+    }
+
+    .overview-scope {
+        @apply inline-flex shrink-0 items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide;
+    }
+
+    .overview-scope--recent {
+        color: var(--color-info);
+        background: color-mix(in srgb, var(--color-info) 14%, transparent);
+    }
+
+    .overview-scope--form {
+        color: var(--color-accent);
+        background: color-mix(in srgb, var(--color-accent) 14%, transparent);
+    }
+
+    .overview-scope--all {
+        color: var(--color-text-muted);
+        background: color-mix(in srgb, var(--color-text-muted) 14%, transparent);
+    }
+
+    .overview-source-head {
+        @apply flex items-center gap-3;
+    }
+
+    .overview-source-icon {
+        @apply flex h-10 w-10 shrink-0 items-center justify-center rounded-lg;
+        color: var(--overview-tone);
+        background: color-mix(in srgb, var(--overview-tone) 16%, transparent);
+    }
+
+    .overview-source-icon svg {
+        @apply h-5 w-5;
+    }
+
+    .overview-source-title {
+        @apply text-base font-semibold text-text leading-tight;
+    }
+
+    .overview-source-stats {
+        @apply flex items-end justify-between gap-3;
+    }
+
+    .overview-source-played {
+        @apply text-2xl font-bold text-text tabular-nums leading-none;
+    }
+
+    .overview-source-played-label {
+        @apply text-xs text-text-muted mt-1;
+    }
+
+    .overview-source-wl {
+        @apply text-right text-sm font-semibold tabular-nums text-text-secondary leading-tight;
+    }
+
+    .overview-source-rate {
+        @apply text-xs font-semibold tabular-nums text-text mt-1;
+    }
+
+    .overview-honors {
+        @apply flex flex-wrap gap-2 mt-auto pt-1;
+    }
+
+    .overview-honor {
+        @apply inline-flex items-center gap-2 rounded-lg border px-2.5 py-1.5 min-w-0;
+        --honor-tone: #eab308;
+        border-color: color-mix(in srgb, var(--honor-tone) 28%, var(--color-border));
+        background: color-mix(in srgb, var(--honor-tone) 10%, var(--color-bg));
+    }
+
+    .overview-honor.is-empty {
+        opacity: 0.42;
+    }
+
+    .overview-honor--gold {
+        --honor-tone: #eab308;
+    }
+
+    .overview-honor--silver {
+        --honor-tone: #94a3b8;
+    }
+
+    .overview-honor--bronze {
+        --honor-tone: #c26d3a;
+    }
+
+    .overview-honor--title {
+        --honor-tone: #f59e0b;
+    }
+
+    .overview-honor-icon {
+        @apply shrink-0;
+    }
+
+    .overview-honor-icon svg {
+        @apply block h-7 w-7;
+    }
+
+    .overview-honor-value {
+        @apply block text-base font-bold tabular-nums text-text leading-none;
+    }
+
+    .overview-honor-label {
+        @apply block text-[10px] uppercase tracking-wide text-text-muted mt-0.5;
+    }
+
     .career-filter-anchor {
         min-height: 2.25rem;
     }
