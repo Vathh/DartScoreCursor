@@ -13,7 +13,7 @@
     @if($demo) data-checkout-wheel-demo="1" @endif
     data-checkout-hits='@json($hits)'
 >
-    <div class="checkout-wheel__stage rounded-xl overflow-visible px-4 py-8 sm:px-8">
+    <div class="checkout-wheel__stage overflow-visible px-2 py-4 sm:px-4">
         {!! $svg !!}
     </div>
 </div>

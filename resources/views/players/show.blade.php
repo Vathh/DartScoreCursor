@@ -126,6 +126,8 @@ document.addEventListener('alpine:init', () => {
         </div>
 
         {{-- Zakładka: Odznaczenia --}}
-        <div x-show="activeTab === 'badges'" x-cloak></div>
+        <div x-show="activeTab === 'badges'" x-cloak>
+            @include('players.partials.overview-badges')
+        </div>
     </div>
 @endsection

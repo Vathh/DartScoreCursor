@@ -2,11 +2,11 @@
 
 namespace Database\Seeders;
 
+use App\Domain\Career\CareerSnapshotMetrics;
+use App\Domain\GameScoring\MatchFormat;
 use App\DTO\GameAchievementDTO;
 use App\DTO\GameResultDTO;
 use App\DTO\UpdateGameDTO;
-use App\Domain\Career\CareerSnapshotMetrics;
-use App\Domain\GameScoring\MatchFormat;
 use App\Enums\AchievementType;
 use App\Enums\CareerSource;
 use App\Enums\GameStage;
@@ -21,8 +21,8 @@ use App\Models\GroupStanding\GroupStanding;
 use App\Models\League\LeagueGame;
 use App\Models\League\LeagueSeason;
 use App\Models\Organization\Organization;
-use App\Models\PlayoffGame\PlayoffGame;
 use App\Models\Player\Player;
+use App\Models\PlayoffGame\PlayoffGame;
 use App\Models\QuickGame\QuickGame;
 use App\Models\QuickGame\QuickGameResult;
 use App\Models\Season\Season;
@@ -96,6 +96,7 @@ class PlayerCareerProfileDemoSeeder extends Seeder
         $existing = Organization::query()->where('name', self::ORGANIZATION_NAME)->first();
         if ($existing !== null) {
             $this->printReady(Player::query()->whereHas('user', fn ($q) => $q->where('email', self::EMAIL))->first());
+            $this->call(PlayerCheckoutWheelDemoSeeder::class);
 
             return;
         }
@@ -139,6 +140,7 @@ class PlayerCareerProfileDemoSeeder extends Seeder
         });
 
         $this->printReady($player->fresh());
+        $this->call(PlayerCheckoutWheelDemoSeeder::class);
     }
 
     private function ensureAdmin(): User

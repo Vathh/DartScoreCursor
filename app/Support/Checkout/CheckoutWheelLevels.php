@@ -2,27 +2,22 @@
 
 namespace App\Support\Checkout;
 
+use App\Domain\Badge\Checkout\CheckoutLevelPolicy;
+
 final class CheckoutWheelLevels
 {
-    public const APEX = 15;
+    public const APEX = CheckoutLevelPolicy::APEX;
 
-    public const BRIGHT = 10;
+    public const BRIGHT = CheckoutLevelPolicy::BRIGHT;
 
-    public const GOLD = 5;
+    public const GOLD = CheckoutLevelPolicy::GOLD;
 
-    public const BRONZE = 3;
+    public const BRONZE = CheckoutLevelPolicy::BRONZE;
 
-    public const IRON = 1;
+    public const IRON = CheckoutLevelPolicy::IRON;
 
     public static function fromHits(int $hits): string
     {
-        return match (true) {
-            $hits >= self::APEX => 'apex',
-            $hits >= self::BRIGHT => 'bright',
-            $hits >= self::GOLD => 'gold',
-            $hits >= self::BRONZE => 'bronze',
-            $hits >= self::IRON => 'iron',
-            default => 'locked',
-        };
+        return CheckoutLevelPolicy::nameForHits($hits);
     }
 }

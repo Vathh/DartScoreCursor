@@ -2,6 +2,8 @@
 
 namespace App\Services\GameScoring;
 
+use App\Domain\GameScoring\MatchFormatScoring;
+use App\Domain\GameScoring\VisitRecorder;
 use App\DTO\GameScoring\CloseLegPlayerStatsDTO;
 use App\DTO\GameScoring\RecordVisitDTO;
 use App\Enums\GameKind;
@@ -20,14 +22,13 @@ use App\Repositories\Game\GameVisitRepository;
 use App\Repositories\League\LeagueGameRepository;
 use App\Repositories\PlayoffGame\PlayoffGameRepository;
 use App\Repositories\QuickGame\QuickGameRepository;
+use App\Services\Badge\BadgeAwardService;
 use App\Services\Career\PlayerCareerSnapshotService;
 use App\Services\Game\GameService;
 use App\Services\Player\PlayerOverviewService;
 use App\Services\Tournament\TournamentGroupMatrixLiveService;
 use App\Support\GameScoring\GameScoringContext;
 use App\Support\GameScoring\GameStatisticsCalculator;
-use App\Domain\GameScoring\MatchFormatScoring;
-use App\Domain\GameScoring\VisitRecorder;
 use DomainException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -47,8 +48,8 @@ class GameScoringService
         private TournamentGroupMatrixLiveService $groupMatrixLiveService,
         private PlayerCareerSnapshotService $careerSnapshotService,
         private PlayerOverviewService $playerOverviewService,
-    ) {
-    }
+        private BadgeAwardService $badgeAwardService,
+    ) {}
 
     public function resolveGroupGame(int $gameId): array
     {
@@ -312,6 +313,9 @@ class GameScoringService
                     $context->player1Id,
                     $context->player2Id,
                 ]);
+                if (in_array($context->kind, [GameKind::GROUP, GameKind::PLAYOFF, GameKind::LEAGUE], true)) {
+                    $this->badgeAwardService->awardForFinishedGame($context, $freshGame);
+                }
             }
 
             $state = $this->broadcastState($context, $freshGame);

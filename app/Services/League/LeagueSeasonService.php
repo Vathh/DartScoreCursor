@@ -4,8 +4,8 @@ namespace App\Services\League;
 
 use App\Domain\GameScoring\GameLegScoreValidator;
 use App\Domain\GameScoring\MatchFormat;
-use App\Domain\League\LeagueMatchdayCalendar;
 use App\Domain\League\LeagueDivisionSnapshot;
+use App\Domain\League\LeagueMatchdayCalendar;
 use App\Domain\League\LeaguePlayoffPairing;
 use App\Domain\League\LeaguePromotionResolver;
 use App\Domain\League\LeagueSeasonStartReadiness;
@@ -13,10 +13,11 @@ use App\Domain\League\LeagueStandingCalculator;
 use App\Domain\League\LeagueStandingRow;
 use App\Domain\League\LeagueTieBreakBracket;
 use App\Domain\League\RoundRobinScheduler;
+use App\Enums\GameKind;
 use App\Enums\LeagueCalendarMode;
-use App\Enums\LeagueMatchdayPlanning;
 use App\Enums\LeagueGamePurpose;
 use App\Enums\LeagueGameStatus;
+use App\Enums\LeagueMatchdayPlanning;
 use App\Enums\LeagueSeasonStatus;
 use App\Enums\LeagueWalkoverType;
 use App\Enums\MatchWinMode;
@@ -26,6 +27,7 @@ use App\Models\League\LeagueSeason;
 use App\Models\League\LeagueSeasonDivision;
 use App\Repositories\League\LeagueRepository;
 use App\Repositories\League\LeagueSeasonRepository;
+use App\Services\Badge\BadgeAwardService;
 use App\Services\Player\PlayerOverviewService;
 use Carbon\Carbon;
 use DomainException;
@@ -38,8 +40,8 @@ class LeagueSeasonService
         private LeagueRepository $leagueRepository,
         private LeagueSeasonRepository $leagueSeasonRepository,
         private PlayerOverviewService $playerOverviewService,
-    ) {
-    }
+        private BadgeAwardService $badgeAwardService,
+    ) {}
 
     public function getForPolicy(int $seasonId): LeagueSeason
     {
@@ -503,6 +505,7 @@ class LeagueSeasonService
     public function recordResult(int $gameId, int $player1Score, int $player2Score): void
     {
         $game = $this->requireOpenGame($gameId);
+        $this->badgeAwardService->retractForGame(GameKind::LEAGUE, $game->id);
         $format = MatchFormat::fromRecord($game);
         try {
             $winnerId = GameLegScoreValidator::validateAndResolveWinner(
@@ -529,6 +532,7 @@ class LeagueSeasonService
     public function recordWalkover(int $gameId, string $type, ?int $winnerPlayerId): void
     {
         $game = $this->requireOpenGame($gameId);
+        $this->badgeAwardService->retractForGame(GameKind::LEAGUE, $game->id);
         $walkover = LeagueWalkoverType::from($type);
         $format = MatchFormat::fromRecord($game);
 
@@ -578,7 +582,10 @@ class LeagueSeasonService
                 throw ValidationException::withMessages(['player_id' => 'Ten zawodnik nie jest aktywny w sezonie.']);
             }
 
-            $this->leagueSeasonRepository->voidGamesForPlayer($season->id, $playerId);
+            $voidedIds = $this->leagueSeasonRepository->voidGamesForPlayer($season->id, $playerId);
+            foreach ($voidedIds as $gameId) {
+                $this->badgeAwardService->retractForGame(GameKind::LEAGUE, $gameId);
+            }
             $this->leagueSeasonRepository->markWithdrawn($season->id, $playerId, now());
             $this->leagueRepository->removePlayer($season->league_id, $playerId);
         });
@@ -758,6 +765,7 @@ class LeagueSeasonService
 
                 if (count($seeded) > 4) {
                     $created += $this->ensureRoundRobinTiebreak($season, $division, $key, $seeded, $existing);
+
                     continue;
                 }
 
@@ -879,6 +887,7 @@ class LeagueSeasonService
                 if (! $row->needsTiebreak || $row->tieGroupKey === null) {
                     $resolved[] = $row;
                     $index++;
+
                     continue;
                 }
                 $group = [];

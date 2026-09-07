@@ -154,20 +154,33 @@ class LeagueSeasonRepository
         $game->save();
     }
 
-    public function voidGamesForPlayer(int $seasonId, int $playerId): void
+    /**
+     * @return list<int>
+     */
+    public function voidGamesForPlayer(int $seasonId, int $playerId): array
     {
-        LeagueGame::query()
+        $ids = LeagueGame::query()
             ->where('league_season_id', $seasonId)
             ->where(function ($query) use ($playerId) {
                 $query->where('player1_id', $playerId)->orWhere('player2_id', $playerId);
             })
-            ->update([
-                'status' => LeagueGameStatus::VOIDED,
-                'player1_score' => null,
-                'player2_score' => null,
-                'winner_id' => null,
-                'walkover_type' => LeagueWalkoverType::NONE,
-            ]);
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+
+        if ($ids !== []) {
+            LeagueGame::query()
+                ->whereIn('id', $ids)
+                ->update([
+                    'status' => LeagueGameStatus::VOIDED,
+                    'player1_score' => null,
+                    'player2_score' => null,
+                    'winner_id' => null,
+                    'walkover_type' => LeagueWalkoverType::NONE,
+                ]);
+        }
+
+        return $ids;
     }
 
     public function markWithdrawn(int $seasonId, int $playerId, CarbonInterface $at): void

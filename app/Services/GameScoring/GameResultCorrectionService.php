@@ -2,24 +2,25 @@
 
 namespace App\Services\GameScoring;
 
+use App\Domain\GameScoring\GameLegScoreValidator;
+use App\Domain\GameScoring\MatchFormat;
 use App\DTO\GameResultDTO;
 use App\DTO\UpdateGameDTO;
+use App\Enums\GameKind;
 use App\Enums\GameStage;
 use App\Enums\GameStatus;
 use App\Enums\GameType;
-use App\Enums\GameKind;
 use App\Repositories\Game\GameRepository;
-use App\Repositories\PlayoffGame\PlayoffGameRepository;
 use App\Repositories\Player\PlayerRepository;
+use App\Repositories\PlayoffGame\PlayoffGameRepository;
+use App\Services\Badge\BadgeAwardService;
 use App\Services\Game\GameService;
 use App\Services\GroupStanding\GroupStandingService;
-use App\Services\PlayoffGame\PlayoffService;
-use App\Services\Player\PlayerStatsService;
 use App\Services\Player\PlayerOverviewService;
+use App\Services\Player\PlayerStatsService;
+use App\Services\PlayoffGame\PlayoffService;
 use App\Services\Tournament\TournamentGroupMatrixLiveService;
 use App\Services\Tournament\TournamentResultService;
-use App\Domain\GameScoring\GameLegScoreValidator;
-use App\Domain\GameScoring\MatchFormat;
 use DomainException;
 use Illuminate\Support\Facades\DB;
 use Throwable;
@@ -37,8 +38,8 @@ class GameResultCorrectionService
         private PlayerOverviewService $playerOverviewService,
         private TournamentResultService $tournamentResultService,
         private TournamentGroupMatrixLiveService $groupMatrixLiveService,
-    ) {
-    }
+        private BadgeAwardService $badgeAwardService,
+    ) {}
 
     public function applyFromWeb(
         GameKind $kind,
@@ -74,6 +75,7 @@ class GameResultCorrectionService
     {
         $game = $this->gameRepository->find($gameId);
         $gameModel = $this->gameRepository->findModel($gameId);
+        $this->badgeAwardService->retractForGame(GameKind::GROUP, $gameId);
 
         if ($game->player1 === null || $game->player2 === null) {
             throw new DomainException('Mecz nie ma przypisanych graczy.');
@@ -106,7 +108,7 @@ class GameResultCorrectionService
         );
 
         if ($game->status === GameStatus::FINISHED) {
-            DB::transaction(function () use ($dto, $game) {
+            DB::transaction(function () use ($dto) {
                 $this->gameRepository->finish($dto->gameResultDTO);
                 $this->groupStandingService->recalculateGroupFromFinishedGames(
                     $dto->gameResultDTO->tournamentId,
@@ -131,6 +133,7 @@ class GameResultCorrectionService
     private function applyPlayoffResult(int $gameId, int $player1Score, int $player2Score): void
     {
         $game = $this->playoffGameRepository->find($gameId);
+        $this->badgeAwardService->retractForGame(GameKind::PLAYOFF, $gameId);
 
         if ($game->player1Id === null || $game->player2Id === null) {
             throw new DomainException('Mecz playoff nie ma przypisanych graczy.');

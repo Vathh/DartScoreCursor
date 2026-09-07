@@ -8,6 +8,7 @@ use App\Domain\PlayerDomain;
 use App\Models\Player\Player;
 use App\Models\Users\User;
 use App\Repositories\Player\PlayerRepository;
+use App\Services\Badge\CheckoutWheelAssembler;
 use App\Services\Career\PlayerCareerStatsService;
 use App\Services\Friends\FriendshipService;
 use Illuminate\Support\Facades\Validator;
@@ -23,8 +24,8 @@ class PlayerProfileService
         private PlayerRepository $playerRepository,
         private PlayerCareerStatsService $playerCareerStatsService,
         private PlayerOverviewService $playerOverviewService,
-    ) {
-    }
+        private CheckoutWheelAssembler $checkoutWheelAssembler,
+    ) {}
 
     /**
      * Pełny payload profilu dla API mobile (odpowiednik web players.show).
@@ -135,7 +136,9 @@ class PlayerProfileService
      *     gameHistoryHasMore: bool,
      *     liveGames: array,
      *     overviewSplit: array{window: string, quick: array<string, mixed>, tournament: array<string, mixed>},
-     *     overview: array<string, mixed>
+     *     overview: array<string, mixed>,
+     *     checkoutHits: array<int, int>,
+     *     checkoutItems: list<array{key: string, timesEarned: int, level: int, levelName: string}>
      * }
      */
     public function buildWebShow(Player $player, ?User $viewer): array
@@ -143,6 +146,7 @@ class PlayerProfileService
         $isSelf = $this->isSelf($player, $viewer);
         $core = $this->prepareRegisteredProfile($player, $isSelf);
         $friendship = $this->resolveFriendshipState($player, $viewer);
+        $checkoutItems = $this->checkoutWheelAssembler->itemsForPlayer((int) $player->id);
 
         return [
             'player' => $player,
@@ -159,6 +163,8 @@ class PlayerProfileService
             'career' => $this->playerCareerStatsService->build($player, $viewer, CareerWindow::DEFAULT_KEY, 'all'),
             'overviewSplit' => $this->playerCareerStatsService->buildOverviewSplit($player),
             'overview' => $this->playerOverviewService->forProfile($player),
+            'checkoutHits' => $this->checkoutWheelAssembler->hitsForPlayer((int) $player->id),
+            'checkoutItems' => $checkoutItems,
         ];
     }
 
