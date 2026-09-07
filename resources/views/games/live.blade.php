@@ -38,6 +38,10 @@
             </a>
         </div>
 
+        <div class="mb-4">
+            @include('games.partials.overlay-obs-link')
+        </div>
+
         <div class="flex flex-wrap items-center gap-2 mb-2">
             <span class="px-3 py-1 rounded-full text-xs font-semibold badge-live">
                 {{ $label }}

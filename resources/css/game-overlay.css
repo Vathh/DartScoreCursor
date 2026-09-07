@@ -1,0 +1,551 @@
+:root {
+    --color-bg-deep: #0c0c0f;
+    --color-bg: #141418;
+    --color-bg-elevated: #1c1c22;
+    --color-accent: #f59e0b;
+    --color-accent-hover: #d97706;
+    --color-on-accent: #0c0c0f;
+    --color-success-bright: #4ade80;
+    --color-success-muted: rgba(34, 197, 94, 0.18);
+    --color-danger-muted: #3f1515;
+    --color-danger-text: #fecaca;
+    --color-text: #f4f4f5;
+    --color-text-secondary: #d4d4d8;
+    --color-text-muted: #a1a1aa;
+    --color-border: #2e2e38;
+    --overlay-display: Bahnschrift, "Arial Narrow", "Segoe UI", sans-serif;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html.game-overlay-html,
+body.game-overlay {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: var(--overlay-display);
+    color: var(--color-text);
+}
+
+html.game-overlay-bg-transparent,
+body.game-overlay-bg-transparent {
+    background: transparent !important;
+}
+
+html.game-overlay-bg-solid,
+body.game-overlay-bg-solid {
+    background: var(--color-bg-deep);
+}
+
+body.game-overlay-preview {
+    background-color: #16161c;
+    background-image:
+        linear-gradient(45deg, #2a2a32 25%, transparent 25%),
+        linear-gradient(-45deg, #2a2a32 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #2a2a32 75%),
+        linear-gradient(-45deg, transparent 75%, #2a2a32 75%);
+    background-size: 40px 40px;
+    background-position: 0 0, 0 20px, 20px -20px, -20px 0;
+}
+
+.game-overlay-stage {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.game-overlay-dock {
+    position: absolute;
+    left: 50%;
+    bottom: 48px;
+    transform: translateX(-50%);
+    width: min(1100px, calc(100vw - 72px));
+    padding-top: 18px;
+}
+
+.game-overlay-scorebug {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 232px minmax(0, 1fr);
+    grid-template-rows: 158px;
+    align-items: stretch;
+    height: 158px;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 28%),
+        linear-gradient(90deg, #121217 0%, #1a1a21 50%, #121217 100%);
+    clip-path: polygon(
+        22px 0,
+        calc(100% - 22px) 0,
+        100% 22px,
+        100% calc(100% - 14px),
+        calc(100% - 22px) 100%,
+        22px 100%,
+        0 calc(100% - 14px),
+        0 22px
+    );
+    box-shadow:
+        0 22px 48px rgba(0, 0, 0, 0.55),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        inset 0 -2px 0 rgba(245, 158, 11, 0.85);
+}
+
+.game-overlay-scorebug::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(90deg, rgba(245, 158, 11, 0.18), transparent 18%, transparent 82%, rgba(245, 158, 11, 0.18));
+}
+
+.game-overlay-player {
+    display: grid;
+    grid-template-columns: 8px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    padding: 16px 16px 18px 0;
+    position: relative;
+    z-index: 1;
+}
+
+.game-overlay-player.is-right {
+    grid-template-columns: auto minmax(0, 1fr) 8px;
+    padding: 16px 0 18px 16px;
+    text-align: right;
+}
+
+.game-overlay-rail {
+    display: block;
+    width: 8px;
+    align-self: stretch;
+    background: rgba(245, 158, 11, 0.22);
+}
+
+.game-overlay-player.is-left .game-overlay-rail {
+    clip-path: polygon(0 22px, 100% 0, 100% 100%, 0 100%);
+}
+
+.game-overlay-player.is-right .game-overlay-rail {
+    clip-path: polygon(0 0, 100% 22px, 100% 100%, 0 100%);
+}
+
+.game-overlay-player.is-throwing .game-overlay-rail {
+    background: var(--color-accent);
+    box-shadow: 0 0 18px rgba(245, 158, 11, 0.7);
+}
+
+.game-overlay-player.is-throwing {
+    background: linear-gradient(180deg, rgba(245, 158, 11, 0.16), transparent 72%);
+}
+
+.game-overlay-copy {
+    min-width: 0;
+}
+
+.game-overlay-name-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.game-overlay-player.is-right .game-overlay-name-row {
+    justify-content: flex-end;
+}
+
+.game-overlay-name {
+    margin: 0;
+    min-width: 0;
+    font-size: 2.05rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--color-text);
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+}
+
+.game-overlay-player.is-throwing .game-overlay-name {
+    color: var(--color-accent);
+}
+
+.game-overlay-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+.game-overlay-player.is-right .game-overlay-meta {
+    justify-content: flex-end;
+}
+
+.game-overlay-avg {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+    padding: 3px 8px 2px;
+    border-radius: 2px;
+    background: rgba(0, 0, 0, 0.28);
+    color: var(--color-text-secondary);
+    font-size: 1.05rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.04em;
+}
+
+.game-overlay-avg-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+}
+
+.game-overlay-darts {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+    padding: 3px 8px 2px;
+    border-radius: 2px;
+    background: rgba(0, 0, 0, 0.28);
+    color: var(--color-text-secondary);
+    font-size: 1.05rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.04em;
+}
+
+.game-overlay-opener {
+    flex: 0 0 auto;
+    display: inline-flex;
+    width: 1.35em;
+    height: 0.78em;
+    color: var(--color-accent);
+    filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.45));
+}
+
+.game-overlay-player.is-right .game-overlay-opener {
+    transform: scaleX(-1);
+}
+
+.game-overlay-opener svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.game-overlay-visit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 3.4rem;
+    padding: 3px 9px 2px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--color-text);
+    font-size: 1.05rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+.game-overlay-visit.is-bust {
+    background: var(--color-danger-muted);
+    color: var(--color-danger-text);
+}
+
+.game-overlay-visit.is-one-eighty {
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+}
+
+.game-overlay-score-block {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    min-width: 0;
+    width: max-content;
+}
+
+.game-overlay-score-caption {
+    width: 0;
+    min-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    text-align: right;
+}
+
+.game-overlay-player.is-right .game-overlay-score-caption {
+    text-align: left;
+}
+
+.game-overlay-remaining {
+    margin: 0;
+    width: 3ch;
+    font-size: 5.4rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 0.86;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text);
+    text-shadow: 0 4px 18px rgba(0, 0, 0, 0.4);
+    text-align: right;
+}
+
+.game-overlay-player.is-right .game-overlay-remaining {
+    text-align: left;
+}
+
+.game-overlay-remaining.is-checkout {
+    color: var(--color-accent);
+    text-shadow: 0 0 28px rgba(245, 158, 11, 0.45);
+}
+
+.game-overlay-hub {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    margin: -18px 0 0;
+    height: calc(100% + 18px);
+    min-height: 0;
+    padding: 14px 12px 16px;
+    text-align: center;
+    background:
+        linear-gradient(180deg, #2a2114 0%, #141418 38%, #0e0e12 100%);
+    clip-path: polygon(10% 0, 90% 0, 100% 16%, 100% 84%, 90% 100%, 10% 100%, 0 84%, 0 16%);
+    box-shadow:
+        0 0 0 1px rgba(245, 158, 11, 0.55),
+        0 16px 28px rgba(0, 0, 0, 0.45);
+}
+
+.game-overlay-brand {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    margin: 0 0 12px;
+}
+
+.game-overlay-logotyp {
+    display: block;
+    height: 30px;
+    width: auto;
+    object-fit: contain;
+}
+
+.game-overlay-wordmark {
+    display: block;
+    height: 13px;
+    width: auto;
+    max-width: 132px;
+    object-fit: contain;
+}
+
+.game-overlay-scoreline {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 8px;
+    margin: 0;
+    line-height: 1;
+}
+
+.game-overlay-scoreline-num {
+    font-size: 2.35rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+    color: var(--color-text);
+}
+
+.game-overlay-scoreline-unit {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+}
+
+.game-overlay-scoreline.is-secondary .game-overlay-scoreline-num {
+    font-size: 1.35rem;
+    color: var(--color-text-secondary);
+}
+
+.game-overlay-scoreline.is-secondary .game-overlay-scoreline-unit {
+    font-size: 0.62rem;
+    color: var(--color-text-muted);
+}
+
+.game-overlay-leg-label {
+    margin: 4px 0 0;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+}
+
+.game-overlay-finished {
+    margin: 6px 0 0;
+    padding: 3px 8px 2px;
+    border-radius: 2px;
+    font-size: 0.64rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    background: var(--color-success-muted);
+    color: var(--color-success-bright);
+}
+
+.game-overlay-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: max-content;
+    max-width: 78%;
+    margin: -1px auto 0;
+    padding: 8px 22px 9px;
+    position: relative;
+    z-index: 0;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 55%),
+        #141418;
+    clip-path: polygon(
+        0 0,
+        100% 0,
+        100% calc(100% - 6px),
+        calc(100% - 12px) 100%,
+        12px 100%,
+        0 calc(100% - 6px)
+    );
+    box-shadow:
+        0 10px 24px rgba(0, 0, 0, 0.35),
+        inset 0 -2px 0 rgba(245, 158, 11, 0.7);
+}
+
+.game-overlay-event,
+.game-overlay-round {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.game-overlay-event {
+    color: var(--color-text-secondary);
+    max-width: 22rem;
+}
+
+.game-overlay-round {
+    color: var(--color-accent);
+    max-width: 28rem;
+}
+
+.game-overlay-footer-dot {
+    color: var(--color-text-muted);
+    font-weight: 700;
+}
+
+.game-overlay-180 {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(12, 12, 15, 0.62);
+    color: var(--color-accent);
+    font-size: 7rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    pointer-events: none;
+    text-shadow: 0 0 42px rgba(245, 158, 11, 0.6);
+}
+
+[x-cloak] {
+    display: none !important;
+}
+
+@media (max-width: 1100px) {
+    .game-overlay-dock {
+        width: calc(100vw - 28px);
+        bottom: 20px;
+    }
+
+    .game-overlay-scorebug {
+        height: 128px;
+        grid-template-rows: 128px;
+        grid-template-columns: minmax(0, 1fr) 168px minmax(0, 1fr);
+    }
+
+    .game-overlay-player {
+        gap: 10px;
+        padding: 12px 12px 12px 0;
+    }
+
+    .game-overlay-player.is-right {
+        padding: 12px 0 12px 12px;
+    }
+
+    .game-overlay-name {
+        font-size: 1.15rem;
+        letter-spacing: 0.04em;
+    }
+
+    .game-overlay-opener {
+        width: 1.1em;
+        height: 0.63em;
+    }
+
+    .game-overlay-remaining {
+        font-size: 3rem;
+    }
+
+    .game-overlay-hub {
+        margin-top: -12px;
+        height: calc(100% + 12px);
+    }
+
+    .game-overlay-scoreline-num {
+        font-size: 1.55rem;
+    }
+
+    .game-overlay-logotyp {
+        height: 22px;
+    }
+
+    .game-overlay-wordmark {
+        height: 10px;
+        max-width: 100px;
+    }
+
+    .game-overlay-180 {
+        font-size: 4.2rem;
+    }
+}

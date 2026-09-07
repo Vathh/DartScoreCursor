@@ -1,6 +1,7 @@
 import Pusher from 'pusher-js';
 
 const GAME_STATE_EVENTS = ['game.state', '.game.state'];
+const CHECKOUT_BOGEYS = [159, 162, 163, 165, 166, 168, 169];
 
 function normalizePayload(payload) {
     if (payload == null) {
@@ -28,6 +29,10 @@ export function registerGameLiveViewer(Alpine) {
         pollTimer: null,
         pusher: null,
         redirecting: false,
+        redirectOnFinish: config.redirectOnFinish !== false,
+        previewDemo: Boolean(config.previewDemo),
+        flash180: false,
+        flash180Timer: null,
 
         init() {
             this.connectWebSocket(config);
@@ -40,6 +45,10 @@ export function registerGameLiveViewer(Alpine) {
                     }
                 },
             );
+            this.$watch(
+                () => this.lastVisitSignature,
+                () => this.onLastVisitChanged(),
+            );
             if (this.isFinished) {
                 this.redirectToShow();
             }
@@ -50,6 +59,10 @@ export function registerGameLiveViewer(Alpine) {
                 clearInterval(this.pollTimer);
                 this.pollTimer = null;
             }
+            if (this.flash180Timer) {
+                clearTimeout(this.flash180Timer);
+                this.flash180Timer = null;
+            }
             if (this.pusher) {
                 this.pusher.unsubscribe(config.channel);
                 this.pusher.disconnect();
@@ -58,7 +71,7 @@ export function registerGameLiveViewer(Alpine) {
         },
 
         redirectToShow() {
-            if (this.redirecting || !config.showUrl) {
+            if (!this.redirectOnFinish || this.redirecting || !config.showUrl) {
                 return;
             }
             this.redirecting = true;
@@ -125,6 +138,9 @@ export function registerGameLiveViewer(Alpine) {
                     headers: { Accept: 'application/json' },
                 });
                 if (res.status === 410) {
+                    if (!this.redirectOnFinish) {
+                        return;
+                    }
                     this.redirectToShow();
                     return;
                 }
@@ -141,6 +157,10 @@ export function registerGameLiveViewer(Alpine) {
         },
 
         get isFinished() {
+            if (this.previewDemo) {
+                return false;
+            }
+
             return this.state?.game?.status === 'finished';
         },
 
@@ -252,6 +272,175 @@ export function registerGameLiveViewer(Alpine) {
                 error: 'Błąd połączenia',
                 offline: 'Tylko odświeżanie',
             }[this.connection] ?? this.connection;
+        },
+
+        get currentPlayerIndex() {
+            return Number(this.state?.turn?.currentPlayerIndex ?? 0);
+        },
+
+        isThrowing(index) {
+            if (this.previewDemo) {
+                return Number(index) === 1;
+            }
+
+            return !this.isFinished && this.currentPlayerIndex === Number(index);
+        },
+
+        get legOpenerIndex() {
+            return Number(this.state?.turn?.legOpenerIndex ?? this.state?.legOpenerIndex ?? 0);
+        },
+
+        isLegOpener(index) {
+            if (this.previewDemo) {
+                return Number(index) === 0;
+            }
+
+            if (this.isFinished) {
+                return false;
+            }
+
+            return this.legOpenerIndex === Number(index);
+        },
+
+        lastVisitForPlayer(playerId) {
+            const list = this.visitsForPlayer(playerId);
+            if (list.length === 0) {
+                return null;
+            }
+
+            return list[list.length - 1];
+        },
+
+        lastVisitLabel(playerId) {
+            const visit = this.lastVisitForPlayer(playerId);
+            if (!visit) {
+                return '';
+            }
+            if (visit.bust) {
+                return 'BUST';
+            }
+
+            return String(visit.score);
+        },
+
+        lastVisitIsBust(playerId) {
+            return Boolean(this.lastVisitForPlayer(playerId)?.bust);
+        },
+
+        lastVisitIs180(playerId) {
+            const visit = this.lastVisitForPlayer(playerId);
+
+            return Boolean(visit && !visit.bust && Number(visit.score) === 180);
+        },
+
+        dartsInCurrentLeg(playerId) {
+            if (this.previewDemo) {
+                if (this.player1 && Number(playerId) === Number(this.player1.playerId)) {
+                    return 9;
+                }
+                if (this.player2 && Number(playerId) === Number(this.player2.playerId)) {
+                    return 6;
+                }
+            }
+
+            return this.visitsForPlayer(playerId).reduce(
+                (total, visit) => total + Number(visit.dartsInVisit ?? 0),
+                0,
+            );
+        },
+
+        get latestVisit() {
+            const list = this.visits;
+            if (list.length === 0) {
+                return null;
+            }
+
+            return list[list.length - 1];
+        },
+
+        get lastVisitSignature() {
+            const visit = this.latestVisit;
+            if (!visit) {
+                return '';
+            }
+
+            return `${visit.id}-${visit.score}-${visit.bust}`;
+        },
+
+        onLastVisitChanged() {
+            const visit = this.latestVisit;
+            if (!visit || visit.bust || Number(visit.score) !== 180) {
+                return;
+            }
+            this.flash180 = true;
+            if (this.flash180Timer) {
+                clearTimeout(this.flash180Timer);
+            }
+            this.flash180Timer = setTimeout(() => {
+                this.flash180 = false;
+            }, 2200);
+        },
+
+        remainingDisplay(player, index) {
+            if (this.isFinished) {
+                const score1 = this.matchScore(this.player1);
+                const score2 = this.matchScore(this.player2);
+                if (score1 === score2) {
+                    return '—';
+                }
+                const leader = score1 > score2 ? 0 : 1;
+
+                return Number(index) === leader ? 0 : '—';
+            }
+            if (player?.remaining == null) {
+                return '—';
+            }
+
+            return player.remaining;
+        },
+
+        isCheckoutRemaining(remaining) {
+            const value = Number(remaining);
+            if (!Number.isFinite(value) || value < 2 || value > 170) {
+                return false;
+            }
+
+            return !CHECKOUT_BOGEYS.includes(value);
+        },
+
+        get overlayPrimaryLeft() {
+            return this.matchScore(this.player1);
+        },
+
+        get overlayPrimaryRight() {
+            return this.matchScore(this.player2);
+        },
+
+        get overlayPrimaryUnit() {
+            return this.isSingleSetFormat() ? 'LEGI' : 'SETY';
+        },
+
+        get overlayLegsLeft() {
+            return this.legsInSet(this.player1);
+        },
+
+        get overlayLegsRight() {
+            return this.legsInSet(this.player2);
+        },
+
+        get overlayLegLabel() {
+            const leg = this.state?.currentLeg;
+            if (this.isFinished) {
+                return 'Koniec meczu';
+            }
+            if (!leg) {
+                return '—';
+            }
+            if (this.isSingleSetFormat()) {
+                return `Leg ${leg.legNumber}`;
+            }
+
+            return `Set ${this.currentSetNumber} · Leg ${leg.legNumber}`;
         },
     }));
 }

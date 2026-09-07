@@ -31,4 +31,28 @@ final class PlayoffRoundLabel
 
         return $round;
     }
+
+    /** Etykieta dla widza (overlay / transmisja) — bez skrótów WB/LB. */
+    public static function broadcastLabel(string $round): string
+    {
+        $stage = GameStage::tryFrom($round);
+        if ($stage !== null) {
+            return $stage->label();
+        }
+
+        if ($round === 'GF' || $round === 'GF1') {
+            return 'Wielki finał';
+        }
+        if ($round === 'GF2') {
+            return 'Wielki finał — reset';
+        }
+        if (preg_match('/^W(\d+)$/', $round, $m)) {
+            return 'Runda '.((int) $m[1] + 1).' drabinki zwycięzców';
+        }
+        if (preg_match('/^L(\d+)$/', $round, $m)) {
+            return 'Runda '.((int) $m[1] + 1).' drabinki przegranych';
+        }
+
+        return $round;
+    }
 }

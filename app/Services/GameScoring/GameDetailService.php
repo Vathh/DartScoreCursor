@@ -201,6 +201,7 @@ class GameDetailService
             'backUrl' => $backUrl,
             'tournamentId' => $tournamentId,
             'groupNumber' => $game instanceof Game ? (int) $game->group_number : null,
+            'playoffRound' => $game instanceof PlayoffGame ? (string) $game->round : null,
             'matchFormat' => $context->matchFormat->toArray(),
             'formatLabel' => $context->matchFormat->formatLabel(),
             'scoreUnit' => $context->matchFormat->scoreUnit(),

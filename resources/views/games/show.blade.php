@@ -24,6 +24,12 @@
             @endif
         </div>
 
+        @if($status === 'in_progress')
+            <div class="mb-4">
+                @include('games.partials.overlay-obs-link')
+            </div>
+        @endif
+
         <h1 class="page-title mb-6">
             @if($player1->user_id)
                 <a href="{{ route('players.show', $player1) }}" class="hover:text-accent hover:underline transition-colors">{{ $player1->name }}</a>

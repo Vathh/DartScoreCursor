@@ -13,6 +13,7 @@ use App\Support\Broadcasting\ReverbClientConfig;
 use DomainException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class GameViewController extends Controller
@@ -22,8 +23,7 @@ class GameViewController extends Controller
         private GameScoringService $gameScoringService,
         private GameResultCorrectionService $gameResultCorrectionService,
         private GameAuthorizationService $gameAuthorizationService,
-    ) {
-    }
+    ) {}
 
     public function show(string $type, int $id): View
     {
@@ -99,6 +99,28 @@ class GameViewController extends Controller
         [$context, $game] = $this->resolveScoringGame($kind, $id);
 
         return response()->json($this->gameScoringService->getState($context, $game));
+    }
+
+    public function overlay(Request $request, string $type, int $id): View
+    {
+        $kind = GameDetailService::kindFromRoute($type);
+        $detail = $this->gameDetailService->build($kind, $id);
+
+        [$context, $game] = $this->resolveScoringGame($kind, $id);
+        $initialState = $this->gameScoringService->getState($context, $game);
+
+        $overlayShowUrl = $kind === GameKind::LEAGUE
+            ? route('league-games.show', $id)
+            : route('games.show', ['type' => $type, 'id' => $id]);
+
+        return view('games.overlay', array_merge($detail, [
+            'initialState' => $initialState,
+            'liveStateUrl' => route('games.live.state', ['type' => $type, 'id' => $id]),
+            'overlayShowUrl' => $overlayShowUrl,
+            'overlayBg' => $request->query('bg') === 'solid' ? 'solid' : 'transparent',
+            'overlayPreview' => $request->boolean('preview'),
+            'reverb' => ReverbClientConfig::forWeb(),
+        ]));
     }
 
     /**
