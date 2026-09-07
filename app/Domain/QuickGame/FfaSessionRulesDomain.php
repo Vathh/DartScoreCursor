@@ -23,6 +23,25 @@ final class FfaSessionRulesDomain
     }
 
     /**
+     * one_device: host sędziuje wszystkich na jednym urządzeniu — `left` nie ma sensu
+     * (nie przekazujemy hosta, gra czeka na powrót albo skasowanie).
+     */
+    public static function allowsPresenceLeft(string $scoringMode): bool
+    {
+        return $scoringMode !== 'one_device';
+    }
+
+    public static function assertHostCanAbort(int $hostUserId, int $actorUserId, bool $lobbyStarted, bool $sessionInProgress): void
+    {
+        if ($hostUserId !== $actorUserId) {
+            throw new DomainException('Tylko host może skasować grę.');
+        }
+        if (! $lobbyStarted || ! $sessionInProgress) {
+            throw new DomainException('Nie ma trwającej gry do skasowania.');
+        }
+    }
+
+    /**
      * @param  array<int, int>  $playerIds
      */
     public static function resolveForfeitWinnerId(array $playerIds, int $leavingPlayerId): int

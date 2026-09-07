@@ -8,6 +8,7 @@ use App\Domain\QuickGame\FfaSessionRulesDomain;
 use App\Domain\QuickGame\FfaTurnRotationDomain;
 use App\Events\QuickGameFfaStateUpdated;
 use App\Models\QuickGame\QuickGameFfaPresence;
+use App\Models\QuickGame\QuickGameFfaSession;
 use App\Models\QuickGame\QuickGameLobby;
 use App\Repositories\Player\PlayerRepository;
 use App\Repositories\QuickGame\QuickGameFfaPresenceRepository;
@@ -259,6 +260,33 @@ class QuickGameFfaScoringService
         $this->syncStalePresence($session);
 
         return $this->broadcastStateForSession($session, $userId);
+    }
+
+    /**
+     * Host unieważnia grę — klienci dostają aborted zanim lobby zniknie z bazy.
+     *
+     * @return array<string, mixed>
+     */
+    public function abortAndBroadcast(int $lobbyId): array
+    {
+        $session = $this->sessionRepository->findOrFailForLobby($lobbyId);
+        $session->status = QuickGameFfaSession::STATUS_ABORTED;
+        $session->finished_at = now();
+        $this->sessionRepository->incrementVersion($session);
+        $this->sessionRepository->save($session);
+
+        $state = [
+            'game' => ['status' => QuickGameFfaSession::STATUS_ABORTED],
+            'session' => [
+                'status' => QuickGameFfaSession::STATUS_ABORTED,
+                'lobbyId' => $lobbyId,
+                'stateVersion' => (int) $session->state_version,
+            ],
+            'players' => [],
+        ];
+        broadcast(new QuickGameFfaStateUpdated($lobbyId, $state));
+
+        return $state;
     }
 
     /**

@@ -243,6 +243,48 @@ class QuickGameLobbyMvpTest extends TestCase
         $this->assertNotSame($lobbyId, $createAgain->json('id'));
     }
 
+    public function test_host_leave_transfers_to_remaining_registered_player(): void
+    {
+        $lobbyId = $this->postJson('/api/quick-game/lobby/create')->json('id');
+        $this->postJson("/api/quick-game/lobby/{$lobbyId}/invite", [
+            'playerId' => $this->friendPlayer->id,
+        ])->assertOk();
+
+        Sanctum::actingAs($this->friend);
+        $this->postJson("/api/quick-game/lobby/{$lobbyId}/join")->assertOk();
+
+        Sanctum::actingAs($this->host);
+        $this->postJson("/api/quick-game/lobby/{$lobbyId}/leave")->assertOk();
+
+        $this->assertDatabaseHas('quick_game_lobbies', [
+            'id' => $lobbyId,
+            'host_id' => $this->friend->id,
+            'status' => 'waiting',
+        ]);
+        $this->assertDatabaseMissing('quick_game_lobby_players', [
+            'lobby_id' => $lobbyId,
+            'player_id' => $this->hostPlayer->id,
+        ]);
+
+        Sanctum::actingAs($this->friend);
+        $this->getJson("/api/quick-game/lobby/{$lobbyId}")
+            ->assertOk()
+            ->assertJsonPath('youAreHost', true)
+            ->assertJsonPath('hostId', $this->friend->id);
+    }
+
+    public function test_host_leave_with_only_guests_deletes_lobby(): void
+    {
+        $lobbyId = $this->postJson('/api/quick-game/lobby/create')->json('id');
+        $this->postJson("/api/quick-game/lobby/{$lobbyId}/add-guest", [
+            'tempPlayerName' => 'Gość',
+        ])->assertOk();
+
+        $this->postJson("/api/quick-game/lobby/{$lobbyId}/leave")->assertOk();
+
+        $this->assertDatabaseMissing('quick_game_lobbies', ['id' => $lobbyId]);
+    }
+
     public function test_cannot_create_second_active_lobby(): void
     {
         $firstId = $this->postJson('/api/quick-game/lobby/create')->json('id');

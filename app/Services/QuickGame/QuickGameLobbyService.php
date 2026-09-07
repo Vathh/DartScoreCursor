@@ -6,6 +6,8 @@ use App\Events\QuickGameLobbyUpdated;
 use App\Events\QuickGameRematchCreated;
 use App\Events\QuickGameRematchIntentUpdated;
 use App\Domain\PlayerDomain;
+use App\Domain\QuickGame\FfaSessionRulesDomain;
+use App\Domain\QuickGame\LobbyHostSuccession;
 use App\Models\QuickGame\QuickGameLobby;
 use App\Repositories\Friends\FriendshipRepository;
 use App\Repositories\Player\PlayerRepository;
@@ -173,13 +175,14 @@ class QuickGameLobbyService
         }
 
         $this->lobbyRepository->removePlayer($lobbyId, $playerId, $tempPlayerName);
-        if (! ($userId && $lobby->host_id === $userId)) {
-            $this->broadcastLobbyUpdatedById($lobbyId);
+
+        if ($userId && $lobby->status === 'waiting') {
+            $this->succeedOrDeleteWaitingLobby($lobbyId, $userId, (int) $lobby->host_id);
+
+            return;
         }
 
-        if ($userId && $lobby->host_id === $userId) {
-            $this->lobbyRepository->delete($lobbyId);
-        }
+        $this->broadcastLobbyUpdatedById($lobbyId);
     }
 
     public function get(int $lobbyId): QuickGameLobby
@@ -300,6 +303,27 @@ class QuickGameLobbyService
         $this->broadcastLobbyUpdated($lobby);
 
         return $lobby;
+    }
+
+    /**
+     * Host unieważnia wystartowaną grę FFA — bez wyniku, bez sukcesji hosta.
+     */
+    public function abortStartedGame(int $lobbyId, int $userId): void
+    {
+        DB::transaction(function () use ($lobbyId, $userId) {
+            $lobby = $this->lobbyRepository->find($lobbyId);
+            $session = $lobby->ffaSession;
+
+            FfaSessionRulesDomain::assertHostCanAbort(
+                (int) $lobby->host_id,
+                $userId,
+                $lobby->status === 'started',
+                $session?->isInProgress() === true,
+            );
+
+            $this->ffaScoringService->abortAndBroadcast($lobbyId);
+            $this->lobbyRepository->deleteStartedGame($lobbyId);
+        });
     }
 
     public function updateSettings(int $lobbyId, int $hostUserId, ?MatchFormat $matchFormat = null): QuickGameLobby
@@ -567,6 +591,35 @@ class QuickGameLobbyService
         broadcast(new QuickGameLobbyUpdated($lobby));
     }
 
+    /**
+     * Waiting: po wyjściu zarejestrowanego — przekazanie hosta albo skasowanie,
+     * gdy nie został nikt z kontem.
+     */
+    private function succeedOrDeleteWaitingLobby(int $lobbyId, int $leavingUserId, int $previousHostUserId): void
+    {
+        $fresh = $this->lobbyRepository->find($lobbyId);
+        $remaining = $fresh->players->map(fn ($lp) => [
+            'userId' => $lp->player?->user_id !== null ? (int) $lp->player->user_id : null,
+            'isRegistered' => (bool) $lp->is_registered,
+        ])->all();
+
+        if ($leavingUserId !== $previousHostUserId) {
+            $this->broadcastLobbyUpdated($fresh);
+
+            return;
+        }
+
+        $nextHostUserId = LobbyHostSuccession::nextHostUserId($remaining, $leavingUserId);
+        if ($nextHostUserId === null) {
+            $this->lobbyRepository->delete($lobbyId);
+
+            return;
+        }
+
+        $this->lobbyRepository->updateHostId($lobbyId, $nextHostUserId);
+        $this->broadcastLobbyUpdatedById($lobbyId);
+    }
+
     private function assertLobbyHasRoom(QuickGameLobby $lobby): void
     {
         if ($lobby->players()->count() >= self::MAX_LOBBY_PLAYERS) {
@@ -623,7 +676,7 @@ class QuickGameLobbyService
     }
 
     /**
-     * Join / rematch: zwolnij waiting (host → delete, gość → leave).
+     * Join / rematch: zwolnij waiting (host → sukcesja albo delete, gość → leave).
      * Przy started → konflikt.
      */
     private function releaseUserFromOtherActiveLobbies(int $userId, ?int $exceptLobbyId): void
@@ -643,9 +696,13 @@ class QuickGameLobbyService
                 );
             }
 
-            // waiting
+            // waiting: host wychodzi → przekazanie albo skasowanie pustego
             if ((int) $lobby->host_id === $userId) {
-                $this->lobbyRepository->delete((int) $lobby->id);
+                $player = $this->playerRepository->findByUserId($userId);
+                if ($player) {
+                    $this->lobbyRepository->removePlayer((int) $lobby->id, $player->id, null);
+                }
+                $this->succeedOrDeleteWaitingLobby((int) $lobby->id, $userId, (int) $lobby->host_id);
                 continue;
             }
 

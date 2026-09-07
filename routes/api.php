@@ -161,6 +161,7 @@ Route::middleware(['auth:sanctum', 'not.banned'])->group(function () {
         Route::post('/{lobbyId}/rematch', [QuickGameLobbyController::class, 'createRematch']);
         Route::get('/{lobbyId}/rematch', [QuickGameLobbyController::class, 'rematchStatus']);
         Route::get('/{lobbyId}/ffa/state', [QuickGameFfaController::class, 'state']);
+        Route::post('/{lobbyId}/ffa/abort', [QuickGameFfaController::class, 'abort']);
         Route::post('/{lobbyId}/ffa/presence', [QuickGameFfaController::class, 'updatePresence']);
         Route::post('/{lobbyId}/ffa/visits', [QuickGameFfaController::class, 'recordVisit']);
         Route::post('/{lobbyId}/ffa/visits/undo', [QuickGameFfaController::class, 'undoVisit']);

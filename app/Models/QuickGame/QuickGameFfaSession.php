@@ -12,6 +12,8 @@ class QuickGameFfaSession extends Model
 
     public const STATUS_FINISHED = 'finished';
 
+    public const STATUS_ABORTED = 'aborted';
+
     protected $fillable = [
         'lobby_id',
         'legs_to_win_set',

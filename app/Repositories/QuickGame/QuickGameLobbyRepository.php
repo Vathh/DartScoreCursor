@@ -22,7 +22,7 @@ class QuickGameLobbyRepository
 
     public function find(int $lobbyId): QuickGameLobby
     {
-        return QuickGameLobby::with(['host.player', 'players.player'])
+        return QuickGameLobby::with(['host.player', 'players.player', 'ffaSession'])
             ->findOrFail($lobbyId);
     }
 
@@ -61,6 +61,27 @@ class QuickGameLobbyRepository
     {
         QuickGameLobbyPlayer::where('lobby_id', $lobbyId)->delete();
         QuickGameLobby::destroy($lobbyId);
+    }
+
+    /**
+     * Wystartowana gra: zdejmij FK na sesję FFA, potem skasuj lobby
+     * (sesja i wizyty spadają CASCADE po lobby_id).
+     */
+    public function deleteStartedGame(int $lobbyId): void
+    {
+        DB::table('quick_game_lobbies')->where('id', $lobbyId)->update([
+            'ffa_session_id' => null,
+            'updated_at' => now(),
+        ]);
+        $this->delete($lobbyId);
+    }
+
+    public function updateHostId(int $lobbyId, int $hostUserId): void
+    {
+        DB::table('quick_game_lobbies')->where('id', $lobbyId)->update([
+            'host_id' => $hostUserId,
+            'updated_at' => now(),
+        ]);
     }
 
     /**

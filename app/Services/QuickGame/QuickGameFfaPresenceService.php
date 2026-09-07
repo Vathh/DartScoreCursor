@@ -69,6 +69,14 @@ class QuickGameFfaPresenceService
                 throw new DomainException('Opuszczono ten mecz — nie można wrócić.');
             }
 
+            if ($status === QuickGameFfaPresence::STATUS_LEFT
+                && ! FfaSessionRulesDomain::allowsPresenceLeft((string) $session->scoring_mode)
+            ) {
+                throw new DomainException(
+                    'W trybie na jednym urządzeniu nie opuszcza się graczy. Możesz wrócić do gry albo skasować ją jako host.'
+                );
+            }
+
             if ($status === QuickGameFfaPresence::STATUS_LEFT) {
                 $presence->status = QuickGameFfaPresence::STATUS_LEFT;
                 $presence->left_at = now();

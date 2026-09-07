@@ -71,4 +71,24 @@ class FfaSessionRulesDomainTest extends TestCase
 
         $this->assertSame(QuickGameFfaPresence::STATUS_LEFT, $status);
     }
+
+    public function test_allows_presence_left_only_outside_one_device(): void
+    {
+        $this->assertTrue(FfaSessionRulesDomain::allowsPresenceLeft('each_own'));
+        $this->assertFalse(FfaSessionRulesDomain::allowsPresenceLeft('one_device'));
+    }
+
+    public function test_assert_host_can_abort_rejects_non_host_and_idle_lobby(): void
+    {
+        FfaSessionRulesDomain::assertHostCanAbort(5, 5, true, true);
+
+        $this->expectException(DomainException::class);
+        FfaSessionRulesDomain::assertHostCanAbort(5, 9, true, true);
+    }
+
+    public function test_assert_host_can_abort_rejects_when_game_not_in_progress(): void
+    {
+        $this->expectException(DomainException::class);
+        FfaSessionRulesDomain::assertHostCanAbort(5, 5, true, false);
+    }
 }

@@ -73,6 +73,18 @@ class QuickGameFfaController
         ]);
     }
 
+    public function abort(Request $request, string $lobbyId): JsonResponse
+    {
+        try {
+            $this->assertLobbyParticipant((int) $lobbyId, $request->user()->id);
+            $this->lobbyService->abortStartedGame((int) $lobbyId, $request->user()->id);
+
+            return response()->json(['success' => true, 'aborted' => true]);
+        } catch (DomainException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
+    }
+
     public function recordVisit(Request $request, string $lobbyId): JsonResponse
     {
         $validated = $request->validate(array_merge([
