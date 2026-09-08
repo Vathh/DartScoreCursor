@@ -175,7 +175,10 @@ class TournamentJoinRequestTest extends TestCase
             ->assertOk()
             ->assertSee('ABCD1234')
             ->assertSee('Dołącz przez QR')
-            ->assertSee('tournamentJoinRequestsLive');
+            ->assertSee('tournamentJoinRequestsLive')
+            ->assertSee('Dodaj uczestników powyżej, aby wystartować turniej.')
+            ->assertSee('Rodzaj turnieju')
+            ->assertSee('participantCount >= minPlayers', false);
     }
 
     public function test_admin_can_remove_participant_via_json(): void

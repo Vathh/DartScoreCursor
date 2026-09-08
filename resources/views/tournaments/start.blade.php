@@ -542,14 +542,26 @@
             >
                 <h2 class="section-title text-accent">Start turnieju</h2>
 
-                @if($participants->isEmpty())
-                    <p class="text-text-secondary text-sm">Dodaj uczestników powyżej, aby wystartować turniej.</p>
-                @elseif($participantCount < $minPlayers)
-                    <p class="text-text-secondary text-sm">
-                        Potrzeba co najmniej {{ $minPlayers }} uczestników (obecnie {{ $participantCount }}).
-                    </p>
-                @else
-                    <form action="{{ route('tournaments.run', $tournament->id) }}" method="POST" class="flex flex-col items-center gap-4">
+                <p
+                    class="text-text-secondary text-sm"
+                    x-show="participantCount === 0"
+                    x-cloak
+                >Dodaj uczestników powyżej, aby wystartować turniej.</p>
+                <p
+                    class="text-text-secondary text-sm"
+                    x-show="participantCount > 0 && participantCount < minPlayers"
+                    x-cloak
+                >
+                    Potrzeba co najmniej <span x-text="minPlayers"></span> uczestników
+                    (obecnie <span x-text="participantCount"></span>).
+                </p>
+                <form
+                    action="{{ route('tournaments.run', $tournament->id) }}"
+                    method="POST"
+                    class="flex flex-col items-center gap-4"
+                    x-show="participantCount >= minPlayers"
+                    x-cloak
+                >
                         @csrf
 
                         <div class="w-full max-w-2xl flex flex-col gap-3">
@@ -609,6 +621,7 @@
                             <div class="flex flex-col">
                                 <label for="groupsCount" class="text-accent font-semibold mb-2">Liczba grup</label>
                                 <select id="groupsCount" name="groupsCount" class="select-field"
+                                        x-ref="groupsSelect"
                                         x-model.number="groupsCount" x-on:change="onGroupsChange()"
                                         x-bind:disabled="tournamentFormat !== 'groups_playoff'">
                                     @foreach ($groupCountOptions as $option)
@@ -749,7 +762,6 @@
                             Potrzeba jeszcze <span x-text="minPlayers - participantCount"></span> uczestników
                         </p>
                     </form>
-                @endif
             </div>
         @endif
 
@@ -791,18 +803,25 @@
                 minGroups: 2,
                 participantCount: config.participantCount ?? 0,
                 init() {
-                    this.refreshGroupAvailability();
+                    this.onParticipantCountChange(this.participantCount, { preserveUserEdits: false });
                     window.addEventListener('tournament-participant-count', (e) => {
                         const next = Number(e.detail?.participantCount);
                         if (!Number.isNaN(next)) {
-                            this.participantCount = next;
-                            this.refreshSeBracket();
-                            this.refreshGroupAvailability();
-                            this.syncMatchFormats();
+                            this.onParticipantCountChange(next);
                         }
                     });
                     // Po zamontowaniu <select> Alpine potrafi nadpisać model pierwszą opcją (101/1/1).
                     this.$nextTick(() => this.syncMatchFormats({ preserveUserEdits: false }));
+                },
+                onParticipantCountChange(next, { preserveUserEdits = true } = {}) {
+                    this.participantCount = next;
+                    this.refreshSeBracket();
+                    this.refreshGroupAvailability();
+                    this.syncMatchFormats({ preserveUserEdits });
+                    this.$nextTick(() => {
+                        this.syncGroupsCount();
+                        this.syncBracketSelect();
+                    });
                 },
                 refreshSeBracket() {
                     let power = 1;
@@ -811,6 +830,96 @@
                     }
                     this.seBracketSize = Math.max(4, power);
                     this.seByeCount = Math.max(0, this.seBracketSize - this.participantCount);
+                },
+                groupSizesFor(playerCount, groupsCount) {
+                    if (groupsCount < 1 || playerCount < 0) {
+                        return [];
+                    }
+                    const baseSize = Math.floor(playerCount / groupsCount);
+                    const remainder = playerCount % groupsCount;
+                    const sizes = [];
+                    for (let i = 0; i < groupsCount; i++) {
+                        sizes.push(baseSize + (i < remainder ? 1 : 0));
+                    }
+                    return sizes;
+                },
+                distributeAdvances(groupSizes, bracketSize) {
+                    const groupsCount = groupSizes.length;
+                    const playerCount = groupSizes.reduce((sum, size) => sum + size, 0);
+                    if (groupsCount < 1 || playerCount < 1) {
+                        return null;
+                    }
+                    if (bracketSize < groupsCount || bracketSize > playerCount) {
+                        return null;
+                    }
+                    const advances = [];
+                    const remainders = [];
+                    for (let i = 0; i < groupsCount; i++) {
+                        const exact = (bracketSize * groupSizes[i]) / playerCount;
+                        advances[i] = Math.floor(exact);
+                        remainders[i] = exact - advances[i];
+                    }
+                    const toAdd = bracketSize - advances.reduce((sum, n) => sum + n, 0);
+                    if (toAdd < 0) {
+                        return null;
+                    }
+                    const indices = Array.from({ length: groupsCount }, (_, i) => i);
+                    indices.sort((a, b) => remainders[b] - remainders[a] || a - b);
+                    for (let k = 0; k < toAdd; k++) {
+                        advances[indices[k]] += 1;
+                    }
+                    for (let i = 0; i < groupsCount; i++) {
+                        if (advances[i] < 1 || advances[i] > groupSizes[i]) {
+                            return null;
+                        }
+                    }
+                    if (advances.reduce((sum, n) => sum + n, 0) !== bracketSize) {
+                        return null;
+                    }
+                    return advances;
+                },
+                bracketOptionLabel(bracketSize) {
+                    const stage = ({
+                        128: '1/64 finału',
+                        64: '1/32 finału',
+                        32: '1/16 finału',
+                        16: '1/8 finału',
+                        8: '1/4 finału',
+                        4: '1/2 finału',
+                    })[bracketSize] ?? `${bracketSize} graczy`;
+                    return `${stage} — ${bracketSize} graczy awansujących`;
+                },
+                rebuildStartConfig() {
+                    const playerCount = this.participantCount;
+                    const groupCounts = this.allowedGroupCountsForPlayers(playerCount);
+                    this.groupCountOptions = groupCounts;
+                    const preview = {};
+                    const bracketMap = {};
+                    for (const groupsCount of groupCounts) {
+                        const sizes = this.groupSizesFor(playerCount, groupsCount);
+                        preview[groupsCount] = {};
+                        const options = [];
+                        for (let bracketSize = 4; bracketSize <= 128; bracketSize *= 2) {
+                            if (bracketSize < groupsCount || bracketSize > playerCount) {
+                                continue;
+                            }
+                            const advances = this.distributeAdvances(sizes, bracketSize);
+                            if (!advances) {
+                                continue;
+                            }
+                            preview[groupsCount][bracketSize] = {
+                                groupSizes: sizes,
+                                advances,
+                            };
+                            options.push({
+                                value: bracketSize,
+                                label: this.bracketOptionLabel(bracketSize),
+                            });
+                        }
+                        bracketMap[groupsCount] = options;
+                    }
+                    this.startConfigPreview = preview;
+                    this.bracketOptionsByGroupCount = bracketMap;
                 },
                 allowedGroupCountsForPlayers(playerCount) {
                     const minPer = this.minPlayersPerGroup;
@@ -828,8 +937,12 @@
                     return options;
                 },
                 refreshGroupAvailability() {
-                    this.groupCountOptions = this.allowedGroupCountsForPlayers(this.participantCount);
-                    if (this.tournamentFormat === 'groups_playoff' && !this.canUseGroupsPlayoff) {
+                    this.rebuildStartConfig();
+                    if (
+                        this.participantCount >= this.minPlayers
+                        && this.tournamentFormat === 'groups_playoff'
+                        && !this.canUseGroupsPlayoff
+                    ) {
                         this.tournamentFormat = 'single_elimination';
                     }
                     this.syncGroupsCount();
@@ -889,8 +1002,21 @@
                     this.matchFormats = next;
                 },
                 syncGroupsCount() {
+                    const sel = this.$refs.groupsSelect;
+                    if (sel) {
+                        sel.replaceChildren();
+                        for (const option of this.groupCountOptions) {
+                            const elOpt = document.createElement('option');
+                            elOpt.value = String(option);
+                            elOpt.textContent = String(option);
+                            sel.appendChild(elOpt);
+                        }
+                    }
                     if (!this.groupCountOptions.includes(this.groupsCount)) {
                         this.groupsCount = this.groupCountOptions[0] ?? 2;
+                    }
+                    if (sel) {
+                        sel.value = String(this.groupsCount);
                     }
                 },
                 syncBracketSelect() {
