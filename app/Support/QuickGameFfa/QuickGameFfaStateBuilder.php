@@ -2,23 +2,32 @@
 
 namespace App\Support\QuickGameFfa;
 
-use App\Models\Player\Player;
-use App\Models\QuickGame\QuickGameFfaSession;
 use App\Domain\GameScoring\MatchFormat;
 use App\Domain\GameScoring\MatchFormatScoring;
-use App\Support\GameScoring\ScoringStateContract;
 use App\Domain\GameScoring\VisitRecorder;
+use App\Models\QuickGame\QuickGameFfaSession;
+use App\Repositories\Player\PlayerRepository;
+use App\Support\GameScoring\ScoringStateContract;
 use Illuminate\Support\Collection;
 
 class QuickGameFfaStateBuilder
 {
+    public function __construct(
+        private PlayerRepository $playerRepository,
+    ) {
+    }
+
     /**
+     * Pełny stan FFA — ten sam kształt na GET i na WS (`ffa.state.updated`).
+     * Cieńszy payload WS (bez historii zamkniętych legów) jest odłożony:
+     * patrz docs/NEXT_STEPS.md („FFA WS — cieńszy payload”).
+     *
      * @return array<string, mixed>
      */
     public function build(QuickGameFfaSession $session, Collection $activeVisits, ?int $currentUserId = null, ?array $presence = null): array
     {
         $playerIds = $session->player_order ?? [];
-        $players = Player::whereIn('id', $playerIds)->get()->keyBy('id');
+        $names = $this->playerRepository->getNamesByIds(array_map('intval', $playerIds));
         $format = MatchFormat::fromRecord($session);
         $legsWonInSet = $session->legs_won_in_set ?? [];
         $setsWon = $session->sets_won ?? [];
@@ -31,7 +40,7 @@ class QuickGameFfaStateBuilder
 
         $playerStates = [];
         foreach ($playerIds as $orderIndex => $playerId) {
-            $player = $players->get($playerId);
+            $player = $names[(int) $playerId] ?? $names[$playerId] ?? null;
             $legVisits = $currentLegVisits->where('player_id', $playerId);
             $remaining = VisitRecorder::remainingFromLegVisits($legVisits, (int) $session->starting_score);
             $playerAll = $activeVisits
@@ -66,7 +75,7 @@ class QuickGameFfaStateBuilder
 
             $playerStates[] = [
                 'playerId' => (int) $playerId,
-                'name' => $player?->name ?? 'Gracz',
+                'name' => $player ?? 'Gracz',
                 'orderIndex' => $orderIndex,
                 'legsWon' => $format->isSingleSet()
                     ? ($legsWon[$playerId] ?? 0)
@@ -174,11 +183,11 @@ class QuickGameFfaStateBuilder
      */
     private function resolveMyIndex(array $playerIds, int $userId): ?int
     {
-        $player = Player::where('user_id', $userId)->first();
+        $player = $this->playerRepository->findByUserId($userId);
         if (! $player) {
             return null;
         }
-        $idx = array_search((int) $player->id, array_map('intval', $playerIds), true);
+        $idx = array_search($player->id, array_map('intval', $playerIds), true);
 
         return $idx === false ? null : (int) $idx;
     }

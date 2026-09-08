@@ -11,6 +11,7 @@ import { registerRefereeScoring } from './referee/refereeScoring.js';
 import { registerLeagueRosterBoard } from './leagueRosterBoard.js';
 import { registerRelatedUserSearch } from './relatedUserSearch.js';
 import { registerCheckoutWheels } from './checkoutWheel.js';
+import { registerFriendsPanel } from './friendsPanel.js';
 import { registerPlayerCareer } from './playerCareer.js';
 
 registerGameLiveViewer(alpine);
@@ -24,6 +25,7 @@ registerRefereeScoring(alpine);
 registerLeagueRosterBoard(alpine);
 registerRelatedUserSearch(alpine);
 registerCheckoutWheels();
+registerFriendsPanel(alpine);
 registerPlayerCareer(alpine);
 
 window.Alpine = alpine;

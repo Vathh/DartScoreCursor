@@ -50,18 +50,11 @@ class AppServiceProvider extends ServiceProvider
         require base_path('routes/channels.php');
 
         View::composer('layouts.app', function ($view) {
-            $friends = collect();
-            $receivedFriendInvitations = collect();
-            $sentFriendInvitations = collect();
+            $friendsCount = 0;
             if (Auth::check()) {
-                $friendshipService = app(FriendshipService::class);
-                $friends = $friendshipService->getFriends(Auth::id());
-                $receivedFriendInvitations = $friendshipService->getReceivedInvitations(Auth::id());
-                $sentFriendInvitations = $friendshipService->getSentInvitations(Auth::id());
+                $friendsCount = app(FriendshipService::class)->countFriends(Auth::id());
             }
-            $view->with('friends', $friends);
-            $view->with('receivedFriendInvitations', $receivedFriendInvitations);
-            $view->with('sentFriendInvitations', $sentFriendInvitations);
+            $view->with('friendsCount', $friendsCount);
         });
 
         Blade::if('canCreateOrganizations', function () {

@@ -10,7 +10,7 @@
     @vite('resources/css/app.css')
     @vite('resources/js/app.js')
 </head>
-<body class="app-shell flex flex-col min-h-screen text-text" x-data="{ friendsOpen: false }">
+<body class="app-shell flex flex-col min-h-screen text-text" @auth x-data="friendsPanel({ url: '{{ route('friends.panel') }}' })" @endauth>
 
     @include('components.notifications')
 
@@ -23,12 +23,12 @@
 
         @auth
             <button type="button"
-                    @click="friendsOpen = true"
+                    @click="show()"
                     class="friends-fab">
-                Znajomi ({{ $friends->count() }})
+                Znajomi ({{ $friendsCount }})
             </button>
 
-            <div x-show="friendsOpen"
+            <div x-show="open"
                  x-transition:enter="transition ease-out duration-200"
                  x-transition:enter-start="opacity-0 translate-x-full"
                  x-transition:enter-end="opacity-100 translate-x-0"
@@ -45,84 +45,23 @@
                         </span>
                         <h2 class="text-lg font-bold text-text truncate">Znajomi</h2>
                     </div>
-                    <button type="button" @click="friendsOpen = false" class="text-text-muted hover:text-accent transition p-1 text-lg leading-none" aria-label="Zamknij">✕</button>
+                    <button type="button" @click="hide()" class="text-text-muted hover:text-accent transition p-1 text-lg leading-none" aria-label="Zamknij">✕</button>
                 </div>
                 <div class="flex-1 overflow-y-auto p-4 space-y-6">
-                    @if($receivedFriendInvitations->isNotEmpty())
-                        <section>
-                            <h3 class="text-sm font-semibold text-accent mb-2">Zaproszenia</h3>
-                            <ul class="space-y-2">
-                                @foreach($receivedFriendInvitations as $invitation)
-                                    <li class="p-3 rounded-lg border border-border bg-bg-elevated/50">
-                                        <p class="text-text-secondary text-sm mb-2">
-                                            {{ $invitation->senderPlayer?->name ?? 'Gracz' }}
-                                        </p>
-                                        <div class="flex gap-2">
-                                            <form action="{{ route('friends.invitations.accept', $invitation->id) }}" method="POST">
-                                                @csrf
-                                                <button type="submit" class="btn btn-mini text-xs py-1 px-2">Akceptuj</button>
-                                            </form>
-                                            <form action="{{ route('friends.invitations.reject', $invitation->id) }}" method="POST">
-                                                @csrf
-                                                <button type="submit" class="text-xs py-1 px-2 rounded-md border border-accent text-accent hover:bg-accent/10 transition">Odrzuć</button>
-                                            </form>
-                                        </div>
-                                    </li>
-                                @endforeach
-                            </ul>
-                        </section>
-                    @endif
-
-                    <section>
-                        <h3 class="text-sm font-semibold text-accent mb-2">Twoi znajomi</h3>
-                    @if($friends->isEmpty())
-                        <x-empty-state
-                            class="!py-8"
-                            title="Brak znajomych"
-                            description="Dodaj graczy z profilu lub wyszukiwarki."
-                        />
-                    @else
-                        <ul class="space-y-2">
-                            @foreach($friends as $friend)
-                                <li>
-                                    <a href="{{ route('players.show', $friend->friendPlayer->id) }}" class="friends-link">
-                                        {{ $friend->friendPlayer->name }}
-                                    </a>
-                                </li>
-                            @endforeach
-                        </ul>
-                    @endif
-                    </section>
-
-                    @if($sentFriendInvitations->isNotEmpty())
-                        <section>
-                            <h3 class="text-sm font-semibold text-accent mb-2">Oczekujący</h3>
-                            <ul class="space-y-2">
-                                @foreach($sentFriendInvitations as $invitation)
-                                    <li>
-                                        @if($invitation->receiverPlayer)
-                                            <a href="{{ route('players.show', $invitation->receiverPlayer->id) }}" class="friends-link">
-                                                {{ $invitation->receiverPlayer->name }}
-                                            </a>
-                                        @else
-                                            <span class="friends-link text-text-muted pointer-events-none">Gracz</span>
-                                        @endif
-                                    </li>
-                                @endforeach
-                            </ul>
-                        </section>
-                    @endif
+                    <p x-show="loading" x-cloak class="text-sm text-text-muted">Ładowanie…</p>
+                    <p x-show="error" x-cloak class="text-sm text-text-muted">Nie udało się załadować listy znajomych.</p>
+                    <div x-show="!loading && !error" x-html="html"></div>
                 </div>
             </div>
 
-            <div x-show="friendsOpen"
+            <div x-show="open"
                  x-transition:enter="transition ease-out duration-200"
                  x-transition:enter-start="opacity-0"
                  x-transition:enter-end="opacity-100"
                  x-transition:leave="transition ease-in duration-150"
                  x-transition:leave-start="opacity-100"
                  x-transition:leave-end="opacity-0"
-                 @click="friendsOpen = false"
+                 @click="hide()"
                  class="overlay"
                  x-cloak
                  style="display: none;"></div>

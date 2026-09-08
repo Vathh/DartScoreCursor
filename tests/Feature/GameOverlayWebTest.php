@@ -5,10 +5,14 @@ namespace Tests\Feature;
 use App\Domain\GameScoring\MatchFormat;
 use App\Enums\GameStatus;
 use App\Enums\TournamentStatus;
+use App\Models\Game\GameLeg;
+use App\Models\Game\GameLegPlayerStat;
+use App\Models\Game\GameVisit;
 use App\Models\Player\Player;
 use App\Models\PlayoffGame\PlayoffGame;
 use App\Models\Tournament\Tournament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class GameOverlayWebTest extends TestCase
@@ -110,6 +114,107 @@ class GameOverlayWebTest extends TestCase
             ->assertOk()
             ->assertSee('SETY')
             ->assertSee('LEGI');
+    }
+
+    public function test_live_state_skips_full_detail_and_returns_410_when_finished(): void
+    {
+        $live = $this->playoffGame(GameStatus::IN_PROGRESS, 'State Alice', 'State Bob');
+
+        $this->getJson(route('games.live.state', ['type' => 'playoff', 'id' => $live->id]))
+            ->assertOk()
+            ->assertJsonPath('game.status', 'in_progress')
+            ->assertJsonPath('players.0.name', 'State Alice');
+
+        $finished = $this->playoffGame(
+            GameStatus::FINISHED,
+            'Done Alice',
+            'Done Bob',
+            player1Score: 2,
+            player2Score: 0,
+        );
+
+        $this->getJson(route('games.live.state', ['type' => 'playoff', 'id' => $finished->id]))
+            ->assertStatus(410)
+            ->assertJsonPath('message', 'Mecz zakończony.');
+    }
+
+    public function test_overlay_queries_game_visits_once(): void
+    {
+        $game = $this->playoffGame(GameStatus::IN_PROGRESS, 'Visit Alice', 'Visit Bob');
+        $leg = GameLeg::create([
+            'playoff_game_id' => $game->id,
+            'leg_number' => 1,
+            'started_at' => now(),
+        ]);
+        GameVisit::create([
+            'game_leg_id' => $leg->id,
+            'player_id' => $game->player1_id,
+            'visit_number' => 1,
+            'score' => 60,
+            'remaining_before' => 501,
+            'remaining_after' => 441,
+            'darts_in_visit' => 3,
+            'closed_leg' => false,
+            'bust' => false,
+            'is_voided' => false,
+            'client_visit_id' => 'overlay-visit-once',
+        ]);
+
+        $visitSelects = 0;
+        DB::listen(function ($query) use (&$visitSelects) {
+            if (preg_match('/from [`"]?game_visits[`"]?/i', $query->sql) === 1) {
+                $visitSelects++;
+            }
+        });
+
+        $this->get(route('games.overlay', ['type' => 'playoff', 'id' => $game->id]))
+            ->assertOk()
+            ->assertSee('Visit Alice');
+
+        $this->assertSame(1, $visitSelects);
+    }
+
+    public function test_show_page_keeps_persisted_leg_average_on_closed_leg(): void
+    {
+        $game = $this->playoffGame(
+            GameStatus::FINISHED,
+            'Cache Alice',
+            'Cache Bob',
+            player1Score: 1,
+            player2Score: 0,
+        );
+        $leg = GameLeg::create([
+            'playoff_game_id' => $game->id,
+            'leg_number' => 1,
+            'winner_id' => $game->player1_id,
+            'started_at' => now(),
+            'finished_at' => now(),
+        ]);
+        GameLegPlayerStat::create([
+            'game_leg_id' => $leg->id,
+            'player_id' => $game->player1_id,
+            'double_tracked' => false,
+            'leg_average' => 77.77,
+            'first_nine_average' => 77.77,
+            'darts_thrown' => 9,
+        ]);
+        GameVisit::create([
+            'game_leg_id' => $leg->id,
+            'player_id' => $game->player1_id,
+            'visit_number' => 1,
+            'score' => 180,
+            'remaining_before' => 501,
+            'remaining_after' => 321,
+            'darts_in_visit' => 3,
+            'closed_leg' => false,
+            'bust' => false,
+            'is_voided' => false,
+            'client_visit_id' => 'show-cache-avg',
+        ]);
+
+        $this->get(route('games.show', ['type' => 'playoff', 'id' => $game->id]))
+            ->assertOk()
+            ->assertSee('77.77');
     }
 
     private function playoffGame(

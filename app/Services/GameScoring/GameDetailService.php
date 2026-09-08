@@ -37,94 +37,117 @@ class GameDetailService
     }
 
     /**
+     * Pełny detal (strona meczu) — wizyty + stats.
+     *
      * @return array<string, mixed>
      */
     public function build(GameKind $kind, int $id): array
     {
+        [$context, $game, $label, $subtitle, $backUrl] = $this->resolveDisplay($kind, $id);
+
+        return $this->assemble($context, $game, $label, $subtitle, $backUrl, withVisitDetail: true);
+    }
+
+    /**
+     * Metadane live/overlay bez wizyt. Scoring state ładuje się osobno z tego samego `$game`.
+     *
+     * @return array{0: array<string, mixed>, 1: GameScoringContext, 2: Game|PlayoffGame|QuickGame|LeagueGame}
+     */
+    public function buildShell(GameKind $kind, int $id): array
+    {
+        [$context, $game, $label, $subtitle, $backUrl] = $this->resolveDisplay($kind, $id);
+
+        return [
+            $this->assemble($context, $game, $label, $subtitle, $backUrl, withVisitDetail: false),
+            $context,
+            $game,
+        ];
+    }
+
+    /**
+     * @return array{0: GameScoringContext, 1: Game|PlayoffGame|QuickGame|LeagueGame, 2: string, 3: ?string, 4: string}
+     */
+    private function resolveDisplay(GameKind $kind, int $id): array
+    {
         return match ($kind) {
-            GameKind::GROUP => $this->buildFromGroupGame(
+            GameKind::GROUP => $this->displayFromGroupGame(
                 $this->gameRepository->findModel($id, ['player1', 'player2', 'tournament.season.organization']),
             ),
-            GameKind::PLAYOFF => $this->buildFromPlayoffGame(
+            GameKind::PLAYOFF => $this->displayFromPlayoffGame(
                 $this->playoffGameRepository->findModel($id, ['player1', 'player2', 'tournament.season.organization']),
             ),
-            GameKind::QUICK => $this->buildFromQuickGame(
+            GameKind::QUICK => $this->displayFromQuickGame(
                 $this->quickGameRepository->findModel($id, ['player1', 'player2']),
             ),
-            GameKind::LEAGUE => $this->buildFromLeagueGame(
+            GameKind::LEAGUE => $this->displayFromLeagueGame(
                 $this->leagueGameRepository->findForPlay($id),
             ),
         };
     }
 
     /**
-     * @return array<string, mixed>
+     * @return array{0: GameScoringContext, 1: Game, 2: string, 3: ?string, 4: string}
      */
-    private function buildFromGroupGame(Game $game): array
+    private function displayFromGroupGame(Game $game): array
     {
-        $context = GameScoringContext::fromGroupGame($game);
-
-        return $this->assemble(
-            $context,
+        return [
+            GameScoringContext::fromGroupGame($game),
             $game,
-            label: 'Turniejowy — grupa',
-            subtitle: $game->tournament?->name,
-            backUrl: $game->tournament
+            'Turniejowy — grupa',
+            $game->tournament?->name,
+            $game->tournament
                 ? route('tournaments.show', ['tournament' => $game->tournament_id, 'tab' => 'groups'])
                 : route('pages.home'),
-        );
+        ];
     }
 
     /**
-     * @return array<string, mixed>
+     * @return array{0: GameScoringContext, 1: PlayoffGame, 2: string, 3: ?string, 4: string}
      */
-    private function buildFromPlayoffGame(PlayoffGame $game): array
+    private function displayFromPlayoffGame(PlayoffGame $game): array
     {
-        $context = GameScoringContext::fromPlayoffGame($game);
-
-        return $this->assemble(
-            $context,
+        return [
+            GameScoringContext::fromPlayoffGame($game),
             $game,
-            label: 'Turniejowy — '.PlayoffRoundLabel::label((string) $game->round),
-            subtitle: $game->tournament?->name,
-            backUrl: $game->tournament
+            'Turniejowy — '.PlayoffRoundLabel::label((string) $game->round),
+            $game->tournament?->name,
+            $game->tournament
                 ? route('tournaments.show', ['tournament' => $game->tournament_id, 'tab' => 'playoff'])
                 : route('pages.home'),
-        );
+        ];
+    }
+
+    /**
+     * @return array{0: GameScoringContext, 1: QuickGame, 2: string, 3: ?string, 4: string}
+     */
+    private function displayFromQuickGame(QuickGame $game): array
+    {
+        return [
+            GameScoringContext::fromQuickGame($game),
+            $game,
+            'Towarzyski',
+            'Szybki mecz',
+            route('pages.home'),
+        ];
+    }
+
+    /**
+     * @return array{0: GameScoringContext, 1: LeagueGame, 2: string, 3: ?string, 4: string}
+     */
+    private function displayFromLeagueGame(LeagueGame $game): array
+    {
+        return [
+            GameScoringContext::fromLeagueGame($game),
+            $game,
+            'Liga',
+            $game->season?->league?->name,
+            route('league-games.show', $game),
+        ];
     }
 
     /**
      * @return array<string, mixed>
      */
-    private function buildFromQuickGame(QuickGame $game): array
-    {
-        $context = GameScoringContext::fromQuickGame($game);
-
-        return $this->assemble(
-            $context,
-            $game,
-            label: 'Towarzyski',
-            subtitle: 'Szybki mecz',
-            backUrl: route('pages.home'),
-        );
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function buildFromLeagueGame(LeagueGame $game): array
-    {
-        $context = GameScoringContext::fromLeagueGame($game);
-
-        return $this->assemble(
-            $context,
-            $game,
-            label: 'Liga',
-            subtitle: $game->season?->league?->name,
-            backUrl: route('league-games.show', $game),
-        );
-    }
-
     /**
      * @return array<string, mixed>
      */
@@ -134,15 +157,20 @@ class GameDetailService
         string $label,
         ?string $subtitle,
         string $backUrl,
+        bool $withVisitDetail,
     ): array {
-        $legs = $this->gameLegRepository->getForContext($context);
+        $legs = $withVisitDetail ? $this->gameLegRepository->getForContext($context) : collect();
         $legIds = $legs->pluck('id')->all();
-        $visits = $this->gameVisitRepository->getActiveForGameLegs($legIds);
-        $legStats = $this->gameLegPlayerStatRepository->getForLegIds($legIds);
+        $visits = $withVisitDetail
+            ? $this->gameVisitRepository->getActiveForGameLegs($legIds)
+            : collect();
+        $legStats = $withVisitDetail
+            ? $this->gameLegPlayerStatRepository->getForLegIds($legIds)
+            : collect();
 
         $openLeg = $legs->first(fn ($leg) => $leg->isOpen());
 
-        $players = [
+        $players = $withVisitDetail ? [
             $this->playerDetail(
                 $context->player1Id,
                 $game->player1?->name ?? '—',
@@ -159,13 +187,16 @@ class GameDetailService
                 $legs,
                 $openLeg?->id,
             ),
-        ];
+        ] : [];
 
         $legsDetail = $legs->map(function ($leg) use ($visits, $legStats) {
             $legVisits = $visits->where('game_leg_id', $leg->id);
             $stats = $legStats->where('game_leg_id', $leg->id)->map(function ($stat) use ($legVisits) {
-                $playerVisits = $legVisits->where('player_id', $stat->player_id);
+                if ($stat->leg_average !== null) {
+                    return $stat;
+                }
 
+                $playerVisits = $legVisits->where('player_id', $stat->player_id);
                 $stat->leg_average = GameStatisticsCalculator::legAverage($playerVisits);
                 $stat->first_nine_average = GameStatisticsCalculator::firstNineAverage($playerVisits);
                 $stat->highest_visit = GameStatisticsCalculator::highestVisit($playerVisits);
@@ -182,12 +213,14 @@ class GameDetailService
             ];
         });
 
-        $legsBySet = GameLegsSetGrouper::group(
-            $legsDetail,
-            $context->matchFormat,
-            $context->player1Id,
-            $context->player2Id,
-        );
+        $legsBySet = $withVisitDetail
+            ? GameLegsSetGrouper::group(
+                $legsDetail,
+                $context->matchFormat,
+                $context->player1Id,
+                $context->player2Id,
+            )
+            : [];
 
         $tournamentId = ($game instanceof Game || $game instanceof PlayoffGame)
             ? (int) $game->tournament_id

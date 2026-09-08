@@ -37,7 +37,7 @@
 | **Live drabinka / playoff (web WS)** | Później — zakładka Playoff dziś SSR (F5); live WS jest dla macierzy grup + pojedynczego meczu. Wzorzec: `TournamentGroupMatrixLiveService` |
 | **Prowadzenie organizacji typu Apagon** | Później — zakres UX do ustalenia przy planie |
 | **Tryby gry** (kolejne) | Później — Bob's 27, Around the Clock, Catch 40 i Cricket 60 są w treningu + quick |
-| **Autoryzacja scoringu / anty-nadużycia** | Daleka przyszłość — kto może `recordVisit` / `closeLeg`; audyt. Nieblocker turnieju klubowego |
+| **FFA WS — cieńszy payload** | Później. Dziś `ffa.state.updated` i GET stanu to **ten sam pełny JSON** (historia zamkniętych legów w `legByLegScores`). Cieńszy event + „brak pola = nie kasuj Statystyk” na mobile: najpierw apka, potem serwer; pilnować undo i dwóch telefonów. Nie ruszać kontraktu bez tej kolejności. |
 | **Aktualizacja APK w apce (self-update)** | Później — przy starcie komunikat „nowa wersja” → pobranie APK → instalator Androida (systemowy dialog Zainstaluj). Nie OTA (`expo-updates` — tylko JS). Na czas testów: endpoint `latestVersion` + URL APK + to samo podpisywanie keystore. Po wejściu do Play: In-App Updates. iOS: tylko TestFlight / App Store. **Nie implementować teraz.** |
 
 ---
@@ -54,6 +54,7 @@ Szczegóły w kodzie / [`../IMPLEMENTED_FEATURES.md`](../IMPLEMENTED_FEATURES.md
 
 - Deploy VPS, `migrate`, EAS — po stronie właściciela (chyba że poprosi)
 - Komunikator, premium, E2E mobile (Maestro/Detox)
+- Cieńszy broadcast FFA (`ffa.state.updated` bez historii legów, GET bez zmian) — **nie teraz**. Ryzyko: Statystyki puste po rzucie / „duch” po undo; stara apka + nowy serwer czyści historię. Zapis: backlog powyżej.
 - Krykiet w turnieju — poza zakresem (jest trening + quick)
 - Bob's 27 w turnieju — poza zakresem (jest trening + quick)
 - Around the Clock w turnieju — poza zakresem (jest trening + quick)

@@ -135,6 +135,22 @@ class FriendshipService
         return $this->invitationRepository->getSentInvitations($userId);
     }
 
+    /**
+     * @return array{
+     *     friends: Collection<int, FriendshipDomain>,
+     *     receivedFriendInvitations: Collection<int, FriendshipInvitationDomain>,
+     *     sentFriendInvitations: Collection<int, FriendshipInvitationDomain>
+     * }
+     */
+    public function webPanelData(int $userId): array
+    {
+        return [
+            'friends' => $this->getFriends($userId),
+            'receivedFriendInvitations' => $this->getReceivedInvitations($userId),
+            'sentFriendInvitations' => $this->getSentInvitations($userId),
+        ];
+    }
+
     public function findPendingInvitation(int $senderId, int $receiverId): ?FriendshipInvitationDomain
     {
         return $this->invitationRepository->findPending($senderId, $receiverId);

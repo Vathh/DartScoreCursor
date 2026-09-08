@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EmailVerificationController;
+use App\Http\Controllers\FriendsController;
 use App\Http\Controllers\FriendInvitationController;
 use App\Http\Controllers\GameViewController;
 use App\Http\Controllers\LeagueController;
@@ -110,6 +111,7 @@ Route::get('/players/{player}', [PlayerController::class, 'show'])->name('player
 Route::get('/players/{player}/games', [PlayerController::class, 'gameHistory'])->name('players.games');
 Route::get('/players/{player}/career', [PlayerController::class, 'career'])->name('players.career');
 Route::post('/players/{player}/add-friend', [PlayerController::class, 'addFriend'])->name('players.add-friend')->middleware('auth');
+Route::get('/friends/panel', [FriendsController::class, 'panel'])->name('friends.panel')->middleware('auth');
 Route::post('/friends/invitations/{invitation}/accept', [FriendInvitationController::class, 'accept'])->name('friends.invitations.accept')->middleware('auth');
 Route::post('/friends/invitations/{invitation}/reject', [FriendInvitationController::class, 'reject'])->name('friends.invitations.reject')->middleware('auth');
 

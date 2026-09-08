@@ -71,13 +71,12 @@ class GameViewController extends Controller
     public function live(string $type, int $id): View|RedirectResponse
     {
         $kind = GameDetailService::kindFromRoute($type);
-        $detail = $this->gameDetailService->build($kind, $id);
+        [$detail, $context, $game] = $this->gameDetailService->buildShell($kind, $id);
 
         if ($detail['status'] === GameStatus::FINISHED->value) {
             return redirect()->route('games.show', ['type' => $type, 'id' => $id]);
         }
 
-        [$context, $game] = $this->resolveScoringGame($kind, $id);
         $initialState = $this->gameScoringService->getState($context, $game);
 
         return view('games.live', array_merge($detail, [
@@ -90,13 +89,12 @@ class GameViewController extends Controller
     public function liveState(string $type, int $id): JsonResponse
     {
         $kind = GameDetailService::kindFromRoute($type);
-        $detail = $this->gameDetailService->build($kind, $id);
+        [$context, $game] = $this->resolveScoringGame($kind, $id);
 
-        if ($detail['status'] === GameStatus::FINISHED->value) {
+        $status = $game->status instanceof \BackedEnum ? $game->status->value : (string) $game->status;
+        if ($status === GameStatus::FINISHED->value) {
             return response()->json(['message' => 'Mecz zakończony.'], 410);
         }
-
-        [$context, $game] = $this->resolveScoringGame($kind, $id);
 
         return response()->json($this->gameScoringService->getState($context, $game));
     }
@@ -104,9 +102,7 @@ class GameViewController extends Controller
     public function overlay(Request $request, string $type, int $id): View
     {
         $kind = GameDetailService::kindFromRoute($type);
-        $detail = $this->gameDetailService->build($kind, $id);
-
-        [$context, $game] = $this->resolveScoringGame($kind, $id);
+        [$detail, $context, $game] = $this->gameDetailService->buildShell($kind, $id);
         $initialState = $this->gameScoringService->getState($context, $game);
 
         $overlayShowUrl = $kind === GameKind::LEAGUE
