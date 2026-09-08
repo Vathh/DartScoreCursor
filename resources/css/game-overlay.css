@@ -144,6 +144,13 @@ body.game-overlay-preview {
     background: linear-gradient(180deg, rgba(245, 158, 11, 0.16), transparent 72%);
 }
 
+.game-overlay-scorebug:has(.game-overlay-player.is-throwing) .game-overlay-player:not(.is-throwing) .game-overlay-copy,
+.game-overlay-scorebug:has(.game-overlay-player.is-throwing) .game-overlay-player:not(.is-throwing) .game-overlay-rail,
+.game-overlay-scorebug:has(.game-overlay-player.is-throwing) .game-overlay-player:not(.is-throwing) .game-overlay-score-caption {
+    opacity: 0.75;
+    transition: opacity 0.22s ease;
+}
+
 .game-overlay-copy {
     min-width: 0;
 }
