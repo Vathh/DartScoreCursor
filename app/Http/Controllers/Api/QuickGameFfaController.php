@@ -32,15 +32,11 @@ class QuickGameFfaController
 
     public function state(Request $request, string $lobbyId): JsonResponse
     {
-        try {
-            $this->assertLobbyParticipant((int) $lobbyId, $request->user()->id);
+        $this->assertLobbyParticipant((int) $lobbyId, $request->user()->id);
 
-            return response()->json(
-                $this->ffaScoringService->getState((int) $lobbyId, $request->user()->id)
-            );
-        } catch (DomainException $e) {
-            return response()->json(['message' => $e->getMessage()], 422);
-        }
+        return response()->json(
+            $this->ffaScoringService->getState((int) $lobbyId, $request->user()->id)
+        );
     }
 
     public function updatePresence(Request $request, string $lobbyId): JsonResponse
@@ -49,19 +45,15 @@ class QuickGameFfaController
             'status' => 'required|string|in:connected,disconnected,left',
         ]);
 
-        try {
-            $this->assertLobbyParticipant((int) $lobbyId, $request->user()->id);
+        $this->assertLobbyParticipant((int) $lobbyId, $request->user()->id);
 
-            return response()->json(
-                $this->presenceService->updatePresence(
-                    (int) $lobbyId,
-                    $request->user()->id,
-                    $validated['status'],
-                )
-            );
-        } catch (DomainException $e) {
-            return response()->json(['message' => $e->getMessage()], 422);
-        }
+        return response()->json(
+            $this->presenceService->updatePresence(
+                (int) $lobbyId,
+                $request->user()->id,
+                $validated['status'],
+            )
+        );
     }
 
     public function activeMatch(Request $request): JsonResponse
@@ -75,14 +67,10 @@ class QuickGameFfaController
 
     public function abort(Request $request, string $lobbyId): JsonResponse
     {
-        try {
-            $this->assertLobbyParticipant((int) $lobbyId, $request->user()->id);
-            $this->lobbyService->abortStartedGame((int) $lobbyId, $request->user()->id);
+        $this->assertLobbyParticipant((int) $lobbyId, $request->user()->id);
+        $this->lobbyService->abortStartedGame((int) $lobbyId, $request->user()->id);
 
-            return response()->json(['success' => true, 'aborted' => true]);
-        } catch (DomainException $e) {
-            return response()->json(['message' => $e->getMessage()], 422);
-        }
+        return response()->json(['success' => true, 'aborted' => true]);
     }
 
     public function recordVisit(Request $request, string $lobbyId): JsonResponse
@@ -98,32 +86,24 @@ class QuickGameFfaController
             'clientVisitId' => 'required|uuid',
         ], VisitDartPayload::validationRules()));
 
-        try {
-            $this->assertLobbyParticipant((int) $lobbyId, $request->user()->id);
+        $this->assertLobbyParticipant((int) $lobbyId, $request->user()->id);
 
-            return response()->json(
-                $this->ffaScoringService->recordVisit(
-                    (int) $lobbyId,
-                    $request->user()->id,
-                    RecordFfaVisitDTO::fromArray($validated),
-                )
-            );
-        } catch (DomainException $e) {
-            return response()->json(['message' => $e->getMessage()], 422);
-        }
+        return response()->json(
+            $this->ffaScoringService->recordVisit(
+                (int) $lobbyId,
+                $request->user()->id,
+                RecordFfaVisitDTO::fromArray($validated),
+            )
+        );
     }
 
     public function undoVisit(Request $request, string $lobbyId): JsonResponse
     {
-        try {
-            $this->assertLobbyParticipant((int) $lobbyId, $request->user()->id);
+        $this->assertLobbyParticipant((int) $lobbyId, $request->user()->id);
 
-            return response()->json(
-                $this->ffaScoringService->undoLastVisit((int) $lobbyId, $request->user()->id)
-            );
-        } catch (DomainException $e) {
-            return response()->json(['message' => $e->getMessage()], 422);
-        }
+        return response()->json(
+            $this->ffaScoringService->undoLastVisit((int) $lobbyId, $request->user()->id)
+        );
     }
 
     public function recordCricketDart(Request $request, string $lobbyId): JsonResponse
@@ -136,41 +116,33 @@ class QuickGameFfaController
             'clientDartId' => 'required|uuid',
         ]);
 
-        try {
-            $this->assertLobbyParticipant((int) $lobbyId, $request->user()->id);
+        $this->assertLobbyParticipant((int) $lobbyId, $request->user()->id);
 
-            $segment = $validated['segment'] ?? null;
-            if ($segment !== null && $segment !== 'bull') {
-                $segment = (string) $segment;
-            }
-
-            return response()->json(
-                $this->cricketScoringService->recordDart(
-                    (int) $lobbyId,
-                    $request->user()->id,
-                    (int) $validated['playerId'],
-                    $validated['kind'],
-                    $segment,
-                    (int) ($validated['multiplier'] ?? 1),
-                    $validated['clientDartId'],
-                )
-            );
-        } catch (DomainException $e) {
-            return response()->json(['message' => $e->getMessage()], 422);
+        $segment = $validated['segment'] ?? null;
+        if ($segment !== null && $segment !== 'bull') {
+            $segment = (string) $segment;
         }
+
+        return response()->json(
+            $this->cricketScoringService->recordDart(
+                (int) $lobbyId,
+                $request->user()->id,
+                (int) $validated['playerId'],
+                $validated['kind'],
+                $segment,
+                (int) ($validated['multiplier'] ?? 1),
+                $validated['clientDartId'],
+            )
+        );
     }
 
     public function undoCricketDart(Request $request, string $lobbyId): JsonResponse
     {
-        try {
-            $this->assertLobbyParticipant((int) $lobbyId, $request->user()->id);
+        $this->assertLobbyParticipant((int) $lobbyId, $request->user()->id);
 
-            return response()->json(
-                $this->cricketScoringService->undoLastDart((int) $lobbyId, $request->user()->id)
-            );
-        } catch (DomainException $e) {
-            return response()->json(['message' => $e->getMessage()], 422);
-        }
+        return response()->json(
+            $this->cricketScoringService->undoLastDart((int) $lobbyId, $request->user()->id)
+        );
     }
 
     public function recordBob27Dart(Request $request, string $lobbyId): JsonResponse
@@ -182,34 +154,26 @@ class QuickGameFfaController
             'clientVisitId' => 'required_without:clientDartId|nullable|uuid',
         ]);
 
-        try {
-            $this->assertLobbyParticipant((int) $lobbyId, $request->user()->id);
+        $this->assertLobbyParticipant((int) $lobbyId, $request->user()->id);
 
-            return response()->json(
-                $this->bob27ScoringService->recordVisit(
-                    (int) $lobbyId,
-                    $request->user()->id,
-                    (int) $validated['playerId'],
-                    (int) $validated['hits'],
-                    (string) ($validated['clientVisitId'] ?? $validated['clientDartId']),
-                )
-            );
-        } catch (DomainException $e) {
-            return response()->json(['message' => $e->getMessage()], 422);
-        }
+        return response()->json(
+            $this->bob27ScoringService->recordVisit(
+                (int) $lobbyId,
+                $request->user()->id,
+                (int) $validated['playerId'],
+                (int) $validated['hits'],
+                (string) ($validated['clientVisitId'] ?? $validated['clientDartId']),
+            )
+        );
     }
 
     public function undoBob27Dart(Request $request, string $lobbyId): JsonResponse
     {
-        try {
-            $this->assertLobbyParticipant((int) $lobbyId, $request->user()->id);
+        $this->assertLobbyParticipant((int) $lobbyId, $request->user()->id);
 
-            return response()->json(
-                $this->bob27ScoringService->undoLastDart((int) $lobbyId, $request->user()->id)
-            );
-        } catch (DomainException $e) {
-            return response()->json(['message' => $e->getMessage()], 422);
-        }
+        return response()->json(
+            $this->bob27ScoringService->undoLastDart((int) $lobbyId, $request->user()->id)
+        );
     }
 
     public function recordAtcVisit(Request $request, string $lobbyId): JsonResponse
@@ -221,34 +185,26 @@ class QuickGameFfaController
             'clientVisitId' => 'required_without:clientDartId|nullable|uuid',
         ]);
 
-        try {
-            $this->assertLobbyParticipant((int) $lobbyId, $request->user()->id);
+        $this->assertLobbyParticipant((int) $lobbyId, $request->user()->id);
 
-            return response()->json(
-                $this->atcScoringService->recordVisit(
-                    (int) $lobbyId,
-                    $request->user()->id,
-                    (int) $validated['playerId'],
-                    (int) $validated['hits'],
-                    (string) ($validated['clientVisitId'] ?? $validated['clientDartId']),
-                )
-            );
-        } catch (DomainException $e) {
-            return response()->json(['message' => $e->getMessage()], 422);
-        }
+        return response()->json(
+            $this->atcScoringService->recordVisit(
+                (int) $lobbyId,
+                $request->user()->id,
+                (int) $validated['playerId'],
+                (int) $validated['hits'],
+                (string) ($validated['clientVisitId'] ?? $validated['clientDartId']),
+            )
+        );
     }
 
     public function undoAtcVisit(Request $request, string $lobbyId): JsonResponse
     {
-        try {
-            $this->assertLobbyParticipant((int) $lobbyId, $request->user()->id);
+        $this->assertLobbyParticipant((int) $lobbyId, $request->user()->id);
 
-            return response()->json(
-                $this->atcScoringService->undoLastVisit((int) $lobbyId, $request->user()->id)
-            );
-        } catch (DomainException $e) {
-            return response()->json(['message' => $e->getMessage()], 422);
-        }
+        return response()->json(
+            $this->atcScoringService->undoLastVisit((int) $lobbyId, $request->user()->id)
+        );
     }
 
     public function recordCatch40Visit(Request $request, string $lobbyId): JsonResponse
@@ -265,40 +221,32 @@ class QuickGameFfaController
             'clientDartId' => 'required_without:clientVisitId|nullable|uuid',
         ], VisitDartPayload::validationRules()));
 
-        try {
-            $this->assertLobbyParticipant((int) $lobbyId, $request->user()->id);
+        $this->assertLobbyParticipant((int) $lobbyId, $request->user()->id);
 
-            return response()->json(
-                $this->catch40ScoringService->recordVisit(
-                    (int) $lobbyId,
-                    $request->user()->id,
-                    (int) $validated['playerId'],
-                    (int) $validated['score'],
-                    (int) $validated['remainingBefore'],
-                    (int) $validated['remainingAfter'],
-                    (int) $validated['dartsInVisit'],
-                    (bool) ($validated['bust'] ?? false),
-                    (bool) ($validated['checkout'] ?? false),
-                    (string) ($validated['clientVisitId'] ?? $validated['clientDartId']),
-                    VisitDartPayload::normalize($validated['darts'] ?? null),
-                )
-            );
-        } catch (DomainException $e) {
-            return response()->json(['message' => $e->getMessage()], 422);
-        }
+        return response()->json(
+            $this->catch40ScoringService->recordVisit(
+                (int) $lobbyId,
+                $request->user()->id,
+                (int) $validated['playerId'],
+                (int) $validated['score'],
+                (int) $validated['remainingBefore'],
+                (int) $validated['remainingAfter'],
+                (int) $validated['dartsInVisit'],
+                (bool) ($validated['bust'] ?? false),
+                (bool) ($validated['checkout'] ?? false),
+                (string) ($validated['clientVisitId'] ?? $validated['clientDartId']),
+                VisitDartPayload::normalize($validated['darts'] ?? null),
+            )
+        );
     }
 
     public function undoCatch40Visit(Request $request, string $lobbyId): JsonResponse
     {
-        try {
-            $this->assertLobbyParticipant((int) $lobbyId, $request->user()->id);
+        $this->assertLobbyParticipant((int) $lobbyId, $request->user()->id);
 
-            return response()->json(
-                $this->catch40ScoringService->undoLastVisit((int) $lobbyId, $request->user()->id)
-            );
-        } catch (DomainException $e) {
-            return response()->json(['message' => $e->getMessage()], 422);
-        }
+        return response()->json(
+            $this->catch40ScoringService->undoLastVisit((int) $lobbyId, $request->user()->id)
+        );
     }
 
     public function recordCricket56Visit(Request $request, string $lobbyId): JsonResponse
@@ -312,37 +260,29 @@ class QuickGameFfaController
             'clientDartId' => 'required_without:clientVisitId|nullable|uuid',
         ]);
 
-        try {
-            $this->assertLobbyParticipant((int) $lobbyId, $request->user()->id);
+        $this->assertLobbyParticipant((int) $lobbyId, $request->user()->id);
 
-            return response()->json(
-                $this->cricket56ScoringService->recordVisit(
-                    (int) $lobbyId,
-                    $request->user()->id,
-                    (int) $validated['playerId'],
-                    (int) ($validated['points'] ?? 0),
-                    (string) ($validated['clientVisitId'] ?? $validated['clientDartId']),
-                    isset($validated['marks']) && is_array($validated['marks'])
-                        ? array_map('intval', $validated['marks'])
-                        : null,
-                )
-            );
-        } catch (DomainException $e) {
-            return response()->json(['message' => $e->getMessage()], 422);
-        }
+        return response()->json(
+            $this->cricket56ScoringService->recordVisit(
+                (int) $lobbyId,
+                $request->user()->id,
+                (int) $validated['playerId'],
+                (int) ($validated['points'] ?? 0),
+                (string) ($validated['clientVisitId'] ?? $validated['clientDartId']),
+                isset($validated['marks']) && is_array($validated['marks'])
+                    ? array_map('intval', $validated['marks'])
+                    : null,
+            )
+        );
     }
 
     public function undoCricket56Visit(Request $request, string $lobbyId): JsonResponse
     {
-        try {
-            $this->assertLobbyParticipant((int) $lobbyId, $request->user()->id);
+        $this->assertLobbyParticipant((int) $lobbyId, $request->user()->id);
 
-            return response()->json(
-                $this->cricket56ScoringService->undoLastVisit((int) $lobbyId, $request->user()->id)
-            );
-        } catch (DomainException $e) {
-            return response()->json(['message' => $e->getMessage()], 422);
-        }
+        return response()->json(
+            $this->cricket56ScoringService->undoLastVisit((int) $lobbyId, $request->user()->id)
+        );
     }
 
     private function assertLobbyParticipant(int $lobbyId, int $userId): void

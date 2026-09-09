@@ -6,7 +6,6 @@ use App\DTO\QuickGame\PlayerResultDTO;
 use App\DTO\QuickGameFfa\RecordFfaVisitDTO;
 use App\Domain\QuickGame\FfaSessionRulesDomain;
 use App\Domain\QuickGame\FfaTurnRotationDomain;
-use App\Events\QuickGameFfaStateUpdated;
 use App\Models\QuickGame\QuickGameFfaPresence;
 use App\Models\QuickGame\QuickGameFfaSession;
 use App\Models\QuickGame\QuickGameLobby;
@@ -16,13 +15,15 @@ use App\Repositories\QuickGame\QuickGameFfaSessionRepository;
 use App\Repositories\QuickGame\QuickGameFfaVisitRepository;
 use App\Repositories\QuickGame\QuickGameLobbyRepository;
 use App\Repositories\QuickGame\QuickGameRepository;
+use App\Support\QuickGameFfa\FfaStateBroadcaster;
+use App\Support\QuickGameFfa\FfaTurnNormalize;
 use App\Support\QuickGameFfa\QuickGameFfaStateBuilder;
 use App\Domain\GameScoring\MatchFormat;
 use App\Domain\QuickGame\AroundTheClockRules;
 use App\Domain\QuickGame\Bob27Rules;
 use App\Domain\QuickGame\Catch40Rules;
 use App\Domain\QuickGame\Cricket56Rules;
-use App\Support\QuickGameFfa\CricketRules;
+use App\Domain\QuickGame\CricketRules;
 use App\Domain\GameScoring\MatchFormatScoring;
 use App\Domain\GameScoring\VisitRecorder;
 use App\Support\QuickGameLobbyPlayerOrder;
@@ -46,6 +47,7 @@ class QuickGameFfaScoringService
         private QuickGameFfaCatch40ScoringService $catch40ScoringService,
         private QuickGameFfaCricket56ScoringService $cricket56ScoringService,
         private PlayerCareerSnapshotService $careerSnapshotService,
+        private FfaSubmitGuard $submitGuard,
     ) {
     }
 
@@ -284,9 +286,7 @@ class QuickGameFfaScoringService
             ],
             'players' => [],
         ];
-        broadcast(new QuickGameFfaStateUpdated($lobbyId, $state));
-
-        return $state;
+        return FfaStateBroadcaster::emit($lobbyId, $state);
     }
 
     /**
@@ -364,7 +364,7 @@ class QuickGameFfaScoringService
                 throw new DomainException('Teraz rzuca inny gracz.');
             }
 
-            $this->assertCanSubmitVisit($session, $userId, $dto->playerId);
+            $this->submitGuard->assert($session, $userId, $dto->playerId);
 
             VisitRecorder::validateDto($dto, (int) $session->starting_score);
 
@@ -404,7 +404,7 @@ class QuickGameFfaScoringService
                 throw new DomainException('Mecz jest już zakończony.');
             }
 
-            $this->assertCanSubmitVisit($session, $userId, null);
+            $this->submitGuard->assert($session, $userId, null);
 
             $legNumber = $this->resolveLegNumberForUndo($session);
             $voided = $this->visitRepository->voidLastForLeg($session, $legNumber);
@@ -444,53 +444,6 @@ class QuickGameFfaScoringService
 
             return $this->broadcastStateForSession($session->fresh(), $userId);
         });
-    }
-
-    private function assertCanSubmitVisit(
-        \App\Models\QuickGame\QuickGameFfaSession $session,
-        int $userId,
-        ?int $visitPlayerId,
-    ): void {
-        $lobby = $session->lobby;
-        if ($lobby === null) {
-            throw new DomainException('Lobby nie istnieje.');
-        }
-
-        $playerIds = array_map('intval', $session->player_order ?? []);
-        $leftIds = $this->presenceRepository->getLeftPlayerIds($session);
-
-        if ($visitPlayerId !== null && in_array($visitPlayerId, $leftIds, true)) {
-            throw new DomainException('Ten gracz opuścił mecz.');
-        }
-
-        if ($session->scoring_mode === 'one_device') {
-            if ((int) $lobby->host_id !== $userId) {
-                throw new DomainException('W trybie jednego urządzenia punkty wpisuje tylko host.');
-            }
-
-            return;
-        }
-
-        $player = $this->playerRepository->findByUserId($userId);
-        if ($player === null) {
-            throw new DomainException('Nie znaleziono gracza.');
-        }
-
-        if (in_array((int) $player->id, $leftIds, true)) {
-            throw new DomainException('Opuszczono ten mecz — nie możesz wpisywać rzutów.');
-        }
-
-        if ($visitPlayerId === null) {
-            if (! in_array((int) $player->id, $playerIds, true)) {
-                throw new DomainException('Nie jesteś uczestnikiem tego meczu.');
-            }
-
-            return;
-        }
-
-        if ((int) $player->id !== $visitPlayerId) {
-            throw new DomainException('Możesz wpisywać tylko własne rzuty.');
-        }
     }
 
     private function applyTurnAfterVisit(
@@ -666,20 +619,7 @@ class QuickGameFfaScoringService
         array $playerIds,
         array $leftIds,
     ): void {
-        if ($leftIds === []) {
-            return;
-        }
-
-        $session->current_player_index = FfaTurnRotationDomain::normalizeIndexAt(
-            (int) $session->current_player_index,
-            $playerIds,
-            $leftIds,
-        );
-        $session->leg_opener_index = FfaTurnRotationDomain::normalizeIndexAt(
-            (int) $session->leg_opener_index,
-            $playerIds,
-            $leftIds,
-        );
+        FfaTurnNormalize::apply($session, $playerIds, $leftIds);
     }
 
     /**
@@ -693,43 +633,42 @@ class QuickGameFfaScoringService
         $session->loadMissing('lobby');
         $gameType = strtolower((string) $session->game_type);
         if ($gameType === MatchFormat::GAME_TYPE_CRICKET) {
-            $state = $this->cricketScoringService->getState((int) $session->lobby_id, $userId);
-            broadcast(new QuickGameFfaStateUpdated($session->lobby_id, $state));
-
-            return $state;
+            return FfaStateBroadcaster::emit(
+                (int) $session->lobby_id,
+                $this->cricketScoringService->getState((int) $session->lobby_id, $userId),
+            );
         }
         if ($gameType === MatchFormat::GAME_TYPE_BOB27) {
-            $state = $this->bob27ScoringService->getState((int) $session->lobby_id, $userId);
-            broadcast(new QuickGameFfaStateUpdated($session->lobby_id, $state));
-
-            return $state;
+            return FfaStateBroadcaster::emit(
+                (int) $session->lobby_id,
+                $this->bob27ScoringService->getState((int) $session->lobby_id, $userId),
+            );
         }
         if ($gameType === MatchFormat::GAME_TYPE_ATC) {
-            $state = $this->atcScoringService->getState((int) $session->lobby_id, $userId);
-            broadcast(new QuickGameFfaStateUpdated($session->lobby_id, $state));
-
-            return $state;
+            return FfaStateBroadcaster::emit(
+                (int) $session->lobby_id,
+                $this->atcScoringService->getState((int) $session->lobby_id, $userId),
+            );
         }
         if ($gameType === MatchFormat::GAME_TYPE_CATCH40) {
-            $state = $this->catch40ScoringService->getState((int) $session->lobby_id, $userId);
-            broadcast(new QuickGameFfaStateUpdated($session->lobby_id, $state));
-
-            return $state;
+            return FfaStateBroadcaster::emit(
+                (int) $session->lobby_id,
+                $this->catch40ScoringService->getState((int) $session->lobby_id, $userId),
+            );
         }
         if ($gameType === MatchFormat::GAME_TYPE_CRICKET56) {
-            $state = $this->cricket56ScoringService->getState((int) $session->lobby_id, $userId);
-            broadcast(new QuickGameFfaStateUpdated($session->lobby_id, $state));
-
-            return $state;
+            return FfaStateBroadcaster::emit(
+                (int) $session->lobby_id,
+                $this->cricket56ScoringService->getState((int) $session->lobby_id, $userId),
+            );
         }
 
         $this->syncStalePresence($session);
         $visits = $this->visitRepository->getActiveForSession($session);
         $presence = $this->buildPresencePayload($session);
         $state = $this->stateBuilder->build($session, $visits, $userId, $presence);
-        broadcast(new QuickGameFfaStateUpdated($session->lobby_id, $state));
 
-        return $state;
+        return FfaStateBroadcaster::emit((int) $session->lobby_id, $state);
     }
 
     private function syncStalePresence(\App\Models\QuickGame\QuickGameFfaSession $session): void

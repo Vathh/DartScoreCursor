@@ -6,7 +6,6 @@ use App\Enums\GameType;
 use App\Http\Requests\LockGameRequest;
 use App\Http\Requests\GameResultRequest;
 use App\Services\Game\GameService;
-use DomainException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -22,14 +21,10 @@ class GameController
     {
         $validated = $request->validated();
 
-        try {
-            $this->gameService->lockGame(
-                (int) $validated['gameId'],
-                GameType::from($validated['type']),
-            );
-        } catch (DomainException $e) {
-            return response()->json(['message' => $e->getMessage()], 409);
-        }
+        $this->gameService->lockGame(
+            (int) $validated['gameId'],
+            GameType::from($validated['type']),
+        );
 
         return response()->json(['success' => true]);
     }
@@ -38,14 +33,10 @@ class GameController
     {
         $validated = $request->validated();
 
-        try {
-            $this->gameService->releaseGameLock(
-                (int) $validated['gameId'],
-                GameType::from($validated['type']),
-            );
-        } catch (DomainException $e) {
-            return response()->json(['message' => $e->getMessage()], 409);
-        }
+        $this->gameService->releaseGameLock(
+            (int) $validated['gameId'],
+            GameType::from($validated['type']),
+        );
 
         return response()->json(['success' => true]);
     }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Support\Http\DomainExceptionHttp;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -29,6 +30,12 @@ return Application::configure(basePath: dirname(__DIR__))
         $schedule->command('quick-game:prune-lobbies')->hourly();
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        $exceptions->dontReport(\DomainException::class);
+
+        $exceptions->render(function (\DomainException $e, $request) {
+            return DomainExceptionHttp::render($e, $request);
+        });
+
         $exceptions->render(function (TokenMismatchException $e, $request) {
             if ($request->expectsJson()) {
                 return response()->json(['message' => 'Sesja wygasła. Odśwież stronę i spróbuj ponownie.'], 419);

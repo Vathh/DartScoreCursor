@@ -7,6 +7,7 @@ use App\Repositories\Player\PlayerRepository;
 use App\Repositories\Season\SeasonRepository;
 use App\Services\Player\PlayerService;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 use Throwable;
 
@@ -76,6 +77,18 @@ class SeasonService
             ]);
         }
     }
+    /**
+     * @param  list<string>  $additionalRelations
+     */
+    public function loadAndAuthorize(int $seasonId, array $additionalRelations = []): SeasonDomain
+    {
+        $allRelations = array_merge($additionalRelations, ['admins']);
+        $season = $this->seasonRepository->findModel($seasonId, array_values(array_unique($allRelations)));
+        Gate::authorize('update', $season);
+
+        return SeasonDomain::fromEloquent($season, $allRelations);
+    }
+
     public function getRelatedUsers(int $seasonId): Collection
     {
         return $this->seasonRepository->getRelatedUsers($seasonId);

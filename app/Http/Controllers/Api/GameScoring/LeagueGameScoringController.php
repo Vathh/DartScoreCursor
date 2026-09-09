@@ -7,7 +7,6 @@ use App\DTO\GameScoring\RecordVisitDTO;
 use App\Http\Controllers\Controller;
 use App\Services\GameScoring\GameScoringService;
 use App\Services\League\LeagueGamePlayService;
-use DomainException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -99,17 +98,13 @@ class LeagueGameScoringController extends Controller
 
     private function respond(Request $request, int $leagueGameId, bool $mutate, callable $run): JsonResponse
     {
-        try {
-            [$context, $game] = $this->gameScoringService->resolveLeagueGame($leagueGameId);
-            if ($mutate) {
-                $this->leagueGamePlayService->assertCanScore($request->user(), $game);
-            } else {
-                $this->leagueGamePlayService->assertCanViewScoring($request->user(), $game);
-            }
-
-            return response()->json($run($context, $game));
-        } catch (DomainException $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
+        [$context, $game] = $this->gameScoringService->resolveLeagueGame($leagueGameId);
+        if ($mutate) {
+            $this->leagueGamePlayService->assertCanScore($request->user(), $game);
+        } else {
+            $this->leagueGamePlayService->assertCanViewScoring($request->user(), $game);
         }
+
+        return response()->json($run($context, $game));
     }
 }

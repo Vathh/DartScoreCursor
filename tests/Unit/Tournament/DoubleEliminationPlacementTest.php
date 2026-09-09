@@ -3,7 +3,7 @@
 namespace Tests\Unit\Tournament;
 
 use App\Enums\BracketSide;
-use App\Support\Tournament\DoubleEliminationPlacement;
+use App\Domain\Tournament\DoubleEliminationPlacement;
 use PHPUnit\Framework\TestCase;
 
 class DoubleEliminationPlacementTest extends TestCase

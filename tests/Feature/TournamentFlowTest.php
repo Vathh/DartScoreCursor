@@ -22,7 +22,7 @@ use App\Models\Users\User;
 use App\Services\Game\GameService;
 use App\Services\Player\PlayerService;
 use App\Support\Tournament\PlayoffFirstRoundPairing;
-use App\Support\Tournament\TournamentGroupDistribution;
+use App\Domain\Tournament\TournamentGroupDistribution;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Support\SeedsTournamentParticipants;
 use Tests\TestCase;

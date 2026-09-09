@@ -206,6 +206,23 @@ class QuickGameFfaPresenceApiTest extends TestCase
             ->assertJsonPath('presence.1.status', QuickGameFfaPresence::STATUS_LEFT);
 
         Sanctum::actingAs($this->friend);
+        $this->postJson("/api/quick-game/lobby/{$lobbyId}/ffa/visits", [
+            'playerId' => $this->friendPlayer->id,
+            'score' => 60,
+            'remainingBefore' => 501,
+            'remainingAfter' => 441,
+            'dartsInVisit' => 3,
+            'closedLeg' => false,
+            'bust' => false,
+            'clientVisitId' => (string) Str::uuid(),
+        ])->assertStatus(422)
+            ->assertJsonPath('message', 'Ten gracz opuścił mecz.');
+
+        $this->postJson("/api/quick-game/lobby/{$lobbyId}/ffa/visits/undo")
+            ->assertStatus(422)
+            ->assertJsonPath('message', 'Opuszczono ten mecz — nie możesz wpisywać rzutów.');
+
+        Sanctum::actingAs($this->friend);
         $this->getJson('/api/quick-game/lobby/active-match')
             ->assertOk()
             ->assertJsonPath('match', null);

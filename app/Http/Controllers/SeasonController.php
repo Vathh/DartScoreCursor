@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Domain\SeasonDomain;
 use App\Enums\AssignableEntityType;
-use App\Models\Organization\Organization;
 use App\Models\Season\Season;
 use App\Rules\UniquePlayerInSeasonAndOrganization;
+use App\Services\Organization\OrganizationService;
 use App\Services\Player\PlayerService;
 use App\Services\Season\SeasonService;
 use App\Services\User\UserService;
@@ -23,6 +23,7 @@ class SeasonController extends Controller
 {
     public function __construct(
         private SeasonService $seasonService,
+        private OrganizationService $organizationService,
         private UserService $userService,
         private PlayerService $playerService,
     )
@@ -47,9 +48,7 @@ class SeasonController extends Controller
     public function create(Request $request): Factory|View
     {
         $organizationId = $request->query('organizationId');
-        $organization = Organization::with('admins')->findOrFail($organizationId);
-
-        $this->authorize('createSeason', $organization);
+        $this->organizationService->authorizeCreateSeason((int) $organizationId);
 
         return view('seasons.create', ['organizationId' => $organizationId]);
     }
@@ -281,11 +280,7 @@ class SeasonController extends Controller
 
     public function loadAndAuthorize(int $seasonId, array $additionalRelations = []): SeasonDomain
     {
-        $allRelations = array_merge($additionalRelations, ['admins']);
-        $season = Season::with($allRelations)->findOrFail($seasonId);
-        $this->authorize('update', $season);
-
-        return SeasonDomain::fromEloquent($season, $allRelations);
+        return $this->seasonService->loadAndAuthorize($seasonId, $additionalRelations);
     }
 }
 

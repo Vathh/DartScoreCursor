@@ -69,4 +69,27 @@ final class FfaTurnRotationDomain
 
         return self::nextIndexAfter($index, $playerIds, $leftPlayerIds);
     }
+
+    /**
+     * Para (current, opener) po pominięciu skipIds (left i/lub wyeliminowani z planszy).
+     *
+     * @param  array<int, int>  $playerIds
+     * @param  array<int, int>  $skipIds
+     * @return array{0: int, 1: int}
+     */
+    public static function normalizeTurnPair(
+        int $currentPlayerIndex,
+        int $legOpenerIndex,
+        array $playerIds,
+        array $skipIds,
+    ): array {
+        if ($skipIds === []) {
+            return [$currentPlayerIndex, $legOpenerIndex];
+        }
+
+        return [
+            self::normalizeIndexAt($currentPlayerIndex, $playerIds, $skipIds),
+            self::normalizeIndexAt($legOpenerIndex, $playerIds, $skipIds),
+        ];
+    }
 }

@@ -10,7 +10,7 @@ use App\Repositories\Tournament\TournamentRepository;
 use App\Services\Player\PlayerService;
 use App\Domain\GameScoring\MatchFormat;
 use App\Support\Organization\OrganizationMatchFormatPresets;
-use App\Support\Tournament\TournamentStartRules;
+use App\Domain\Tournament\TournamentStartRules;
 use Illuminate\Http\Request;
 
 /**

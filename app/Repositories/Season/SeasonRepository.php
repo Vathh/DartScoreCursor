@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Season;
 
+use App\Domain\AdminRoster;
 use App\Domain\SeasonDomain;
 use App\Models\Season\Season;
 use App\Models\Users\User;
@@ -109,7 +110,8 @@ class SeasonRepository
 
     public function removeAdmin(int $seasonId, int $userId): void
     {
-        $season = Season::findOrFail($seasonId);
+        $season = Season::withCount('admins')->findOrFail($seasonId);
+        AdminRoster::assertCanRemove((int) $season->admins_count, 'Sezon');
         $season->admins()->detach($userId);
     }
 
@@ -125,10 +127,12 @@ class SeasonRepository
 
     /**
      * Surowy model Eloquent (np. do autoryzacji policy).
+     *
+     * @param  list<string>  $relations
      */
-    public function findModel(int $seasonId): Season
+    public function findModel(int $seasonId, array $relations = []): Season
     {
-        return Season::findOrFail($seasonId);
+        return Season::with($relations)->findOrFail($seasonId);
     }
 }
 

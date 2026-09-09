@@ -232,6 +232,17 @@ class PlayoffGameRepository
     }
 
     /**
+     * Surowy mecz playoff po slocie (np. GF2), albo null.
+     */
+    public function findModelByTournamentSlot(int $tournamentId, string $slot): ?PlayoffGame
+    {
+        return PlayoffGame::query()
+            ->where('tournament_id', $tournamentId)
+            ->where('slot', $slot)
+            ->first();
+    }
+
+    /**
      * @return Collection<int, PlayoffGame>
      */
     public function listFinished(): Collection

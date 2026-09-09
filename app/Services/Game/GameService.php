@@ -318,7 +318,7 @@ class GameService
         $loserId = $dto->winnerId === $dto->player1Id ? $dto->player2Id : $dto->player1Id;
 
         if ($game->slot === 'GF1') {
-            $tournament = \App\Models\Tournament\Tournament::query()->find($game->tournamentId);
+            $tournament = $this->tournamentRepository->findModelOrNull($game->tournamentId);
             $reset = $tournament?->grand_final_mode === \App\Enums\GrandFinalMode::Reset;
             $lbWon = $dto->winnerId === $dto->player2Id;
 
@@ -351,7 +351,7 @@ class GameService
             return;
         }
 
-        $place = \App\Support\Tournament\DoubleEliminationPlacement::placeForLoser(
+        $place = \App\Domain\Tournament\DoubleEliminationPlacement::placeForLoser(
             $game->bracketSide,
             $game->round,
             $game->slot,
@@ -366,7 +366,7 @@ class GameService
         $this->tournamentResultService->createForPlayoff(
             $game->tournamentId,
             $loserId,
-            \App\Support\Tournament\DoubleEliminationPlacement::resultStageForRound($game->round),
+            \App\Domain\Tournament\DoubleEliminationPlacement::resultStageForRound($game->round),
             $place,
         );
     }
@@ -378,13 +378,10 @@ class GameService
         }
 
         if ($game->slot === 'GF1') {
-            $tournament = \App\Models\Tournament\Tournament::query()->find($game->tournamentId);
+            $tournament = $this->tournamentRepository->findModelOrNull($game->tournamentId);
             if ($tournament?->grand_final_mode === \App\Enums\GrandFinalMode::Reset) {
                 // Finish tylko gdy nie ma otwartego GF2 z graczami — uproszczenie: finish gdy GF2 nie ma obu graczy
-                $gf2 = \App\Models\PlayoffGame\PlayoffGame::query()
-                    ->where('tournament_id', $game->tournamentId)
-                    ->where('slot', 'GF2')
-                    ->first();
+                $gf2 = $this->playoffGameRepository->findModelByTournamentSlot($game->tournamentId, 'GF2');
 
                 return $gf2 === null
                     || $gf2->player1_id === null

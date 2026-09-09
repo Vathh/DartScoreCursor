@@ -53,6 +53,8 @@ class QuickGameLobbyController
                 'existingLobbyId' => $e->existingLobbyId,
                 'status' => $e->existingStatus,
             ], 409);
+        } catch (\DomainException $e) {
+            throw $e;
         } catch (\RuntimeException $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
@@ -65,6 +67,8 @@ class QuickGameLobbyController
             $this->lobbyService->leave((int) $lobbyId, $userId);
 
             return response()->json(['success' => true]);
+        } catch (\DomainException $e) {
+            throw $e;
         } catch (\RuntimeException $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
@@ -77,6 +81,8 @@ class QuickGameLobbyController
             $lobby = $this->lobbyService->setReady((int) $lobbyId, $userId, true);
 
             return response()->json(QuickGameLobbyPayload::fromLobby($lobby, $userId));
+        } catch (\DomainException $e) {
+            throw $e;
         } catch (\RuntimeException $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
@@ -98,7 +104,9 @@ class QuickGameLobbyController
             }
 
             return response()->json(QuickGameLobbyPayload::fromLobby($lobby, $userId));
-        } catch (\RuntimeException|\DomainException $e) {
+        } catch (\DomainException $e) {
+            throw $e;
+        } catch (\RuntimeException $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }
@@ -128,6 +136,8 @@ class QuickGameLobbyController
             $payload['isHost'] = (int) $lobby->host_id === (int) $userId;
 
             return response()->json($payload);
+        } catch (\DomainException $e) {
+            throw $e;
         } catch (\RuntimeException $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
@@ -143,6 +153,8 @@ class QuickGameLobbyController
             $this->lobbyService->invite((int) $lobbyId, $userId, $validated['playerId']);
 
             return response()->json(['message' => 'Zaproszenie wysłane'], 200);
+        } catch (\DomainException $e) {
+            throw $e;
         } catch (\RuntimeException $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
@@ -163,6 +175,8 @@ class QuickGameLobbyController
             $this->lobbyService->rejectInvitation($invitationId, $userId);
 
             return response()->json(['message' => 'Zaproszenie odrzucone'], 200);
+        } catch (\DomainException $e) {
+            throw $e;
         } catch (\RuntimeException $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
@@ -178,6 +192,8 @@ class QuickGameLobbyController
             $lobby = $this->lobbyService->addGuest((int) $lobbyId, $userId, $validated['tempPlayerName']);
 
             return response()->json(QuickGameLobbyPayload::fromLobby($lobby, $userId));
+        } catch (\DomainException $e) {
+            throw $e;
         } catch (\RuntimeException $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
@@ -190,6 +206,8 @@ class QuickGameLobbyController
             return response()->json(
                 $this->lobbyService->expressRematchIntent((int) $lobbyId, $userId)
             );
+        } catch (\DomainException $e) {
+            throw $e;
         } catch (\RuntimeException $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
@@ -208,6 +226,8 @@ class QuickGameLobbyController
                 'existingLobbyId' => $e->existingLobbyId,
                 'status' => $e->existingStatus,
             ], 409);
+        } catch (\DomainException $e) {
+            throw $e;
         } catch (\RuntimeException $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
@@ -220,6 +240,8 @@ class QuickGameLobbyController
             return response()->json(
                 $this->lobbyService->getRematchStatus((int) $lobbyId, $userId)
             );
+        } catch (\DomainException $e) {
+            throw $e;
         } catch (\RuntimeException $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }

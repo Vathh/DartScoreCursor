@@ -114,7 +114,7 @@ class QuickGameFfaCricketApiTest extends TestCase
         $lobbyId = $this->startCricketLobby('one_device', legsToWin: 1);
 
         $session = QuickGameFfaSession::where('lobby_id', $lobbyId)->firstOrFail();
-        $closed = \App\Support\QuickGameFfa\CricketRules::emptyHits();
+        $closed = \App\Domain\QuickGame\CricketRules::emptyHits();
         foreach (array_keys($closed) as $key) {
             $closed[$key] = 3;
         }
@@ -122,7 +122,7 @@ class QuickGameFfaCricketApiTest extends TestCase
             'boards' => [
                 (string) $this->hostPlayer->id => ['hits' => $closed, 'points' => 20],
                 (string) $this->friendPlayer->id => [
-                    'hits' => \App\Support\QuickGameFfa\CricketRules::emptyHits(),
+                    'hits' => \App\Domain\QuickGame\CricketRules::emptyHits(),
                     'points' => 0,
                 ],
             ],

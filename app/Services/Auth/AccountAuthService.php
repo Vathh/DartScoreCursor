@@ -4,6 +4,7 @@ namespace App\Services\Auth;
 
 use App\Repositories\User\UserRepository;
 use App\Services\Tournament\LoginCodeService;
+use Illuminate\Auth\Events\Verified;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
@@ -81,6 +82,27 @@ class AccountAuthService
         if ($user !== null && ! $user->hasVerifiedEmail()) {
             $user->sendEmailVerificationNotification();
         }
+    }
+
+    /**
+     * @return 'already'|'confirmed'
+     */
+    public function confirmEmailVerification(int $userId, string $hash): string
+    {
+        $user = $this->userRepository->findModel($userId);
+
+        if (! hash_equals(sha1($user->getEmailForVerification()), (string) $hash)) {
+            abort(403);
+        }
+
+        if ($user->hasVerifiedEmail()) {
+            return 'already';
+        }
+
+        $user->markEmailAsVerified();
+        event(new Verified($user));
+
+        return 'confirmed';
     }
 
     /**

@@ -249,6 +249,22 @@ class OrganizationControllerTest extends TestCase
         $this->assertFalse($organization->fresh()->admins->contains('id', $this->regularUser->id));
     }
 
+    public function test_cannot_remove_last_organization_admin(): void
+    {
+        $this->actingAs($this->adminUser);
+        $organization = Organization::create(['name' => 'Solo Admin Org', 'description' => 'Test']);
+        $organization->admins()->attach($this->adminUser->id);
+
+        $response = $this->from("/organizations/{$organization->id}/admins")
+            ->delete("/organizations/{$organization->id}/admins/remove", [
+                'user_id' => $this->adminUser->id,
+            ]);
+
+        $response->assertRedirect("/organizations/{$organization->id}/admins");
+        $response->assertSessionHas('error', 'Organizacja musi mieć co najmniej jednego administratora.');
+        $this->assertTrue($organization->fresh()->admins->contains('id', $this->adminUser->id));
+    }
+
     public function test_admin_can_add_guest(): void
     {
         $this->actingAs($this->adminUser);

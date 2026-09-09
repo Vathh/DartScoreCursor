@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Support\Tournament;
+namespace App\Domain\Tournament;
 
 use InvalidArgumentException;
 

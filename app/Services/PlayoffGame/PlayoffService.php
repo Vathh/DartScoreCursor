@@ -17,7 +17,6 @@ use App\Repositories\Tournament\TournamentRepository;
 use App\Support\Tournament\PlayoffByePairing;
 use App\Support\Tournament\PlayoffFirstRoundPairing;
 use App\Support\Tournament\PlayoffSlotIds;
-use App\Models\Tournament\Tournament;
 
 class PlayoffService
 {
@@ -77,7 +76,7 @@ class PlayoffService
     public function generateDoubleEliminationBracket(int $tournamentId, array $playerIds): void
     {
         $bracketSize = $this->tournamentRepository->getBracketSize($tournamentId);
-        $tournament = Tournament::query()->findOrFail($tournamentId);
+        $tournament = $this->tournamentRepository->findModel($tournamentId);
         $reset = ($tournament->grand_final_mode?->value ?? GrandFinalMode::Reset->value)
             === GrandFinalMode::Reset->value;
 
@@ -214,7 +213,7 @@ class PlayoffService
 
     private function advanceGrandFinal(GameResultDTO $dto, PlayoffGameDomain $game): void
     {
-        $tournament = Tournament::query()->find($game->tournamentId);
+        $tournament = $this->tournamentRepository->findModelOrNull($game->tournamentId);
         if ($tournament === null) {
             return;
         }

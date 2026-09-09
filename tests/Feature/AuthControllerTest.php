@@ -69,6 +69,24 @@ class AuthControllerTest extends TestCase
         $this->assertTrue(Auth::check());
     }
 
+    public function test_unverified_user_can_request_verification_email_again(): void
+    {
+        Notification::fake();
+
+        $user = User::factory()->unverified()->create([
+            'email' => 'resend-web@example.com',
+        ]);
+
+        $this->post(route('verification.send'), [
+            'email' => 'resend-web@example.com',
+        ])
+            ->assertRedirect(route('verification.notice'))
+            ->assertSessionHas('success')
+            ->assertSessionHas('registered_email', 'resend-web@example.com');
+
+        Notification::assertSentTo($user, VerifyEmailNotification::class);
+    }
+
     public function test_user_cannot_register_with_existing_email(): void
     {
         User::factory()->create(['email' => 'existing@example.com']);

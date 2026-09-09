@@ -43,4 +43,12 @@ class FfaTurnRotationDomainTest extends TestCase
 
         $this->assertSame(2, FfaTurnRotationDomain::normalizeIndexAt(1, $playerIds, [20]));
     }
+
+    public function test_normalize_turn_pair_skips_both_indexes(): void
+    {
+        $playerIds = [10, 20, 30];
+
+        $this->assertSame([0, 2], FfaTurnRotationDomain::normalizeTurnPair(0, 2, $playerIds, []));
+        $this->assertSame([2, 2], FfaTurnRotationDomain::normalizeTurnPair(1, 1, $playerIds, [20]));
+    }
 }

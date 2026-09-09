@@ -191,6 +191,27 @@ class SeasonControllerTest extends TestCase
         $this->assertFalse($season->fresh()->admins->contains('id', $this->regularUser->id));
     }
 
+    public function test_cannot_remove_last_season_admin(): void
+    {
+        $this->actingAs($this->adminUser);
+        $season = Season::create([
+            'name' => 'Solo Admin Season',
+            'organization_id' => $this->organization->id,
+            'start_date' => '2024-01-01',
+            'end_date' => '2024-12-31',
+        ]);
+        $season->admins()->attach($this->adminUser->id);
+
+        $response = $this->from("/seasons/{$season->id}/admins")
+            ->delete("/seasons/{$season->id}/admins/remove", [
+                'user_id' => $this->adminUser->id,
+            ]);
+
+        $response->assertRedirect("/seasons/{$season->id}/admins");
+        $response->assertSessionHas('error', 'Sezon musi mieć co najmniej jednego administratora.');
+        $this->assertTrue($season->fresh()->admins->contains('id', $this->adminUser->id));
+    }
+
     public function test_season_admin_can_add_guest(): void
     {
         $this->actingAs($this->adminUser);

@@ -2,8 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Repositories\User\UserRepository;
-use Illuminate\Auth\Events\Verified;
+use App\Services\Auth\AccountAuthService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
@@ -11,34 +10,25 @@ use Illuminate\Support\Facades\URL;
 class EmailVerificationController extends Controller
 {
     public function __construct(
-        private UserRepository $userRepository,
+        private AccountAuthService $accountAuthService,
     ) {
     }
 
     public function verify(Request $request, int $id, string $hash): RedirectResponse
     {
-        $user = $this->userRepository->findModel($id);
-
-        if (! hash_equals(sha1($user->getEmailForVerification()), (string) $hash)) {
-            abort(403);
-        }
-
         if (! URL::hasValidSignature($request)) {
             abort(403);
         }
 
-        if ($user->hasVerifiedEmail()) {
-            return redirect()
-                ->route('pages.loginPanel')
-                ->with('success', 'Ten adres email jest już potwierdzony. Możesz się zalogować.');
-        }
+        $outcome = $this->accountAuthService->confirmEmailVerification($id, $hash);
 
-        $user->markEmailAsVerified();
-        event(new Verified($user));
+        $message = $outcome === 'already'
+            ? 'Ten adres email jest już potwierdzony. Możesz się zalogować.'
+            : 'Adres email potwierdzony. Możesz się zalogować.';
 
         return redirect()
             ->route('pages.loginPanel')
-            ->with('success', 'Adres email potwierdzony. Możesz się zalogować.');
+            ->with('success', $message);
     }
 
     public function send(Request $request): RedirectResponse
@@ -47,11 +37,7 @@ class EmailVerificationController extends Controller
             'email' => 'required|email',
         ]);
 
-        $user = $this->userRepository->findByEmail($validated['email']);
-
-        if ($user !== null && ! $user->hasVerifiedEmail()) {
-            $user->sendEmailVerificationNotification();
-        }
+        $this->accountAuthService->resendVerificationEmail($validated['email']);
 
         return redirect()
             ->route('verification.notice')

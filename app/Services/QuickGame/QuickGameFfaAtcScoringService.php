@@ -7,13 +7,14 @@ use App\Domain\GameScoring\MatchFormat;
 use App\Domain\QuickGame\AroundTheClockRules;
 use App\Domain\QuickGame\FfaMatchLog;
 use App\Domain\QuickGame\FfaTurnRotationDomain;
-use App\Events\QuickGameFfaStateUpdated;
 use App\Models\QuickGame\QuickGameFfaSession;
 use App\Repositories\Player\PlayerRepository;
 use App\Repositories\QuickGame\QuickGameFfaPresenceRepository;
 use App\Repositories\QuickGame\QuickGameFfaSessionRepository;
 use App\Repositories\QuickGame\QuickGameLobbyRepository;
 use App\Repositories\QuickGame\QuickGameRepository;
+use App\Support\QuickGameFfa\FfaStateBroadcaster;
+use App\Support\QuickGameFfa\FfaTurnNormalize;
 use App\Services\Career\PlayerCareerSnapshotService;
 use DomainException;
 use Illuminate\Support\Facades\DB;
@@ -30,6 +31,7 @@ class QuickGameFfaAtcScoringService
         private QuickGameRepository $quickGameRepository,
         private QuickGameLobbyRepository $lobbyRepository,
         private PlayerCareerSnapshotService $careerSnapshotService,
+        private FfaSubmitGuard $submitGuard,
     ) {
     }
 
@@ -72,6 +74,7 @@ class QuickGameFfaAtcScoringService
             if (! in_array($playerId, $playerIds, true)) {
                 throw new DomainException('Gracz nie należy do tego meczu.');
             }
+            $this->submitGuard->assert($session, $userId, $playerId);
             if (in_array($playerId, $skipIds, true)) {
                 throw new DomainException('Ten gracz nie rzuca w tej turze.');
             }
@@ -82,8 +85,6 @@ class QuickGameFfaAtcScoringService
             if ($playerId !== $currentPlayerId) {
                 throw new DomainException('Teraz rzuca inny gracz.');
             }
-
-            $this->assertCanSubmit($session, $userId, $playerId);
 
             foreach ($state['dartLog'] as $entry) {
                 if (($entry['clientDartId'] ?? $entry['clientVisitId'] ?? null) === $clientVisitId) {
@@ -146,7 +147,7 @@ class QuickGameFfaAtcScoringService
                 throw new DomainException('Mecz jest już zakończony.');
             }
 
-            $this->assertCanSubmit($session, $userId, null);
+            $this->submitGuard->assert($session, $userId, null);
 
             $playerIds = array_map('intval', $session->player_order ?? []);
             $state = $this->normalizeState($session, $playerIds);
@@ -304,10 +305,7 @@ class QuickGameFfaAtcScoringService
      */
     private function broadcastState(QuickGameFfaSession $session, ?int $userId): array
     {
-        $state = $this->buildState($session, $userId);
-        broadcast(new QuickGameFfaStateUpdated($session->lobby_id, $state));
-
-        return $state;
+        return FfaStateBroadcaster::emit((int) $session->lobby_id, $this->buildState($session, $userId));
     }
 
     /**
@@ -451,48 +449,6 @@ class QuickGameFfaAtcScoringService
      */
     private function normalizeTurnIndices(QuickGameFfaSession $session, array $playerIds, array $skipIds): void
     {
-        if ($skipIds === []) {
-            return;
-        }
-        $session->current_player_index = FfaTurnRotationDomain::normalizeIndexAt(
-            (int) $session->current_player_index,
-            $playerIds,
-            $skipIds,
-        );
-        $session->leg_opener_index = FfaTurnRotationDomain::normalizeIndexAt(
-            (int) $session->leg_opener_index,
-            $playerIds,
-            $skipIds,
-        );
-    }
-
-    private function assertCanSubmit(QuickGameFfaSession $session, int $userId, ?int $dartPlayerId): void
-    {
-        $lobby = $session->lobby;
-        if ($lobby === null) {
-            throw new DomainException('Lobby nie istnieje.');
-        }
-
-        if ($session->scoring_mode === 'one_device') {
-            if ((int) $lobby->host_id !== $userId) {
-                throw new DomainException('W trybie jednego urządzenia punkty wpisuje tylko host.');
-            }
-
-            return;
-        }
-
-        $player = $this->playerRepository->findByUserId($userId);
-        if ($player === null) {
-            throw new DomainException('Brak profilu gracza.');
-        }
-
-        if ($dartPlayerId !== null && (int) $player->id !== $dartPlayerId) {
-            throw new DomainException('Możesz wpisywać tylko własne rzuty.');
-        }
-
-        $playerIds = array_map('intval', $session->player_order ?? []);
-        if (! in_array((int) $player->id, $playerIds, true)) {
-            throw new DomainException('Nie jesteś uczestnikiem tego meczu.');
-        }
+        FfaTurnNormalize::apply($session, $playerIds, $skipIds);
     }
 }

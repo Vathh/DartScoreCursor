@@ -189,7 +189,7 @@ class LeagueRosterPoolTest extends TestCase
         $this->patchJson(route('leagues.roster.capacity', $this->league), [
             'division_id' => $division->id,
             'capacity' => 10,
-        ])->assertStatus(400);
+        ])->assertStatus(422);
 
         $this->assertSame(8, $division->fresh()->capacity);
     }

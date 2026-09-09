@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Tournament;
 
-use App\Support\Tournament\TournamentGroupAdvanceDistribution;
-use App\Support\Tournament\TournamentGroupDistribution;
+use App\Domain\Tournament\TournamentGroupAdvanceDistribution;
+use App\Domain\Tournament\TournamentGroupDistribution;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 

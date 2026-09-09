@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Services\League\LeagueGamePlayService;
-use DomainException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -57,10 +56,6 @@ class LeagueGamePlayController extends Controller
 
     private function ok(callable $action): JsonResponse
     {
-        try {
-            return response()->json($action());
-        } catch (DomainException $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
-        }
+        return response()->json($action());
     }
 }

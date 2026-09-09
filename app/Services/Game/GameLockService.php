@@ -8,6 +8,7 @@ use App\Repositories\Game\GameRepository;
 use App\Repositories\Game\GameVisitRepository;
 use App\Repositories\PlayoffGame\PlayoffGameRepository;
 use App\Support\GameScoring\GameScoringContext;
+use App\Support\Http\DomainExceptionHttp;
 use DomainException;
 use Illuminate\Support\Facades\DB;
 
@@ -28,11 +29,17 @@ class GameLockService
                 || $this->gameRepository->isInProgress($gameId),
             GameType::PLAYOFF => $this->playoffGameRepository->tryLockScheduled($gameId)
                 || $this->playoffGameRepository->isInProgress($gameId),
-            GameType::QUICK_MATCH => throw new DomainException('Quick game blokuje się przez sesję FFA lobby, nie przez lock turniejowy.'),
+            GameType::QUICK_MATCH => throw new DomainException(
+                'Quick game blokuje się przez sesję FFA lobby, nie przez lock turniejowy.',
+                DomainExceptionHttp::CONFLICT,
+            ),
         };
 
         if (! $locked) {
-            throw new DomainException('Mecz jest już rozegrany lub sędziowany na innym tablecie.');
+            throw new DomainException(
+                'Mecz jest już rozegrany lub sędziowany na innym tablecie.',
+                DomainExceptionHttp::CONFLICT,
+            );
         }
     }
 
@@ -45,11 +52,17 @@ class GameLockService
             GameType::PLAYOFF => GameScoringContext::fromPlayoffGame(
                 $this->playoffGameRepository->findModel($gameId),
             ),
-            GameType::QUICK_MATCH => throw new DomainException('Quick game zwalnia się z sesją FFA, nie przez release turniejowy.'),
+            GameType::QUICK_MATCH => throw new DomainException(
+                'Quick game zwalnia się z sesją FFA, nie przez release turniejowy.',
+                DomainExceptionHttp::CONFLICT,
+            ),
         };
 
         if (! $this->canRelease($context)) {
-            throw new DomainException('Nie można odblokować meczu — wprowadzono już wyniki.');
+            throw new DomainException(
+                'Nie można odblokować meczu — wprowadzono już wyniki.',
+                DomainExceptionHttp::CONFLICT,
+            );
         }
 
         DB::transaction(function () use ($context, $gameId, $type) {
@@ -62,7 +75,10 @@ class GameLockService
             };
 
             if (! $unlocked) {
-                throw new DomainException('Mecz nie jest w trakcie sędziowania.');
+                throw new DomainException(
+                    'Mecz nie jest w trakcie sędziowania.',
+                    DomainExceptionHttp::CONFLICT,
+                );
             }
         });
     }

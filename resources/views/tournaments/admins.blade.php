@@ -21,12 +21,14 @@
                     @foreach($admins as $admin)
                         <div class="tile flex items-center justify-center flex-col min-w-[140px]">
                             <span class="card-title mb-4 text-wrap text-center">{{ $admin['name'] }}</span>
+                            @if($admins->count() > 1)
                             <form action="{{ route('tournaments.admins.remove', $tournament->id) }}" method="POST">
                                 @csrf
                                 @method('DELETE')
                                 <input type="hidden" name="user_id" value="{{ $admin['id'] }}">
                                 <button type="submit" class="btn-mini-danger">Usuń</button>
                             </form>
+                            @endif
                         </div>
                     @endforeach
                 </div>

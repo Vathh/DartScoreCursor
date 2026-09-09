@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Organization;
 
+use App\Domain\AdminRoster;
 use App\Domain\OrganizationDomain;
 use App\Models\Organization\Organization;
 use Illuminate\Support\Collection;
@@ -94,7 +95,8 @@ class OrganizationRepository
 
     public function removeAdmin(int $organizationId, int $userId): void
     {
-        $organization = Organization::findOrFail($organizationId);
+        $organization = Organization::withCount('admins')->findOrFail($organizationId);
+        AdminRoster::assertCanRemove((int) $organization->admins_count, 'Organizacja');
         $organization->admins()->detach($userId);
     }
 
@@ -126,6 +128,16 @@ class OrganizationRepository
     {
         $organization = Organization::with('guests')->findOrFail($organizationId);
         return OrganizationDomain::fromEloquent($organization, ['guests']);
+    }
+
+    /**
+     * Surowy model Eloquent (np. do autoryzacji policy).
+     *
+     * @param  list<string>  $relations
+     */
+    public function findModel(int $organizationId, array $relations = []): Organization
+    {
+        return Organization::with($relations)->findOrFail($organizationId);
     }
 }
 

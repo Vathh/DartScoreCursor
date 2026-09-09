@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Tournament;
 
+use App\Domain\AdminRoster;
 use App\Domain\Tournament\PointSchemeDomain;
 use App\Domain\Tournament\TournamentDomain;
 use App\Enums\TournamentStatus;
@@ -93,9 +94,7 @@ class TournamentRepository
     public function removeAdmin(int $tournamentId, int $userId): void
     {
         $tournament = Tournament::withCount('admins')->findOrFail($tournamentId);
-        if ((int) $tournament->admins_count <= 1) {
-            throw new \DomainException('Turniej musi mieć co najmniej jednego administratora.');
-        }
+        AdminRoster::assertCanRemove((int) $tournament->admins_count, 'Turniej');
         $tournament->admins()->detach($userId);
     }
 

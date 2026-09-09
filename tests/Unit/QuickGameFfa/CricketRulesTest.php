@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\QuickGameFfa;
 
-use App\Support\QuickGameFfa\CricketRules;
+use App\Domain\QuickGame\CricketRules;
 use PHPUnit\Framework\TestCase;
 
 class CricketRulesTest extends TestCase

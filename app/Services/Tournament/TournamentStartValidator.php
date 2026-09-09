@@ -2,9 +2,9 @@
 
 namespace App\Services\Tournament;
 
-use App\Support\Tournament\TournamentGroupAdvanceDistribution;
-use App\Support\Tournament\TournamentGroupDistribution;
-use App\Support\Tournament\TournamentStartRules;
+use App\Domain\Tournament\TournamentGroupAdvanceDistribution;
+use App\Domain\Tournament\TournamentGroupDistribution;
+use App\Domain\Tournament\TournamentStartRules;
 use Illuminate\Validation\ValidationException;
 
 class TournamentStartValidator

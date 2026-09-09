@@ -5,7 +5,7 @@ namespace App\Factories;
 use App\Domain\Game\PlayoffGameDomain;
 use App\Enums\GameStage;
 use App\Support\Tournament\PlayoffSlotIds;
-use App\Support\Tournament\TournamentStartRules;
+use App\Domain\Tournament\TournamentStartRules;
 use Illuminate\Support\Collection;
 use InvalidArgumentException;
 

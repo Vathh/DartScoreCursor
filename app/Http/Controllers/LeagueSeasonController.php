@@ -8,7 +8,6 @@ use App\Models\League\LeagueGame;
 use App\Models\League\LeagueSeason;
 use App\Services\League\LeagueSeasonService;
 use App\Services\League\LeagueService;
-use DomainException;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -66,24 +65,20 @@ class LeagueSeasonController extends Controller
             'win_length' => 'nullable|integer|min:1|max:16',
         ]);
 
-        try {
-            $season = $this->leagueSeasonService->create(
-                $league->id,
-                $validated['seasonName'],
-                $validated['calendar_mode'],
-                (int) $validated['rounds_each'],
-                $validated['startDate'],
-                $validated['endDate'] ?? null,
-                $validated['deadline_at'] ?? null,
-                $request->boolean('start_now'),
-                isset($validated['matchday_length_days']) ? (int) $validated['matchday_length_days'] : null,
-                $validated['matchday_planning'] ?? null,
-                $request->boolean('allows_draws'),
-                (int) ($validated['win_length'] ?? 2),
-            );
-        } catch (DomainException $e) {
-            return back()->with('error', $e->getMessage())->withInput();
-        }
+        $season = $this->leagueSeasonService->create(
+            $league->id,
+            $validated['seasonName'],
+            $validated['calendar_mode'],
+            (int) $validated['rounds_each'],
+            $validated['startDate'],
+            $validated['endDate'] ?? null,
+            $validated['deadline_at'] ?? null,
+            $request->boolean('start_now'),
+            isset($validated['matchday_length_days']) ? (int) $validated['matchday_length_days'] : null,
+            $validated['matchday_planning'] ?? null,
+            $request->boolean('allows_draws'),
+            (int) ($validated['win_length'] ?? 2),
+        );
 
         return redirect()
             ->route('league-seasons.show', $season)
@@ -103,11 +98,7 @@ class LeagueSeasonController extends Controller
     {
         $this->authorize('update', $this->leagueSeasonService->getForPolicy($leagueSeason->id));
 
-        try {
-            $this->leagueSeasonService->start($leagueSeason->id);
-        } catch (DomainException $e) {
-            return back()->with('error', $e->getMessage());
-        }
+        $this->leagueSeasonService->start($leagueSeason->id);
 
         return back()->with('success', 'Sezon wystartował — wygenerowano mecze.');
     }
@@ -116,11 +107,7 @@ class LeagueSeasonController extends Controller
     {
         $this->authorize('update', $this->leagueSeasonService->getForPolicy($leagueSeason->id));
 
-        try {
-            $message = $this->leagueSeasonService->advance($leagueSeason->id);
-        } catch (DomainException $e) {
-            return back()->with('error', $e->getMessage());
-        }
+        $message = $this->leagueSeasonService->advance($leagueSeason->id);
 
         return back()->with('success', $message);
     }
@@ -133,11 +120,7 @@ class LeagueSeasonController extends Controller
             'player_id' => 'required|integer',
         ]);
 
-        try {
-            $this->leagueSeasonService->withdraw($leagueSeason->id, (int) $validated['player_id']);
-        } catch (DomainException $e) {
-            return back()->with('error', $e->getMessage());
-        }
+        $this->leagueSeasonService->withdraw($leagueSeason->id, (int) $validated['player_id']);
 
         return back()->with('success', 'Zawodnik zrezygnował — mecze anulowane, wypada z piramidy.');
     }
@@ -155,11 +138,7 @@ class LeagueSeasonController extends Controller
             'season_name_confirmation.in' => 'Wpisz dokładnie nazwę sezonu, żeby potwierdzić anulowanie.',
         ]);
 
-        try {
-            $leagueId = $this->leagueSeasonService->cancel($season->id);
-        } catch (DomainException $e) {
-            return back()->with('error', $e->getMessage());
-        }
+        $leagueId = $this->leagueSeasonService->cancel($season->id);
 
         return redirect()
             ->route('leagues.show', $leagueId)
@@ -182,15 +161,11 @@ class LeagueSeasonController extends Controller
             'player2_score' => 'required|integer|min:0|max:15',
         ]);
 
-        try {
-            $this->leagueSeasonService->recordResult(
-                $leagueGame->id,
-                (int) $validated['player1_score'],
-                (int) $validated['player2_score'],
-            );
-        } catch (DomainException $e) {
-            return back()->with('error', $e->getMessage());
-        }
+        $this->leagueSeasonService->recordResult(
+            $leagueGame->id,
+            (int) $validated['player1_score'],
+            (int) $validated['player2_score'],
+        );
 
         return redirect()
             ->route('league-games.show', $leagueGame)
@@ -206,15 +181,11 @@ class LeagueSeasonController extends Controller
             'winner_id' => 'nullable|integer',
         ]);
 
-        try {
-            $this->leagueSeasonService->recordWalkover(
-                $leagueGame->id,
-                $validated['walkover_type'],
-                isset($validated['winner_id']) ? (int) $validated['winner_id'] : null,
-            );
-        } catch (DomainException $e) {
-            return back()->with('error', $e->getMessage());
-        }
+        $this->leagueSeasonService->recordWalkover(
+            $leagueGame->id,
+            $validated['walkover_type'],
+            isset($validated['winner_id']) ? (int) $validated['winner_id'] : null,
+        );
 
         return redirect()
             ->route('league-games.show', $leagueGame)
@@ -229,11 +200,7 @@ class LeagueSeasonController extends Controller
             'deadline_at' => 'required|date',
         ]);
 
-        try {
-            $this->leagueSeasonService->extendGame($leagueGame->id, $validated['deadline_at']);
-        } catch (DomainException $e) {
-            return back()->with('error', $e->getMessage());
-        }
+        $this->leagueSeasonService->extendGame($leagueGame->id, $validated['deadline_at']);
 
         return back()->with('success', 'Przedłużono termin meczu.');
     }

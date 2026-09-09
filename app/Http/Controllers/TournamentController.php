@@ -5,9 +5,7 @@ namespace App\Http\Controllers;
 use App\Domain\Tournament\TournamentDomain;
 use App\Models\Tournament\Tournament;
 use App\Queries\GetTournamentData;
-use App\Repositories\Season\SeasonRepository;
 use App\Services\GameScoring\GameAuthorizationService;
-use App\Services\Player\PlayerService;
 use App\Services\Tournament\LoginCodeService;
 use App\Services\Tournament\TournamentGuestParticipantService;
 use App\Services\Tournament\TournamentGroupMatrixLiveService;
@@ -17,9 +15,7 @@ use App\Services\Tournament\TournamentService;
 use App\Services\Tournament\TournamentStartPageService;
 use Illuminate\Http\JsonResponse;
 use App\Services\User\UserService;
-use App\Support\Tournament\TournamentStartRules;
-use App\Support\Tournament\TournamentMatchFormatRequestParser;
-use DomainException;
+use App\Domain\Tournament\TournamentStartRules;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -33,7 +29,6 @@ class TournamentController extends Controller
 
     public function __construct(
         private TournamentService $tournamentService,
-        private PlayerService $playerService,
         private TournamentInvitationService $invitationService,
         private TournamentJoinRequestService $joinRequestService,
         private TournamentGuestParticipantService $guestParticipantService,
@@ -43,7 +38,6 @@ class TournamentController extends Controller
         private GameAuthorizationService $gameAuthorizationService,
         private TournamentGroupMatrixLiveService $groupMatrixLiveService,
         private TournamentStartPageService $startPageService,
-        private SeasonRepository $seasonRepository,
     ) {
     }
 
@@ -65,12 +59,7 @@ class TournamentController extends Controller
     public function create(Request $request): Factory|View
     {
         $seasonId = $request->query('seasonId');
-
-        if ($seasonId !== null) {
-            $this->authorize('update', $this->seasonRepository->findModel((int) $seasonId));
-        } else {
-            abort_unless(Auth::user()?->can_create_organizations, 403);
-        }
+        $this->tournamentService->assertCanCreate($seasonId !== null ? (int) $seasonId : null);
 
         return view('tournaments.create', ['seasonId' => $seasonId]);
     }
@@ -83,15 +72,11 @@ class TournamentController extends Controller
         ]);
 
         $seasonId = $request->query('seasonId');
-
-        if ($seasonId !== null) {
-            $this->authorize('update', $this->seasonRepository->findModel((int) $seasonId));
-        } else {
-            abort_unless(Auth::user()?->can_create_organizations, 403);
-        }
+        $resolvedSeasonId = $seasonId !== null ? (int) $seasonId : null;
+        $this->tournamentService->assertCanCreate($resolvedSeasonId);
 
         $tournamentId = $this->tournamentService->create(
-            $seasonId !== null ? (int) $seasonId : null,
+            $resolvedSeasonId,
             $validated['tournamentName'],
             $validated['date'],
             Auth::id(),
@@ -424,64 +409,12 @@ class TournamentController extends Controller
             'grandFinalMode' => ['required_if:tournamentFormat,double_elimination', 'nullable', 'string', 'in:single,reset'],
         ]);
 
-        $playerIds = $this->playerService
-            ->getTournamentStartPool($tournamentId)
-            ->pluck('id')
-            ->all();
-
-        $format = \App\Enums\TournamentFormat::from($validated['tournamentFormat']);
-
-        if ($playerIds === []) {
-            return back()->with('error', 'Brak uczestników turnieju — dodaj zaakceptowanych zawodników lub gości');
-        }
-
         try {
-            if ($format === \App\Enums\TournamentFormat::SingleElimination) {
-                $bracketSize = \App\Support\Tournament\PlayoffByePairing::nextPowerOfTwo(count($playerIds));
-                $formatsByStage = TournamentMatchFormatRequestParser::fromRunInput(
-                    $request->all(),
-                    $bracketSize,
-                    includeGroupStage: false,
-                );
-
-                $started = $this->tournamentService->tryStartSingleElimination(
-                    $tournamentId,
-                    $playerIds,
-                    $formatsByStage,
-                );
-            } elseif ($format === \App\Enums\TournamentFormat::DoubleElimination) {
-                $bracketSize = \App\Support\Tournament\PlayoffByePairing::nextPowerOfTwo(count($playerIds));
-                $formatsByStage = TournamentMatchFormatRequestParser::fromRunInput(
-                    $request->all(),
-                    $bracketSize,
-                    includeGroupStage: false,
-                );
-                $grandFinalMode = \App\Enums\GrandFinalMode::from(
-                    $validated['grandFinalMode'] ?? \App\Enums\GrandFinalMode::Reset->value,
-                );
-
-                $started = $this->tournamentService->tryStartDoubleElimination(
-                    $tournamentId,
-                    $playerIds,
-                    $grandFinalMode,
-                    $formatsByStage,
-                );
-            } else {
-                $groupsCount = (int) $validated['groupsCount'];
-                $playoffBracketSize = (int) $validated['playoffBracketSize'];
-                $formatsByStage = TournamentMatchFormatRequestParser::fromRunInput(
-                    $request->all(),
-                    $playoffBracketSize,
-                );
-
-                $started = $this->tournamentService->tryCreateGroupGames(
-                    $tournamentId,
-                    $playerIds,
-                    $groupsCount,
-                    $playoffBracketSize,
-                    $formatsByStage,
-                );
-            }
+            $started = $this->tournamentService->runFromWeb(
+                $tournamentId,
+                $validated,
+                $request->all(),
+            );
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors())->withInput();
         } catch (RuntimeException $e) {
@@ -539,11 +472,7 @@ class TournamentController extends Controller
             'user_id' => 'required|exists:users,id',
         ]);
 
-        try {
-            $this->tournamentService->removeAdmin($tournamentId, (int) $validated['user_id']);
-        } catch (DomainException $e) {
-            return back()->with('error', $e->getMessage());
-        }
+        $this->tournamentService->removeAdmin($tournamentId, (int) $validated['user_id']);
 
         return redirect()
             ->route('tournaments.admins', $tournamentId)

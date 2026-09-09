@@ -7,6 +7,7 @@ use App\Repositories\Organization\OrganizationRepository;
 use App\Repositories\Player\PlayerRepository;
 use App\Services\Player\PlayerService;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Gate;
 
 class OrganizationService
 {
@@ -50,6 +51,24 @@ class OrganizationService
     public function getByIdWithAdmins(int $id): ?OrganizationDomain
     {
         return $this->organizationRepository->findByIdWithAdmins($id);
+    }
+
+    /**
+     * @param  list<string>  $additionalRelations
+     */
+    public function loadAndAuthorize(int $organizationId, array $additionalRelations = []): OrganizationDomain
+    {
+        $allRelations = array_merge($additionalRelations, ['admins']);
+        $organization = $this->organizationRepository->findModel($organizationId, array_values(array_unique($allRelations)));
+        Gate::authorize('update', $organization);
+
+        return OrganizationDomain::fromEloquent($organization, $allRelations);
+    }
+
+    public function authorizeCreateSeason(int $organizationId): void
+    {
+        $organization = $this->organizationRepository->findModel($organizationId, ['admins']);
+        Gate::authorize('createSeason', $organization);
     }
 
     public function create(string $name, string $description, int $userId): OrganizationDomain

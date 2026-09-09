@@ -6,7 +6,6 @@ use App\Models\League\League;
 use App\Models\League\LeagueDivision;
 use App\Models\Organization\Organization;
 use App\Services\League\LeagueService;
-use DomainException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -110,12 +109,8 @@ class LeagueController extends Controller
             'divisions.*.promotePlayoff' => 'nullable|integer|min:0|max:8',
         ]);
 
-        try {
-            $this->leagueService->update($league->id, $validated['leagueName'], $validated['description'] ?? null);
-            $this->leagueService->updateDivisions($league->id, $validated['divisions']);
-        } catch (DomainException $e) {
-            return back()->with('error', $e->getMessage());
-        }
+        $this->leagueService->update($league->id, $validated['leagueName'], $validated['description'] ?? null);
+        $this->leagueService->updateDivisions($league->id, $validated['divisions']);
 
         return redirect()
             ->route('leagues.show', $league)
@@ -138,15 +133,7 @@ class LeagueController extends Controller
             'player_id' => 'required|integer',
         ]);
 
-        try {
-            $this->leagueService->assignPlayer($league->id, (int) $validated['division_id'], (int) $validated['player_id']);
-        } catch (DomainException $e) {
-            if ($request->wantsJson()) {
-                return response()->json(['message' => $e->getMessage()], 400);
-            }
-
-            return back()->with('error', $e->getMessage());
-        }
+        $this->leagueService->assignPlayer($league->id, (int) $validated['division_id'], (int) $validated['player_id']);
 
         if ($request->wantsJson()) {
             return response()->json(['ok' => true]);
@@ -163,15 +150,7 @@ class LeagueController extends Controller
             'player_id' => 'required|integer',
         ]);
 
-        try {
-            $this->leagueService->removePlayer($league->id, (int) $validated['player_id']);
-        } catch (DomainException $e) {
-            if ($request->wantsJson()) {
-                return response()->json(['message' => $e->getMessage()], 400);
-            }
-
-            return back()->with('error', $e->getMessage());
-        }
+        $this->leagueService->removePlayer($league->id, (int) $validated['player_id']);
 
         if ($request->wantsJson()) {
             return response()->json(['ok' => true]);
@@ -189,15 +168,11 @@ class LeagueController extends Controller
             'capacity' => 'required|integer|min:2|max:16',
         ]);
 
-        try {
-            $this->leagueService->updateDivisionCapacity(
-                $league->id,
-                (int) $validated['division_id'],
-                (int) $validated['capacity'],
-            );
-        } catch (DomainException $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
-        }
+        $this->leagueService->updateDivisionCapacity(
+            $league->id,
+            (int) $validated['division_id'],
+            (int) $validated['capacity'],
+        );
 
         return response()->json([
             'ok' => true,
@@ -267,15 +242,7 @@ class LeagueController extends Controller
             'user_id' => 'required|exists:users,id',
         ]);
 
-        try {
-            $this->leagueService->removeRelatedUser($league->id, (int) $validated['user_id']);
-        } catch (DomainException $e) {
-            if ($request->wantsJson()) {
-                return response()->json(['message' => $e->getMessage()], 400);
-            }
-
-            return back()->with('error', $e->getMessage());
-        }
+        $this->leagueService->removeRelatedUser($league->id, (int) $validated['user_id']);
 
         if ($request->wantsJson()) {
             return response()->json([
@@ -324,11 +291,7 @@ class LeagueController extends Controller
             'player_id' => 'required|exists:players,id',
         ]);
 
-        try {
-            $this->leagueService->removeGuest($league->id, (int) $validated['player_id']);
-        } catch (DomainException $e) {
-            return back()->with('error', $e->getMessage());
-        }
+        $this->leagueService->removeGuest($league->id, (int) $validated['player_id']);
 
         return redirect()
             ->route('leagues.guests', $league)

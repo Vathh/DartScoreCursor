@@ -346,11 +346,7 @@ class OrganizationController extends Controller
 
     public function loadAndAuthorize(int $organizationId, array $additionalRelations = []): OrganizationDomain
     {
-        $allRelations = array_merge($additionalRelations, ['admins']);
-        $organization = Organization::with($allRelations)->findOrFail($organizationId);
-        $this->authorize('update', $organization);
-
-        return OrganizationDomain::fromEloquent($organization, $allRelations);
+        return $this->organizationService->loadAndAuthorize($organizationId, $additionalRelations);
     }
 }
 

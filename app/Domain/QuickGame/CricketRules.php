@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Support\QuickGameFfa;
+namespace App\Domain\QuickGame;
 
 /**
  * Standard / scoring cricket — reguły zgodne z mobile helpers/cricket/cricketRules.js

@@ -45,22 +45,18 @@ class GameViewController extends Controller
             $kind,
         );
 
-        try {
-            if ($request->boolean('walkover')) {
-                $winnerId = (int) $request->validated('winner_id');
-                $this->assertWinnerIsParticipant($detail, $winnerId);
-                $this->gameResultCorrectionService->applyWalkoverFromWeb($kind, $id, $winnerId);
-            } else {
-                $validated = $request->validated();
-                $this->gameResultCorrectionService->applyFromWeb(
-                    $kind,
-                    $id,
-                    (int) $validated['player1_score'],
-                    (int) $validated['player2_score'],
-                );
-            }
-        } catch (DomainException $e) {
-            return back()->withInput()->with('error', $e->getMessage());
+        if ($request->boolean('walkover')) {
+            $winnerId = (int) $request->validated('winner_id');
+            $this->assertWinnerIsParticipant($detail, $winnerId);
+            $this->gameResultCorrectionService->applyWalkoverFromWeb($kind, $id, $winnerId);
+        } else {
+            $validated = $request->validated();
+            $this->gameResultCorrectionService->applyFromWeb(
+                $kind,
+                $id,
+                (int) $validated['player1_score'],
+                (int) $validated['player2_score'],
+            );
         }
 
         return redirect()

@@ -5,22 +5,29 @@ namespace App\Services\Tournament;
 use App\Domain\Tournament\TournamentDomain;
 use App\Enums\GameStage;
 use App\Enums\GameStatus;
+use App\Enums\GrandFinalMode;
+use App\Enums\TournamentFormat;
 use App\Enums\TournamentStatus;
 use App\Models\Tournament\Tournament;
 use App\Repositories\Game\GameRepository;
 use App\Repositories\GroupStanding\GroupStandingRepository;
 use App\Repositories\Tournament\TournamentMatchFormatRepository;
 use App\Repositories\Tournament\TournamentRepository;
+use App\Repositories\Season\SeasonRepository;
 use App\Services\GameScoring\GameAuthorizationService;
 use App\Domain\GameScoring\MatchFormat;
-use App\Support\Tournament\TournamentGroupAdvanceDistribution;
-use App\Support\Tournament\TournamentGroupDistribution;
+use App\Domain\Tournament\TournamentGroupAdvanceDistribution;
+use App\Domain\Tournament\TournamentGroupDistribution;
 use App\Support\Tournament\TournamentMatchFormatRequestParser;
-use App\Support\Tournament\TournamentStartRules;
+use App\Domain\Tournament\TournamentStartRules;
 use App\Services\Tournament\LoginCodeService;
 use App\Services\PointScheme\PointSchemeService;
+use App\Services\Player\PlayerService;
+use App\Support\Tournament\PlayoffByePairing;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 use RuntimeException;
 use Throwable;
@@ -38,8 +45,22 @@ class TournamentService
         private TournamentMatchFormatRepository $matchFormatRepository,
         private GameAuthorizationService  $gameAuthorizationService,
         private \App\Services\PlayoffGame\PlayoffService $playoffService,
+        private SeasonRepository $seasonRepository,
+        private PlayerService $playerService,
     )
     {
+    }
+
+    public function assertCanCreate(?int $seasonId): void
+    {
+        if ($seasonId !== null) {
+            $season = $this->seasonRepository->findModel($seasonId, ['admins']);
+            Gate::authorize('update', $season);
+
+            return;
+        }
+
+        abort_unless(Auth::user()?->can_create_organizations, 403);
     }
 
     /**
@@ -361,6 +382,80 @@ class TournamentService
                 $e,
             );
         }
+    }
+
+    /**
+     * Start turnieju z formularza web (format + input formatów meczu).
+     *
+     * @param  array<string, mixed>  $validated
+     * @param  array<string, mixed>  $requestAll
+     *
+     * @throws ValidationException
+     * @throws RuntimeException
+     */
+    public function runFromWeb(int $tournamentId, array $validated, array $requestAll): bool
+    {
+        $playerIds = $this->playerService
+            ->getTournamentStartPool($tournamentId)
+            ->pluck('id')
+            ->all();
+
+        if ($playerIds === []) {
+            throw new RuntimeException(
+                'Brak uczestników turnieju — dodaj zaakceptowanych zawodników lub gości',
+            );
+        }
+
+        $format = TournamentFormat::from($validated['tournamentFormat']);
+
+        if ($format === TournamentFormat::SingleElimination) {
+            $bracketSize = PlayoffByePairing::nextPowerOfTwo(count($playerIds));
+            $formatsByStage = TournamentMatchFormatRequestParser::fromRunInput(
+                $requestAll,
+                $bracketSize,
+                includeGroupStage: false,
+            );
+
+            return $this->tryStartSingleElimination(
+                $tournamentId,
+                $playerIds,
+                $formatsByStage,
+            );
+        }
+
+        if ($format === TournamentFormat::DoubleElimination) {
+            $bracketSize = PlayoffByePairing::nextPowerOfTwo(count($playerIds));
+            $formatsByStage = TournamentMatchFormatRequestParser::fromRunInput(
+                $requestAll,
+                $bracketSize,
+                includeGroupStage: false,
+            );
+            $grandFinalMode = GrandFinalMode::from(
+                $validated['grandFinalMode'] ?? GrandFinalMode::Reset->value,
+            );
+
+            return $this->tryStartDoubleElimination(
+                $tournamentId,
+                $playerIds,
+                $grandFinalMode,
+                $formatsByStage,
+            );
+        }
+
+        $groupsCount = (int) $validated['groupsCount'];
+        $playoffBracketSize = (int) $validated['playoffBracketSize'];
+        $formatsByStage = TournamentMatchFormatRequestParser::fromRunInput(
+            $requestAll,
+            $playoffBracketSize,
+        );
+
+        return $this->tryCreateGroupGames(
+            $tournamentId,
+            $playerIds,
+            $groupsCount,
+            $playoffBracketSize,
+            $formatsByStage,
+        );
     }
 
     private function generateGamesForGroup(array $group): array

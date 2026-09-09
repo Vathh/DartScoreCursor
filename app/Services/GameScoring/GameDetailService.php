@@ -191,20 +191,7 @@ class GameDetailService
 
         $legsDetail = $legs->map(function ($leg) use ($visits, $legStats) {
             $legVisits = $visits->where('game_leg_id', $leg->id);
-            $stats = $legStats->where('game_leg_id', $leg->id)->map(function ($stat) use ($legVisits) {
-                if ($stat->leg_average !== null) {
-                    return $stat;
-                }
-
-                $playerVisits = $legVisits->where('player_id', $stat->player_id);
-                $stat->leg_average = GameStatisticsCalculator::legAverage($playerVisits);
-                $stat->first_nine_average = GameStatisticsCalculator::firstNineAverage($playerVisits);
-                $stat->highest_visit = GameStatisticsCalculator::highestVisit($playerVisits);
-                $stat->highest_finish = GameStatisticsCalculator::highestFinish($playerVisits);
-                $stat->darts_thrown = GameStatisticsCalculator::dartsThrown($playerVisits);
-
-                return $stat;
-            });
+            $stats = $legStats->where('game_leg_id', $leg->id);
 
             return [
                 'leg' => $leg,
