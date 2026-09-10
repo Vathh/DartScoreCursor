@@ -19,8 +19,8 @@ class PlayerStatRepository
     /**
      * Zapisuje lub aktualizuje statystyki gracza w player_stats.
      *
-     * @param array{games: int, avg_three_darts: ?float, highest_hf: ?int, fastest_qf: ?int, count_max: int, count_170_plus: int, count_hf: int, count_qf: int} $quickStats
-     * @param array{games: int, avg_three_darts: ?float, highest_hf: ?int, fastest_qf: ?int, count_max: int, count_170_plus: int, count_hf: int, count_qf: int} $tournamentStats
+     * @param  array{games: int, avg_three_darts: ?float, highest_hf: ?int, fastest_qf: ?int, count_max: int, count_170_plus: int, count_hf: int, count_qf: int}  $quickStats
+     * @param  array{games: int, avg_three_darts: ?float, highest_hf: ?int, fastest_qf: ?int, count_max: int, count_170_plus: int, count_hf: int, count_qf: int}  $tournamentStats
      */
     public function upsert(int $playerId, array $quickStats, array $tournamentStats): void
     {

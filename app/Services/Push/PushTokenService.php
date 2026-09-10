@@ -8,8 +8,7 @@ class PushTokenService
 {
     public function __construct(
         private UserPushTokenRepository $tokenRepository,
-    ) {
-    }
+    ) {}
 
     public function upsert(
         int $userId,

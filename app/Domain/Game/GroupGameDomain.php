@@ -14,17 +14,7 @@ class GroupGameDomain extends GameDomain
 
     /** @var list<string> */
     private const RELATIONS = ['tournament', 'player1', 'player2', 'winner'];
-    /**
-     * @param int $id
-     * @param TournamentDomain|null $tournament
-     * @param PlayerDomain|null $player1
-     * @param PlayerDomain|null $player2
-     * @param int $player1Score
-     * @param int $player2Score
-     * @param PlayerDomain|null $winner
-     * @param int $groupNumber
-     * @param GameStatus $status
-     */
+
     public function __construct(
         int $id,
         public readonly ?TournamentDomain $tournament,
@@ -35,8 +25,7 @@ class GroupGameDomain extends GameDomain
         ?PlayerDomain $winner,
         public readonly int $groupNumber,
         GameStatus $status
-    )
-    {
+    ) {
         parent::__construct(
             id: $id,
             player1: $player1,
@@ -48,11 +37,6 @@ class GroupGameDomain extends GameDomain
         );
     }
 
-    /**
-     * @param Game $game
-     * @param array $with
-     * @return GroupGameDomain
-     */
     public static function fromEloquent(Game $game, array $with = []): GroupGameDomain
     {
         self::assertRelationsLoaded($game, $with, self::RELATIONS);
@@ -89,4 +73,3 @@ class GroupGameDomain extends GameDomain
         $this->validateNotFinished();
     }
 }
-

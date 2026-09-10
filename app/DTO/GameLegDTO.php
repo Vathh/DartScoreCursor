@@ -16,9 +16,7 @@ class GameLegDTO
         public ?int $checkoutScore = null,
         public ?string $startedAt = null,
         public ?string $finishedAt = null,
-    )
-    {
-    }
+    ) {}
 
     public static function fromArray(array $data): GameLegDTO
     {
@@ -37,4 +35,3 @@ class GameLegDTO
         );
     }
 }
-

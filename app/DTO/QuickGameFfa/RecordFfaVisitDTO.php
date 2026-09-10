@@ -20,8 +20,7 @@ class RecordFfaVisitDTO
         public bool $bust,
         public string $clientVisitId,
         public ?array $darts = null,
-    ) {
-    }
+    ) {}
 
     public static function fromArray(array $data): self
     {

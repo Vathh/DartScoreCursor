@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Domain;
 
 use App\Domain\Concerns\AssertsRelationsLoaded;
@@ -15,16 +16,7 @@ class SeasonDomain
     private const RELATIONS = ['organization', 'admins', 'relatedUsers', 'tournaments'];
 
     /**
-     * @param int $id
-     * @param string $name
-     * @param Carbon|null $startDate
-     * @param Carbon|null $endDate
-     * @param Carbon $updatedAt
-     * @param array $admins
-     * @param OrganizationDomain|null $organization
-     * @param array $relatedUsers
-     * @param Collection<TournamentDomain> $tournaments
-     * @param array $guests
+     * @param  Collection<TournamentDomain>  $tournaments
      */
     public function __construct(
         public readonly int $id,
@@ -37,15 +29,8 @@ class SeasonDomain
         public readonly array $relatedUsers,
         public readonly Collection $tournaments,
         public readonly array $guests
-    )
-    {
-    }
+    ) {}
 
-    /**
-     * @param Season $season
-     * @param array $with
-     * @return self
-     */
     public static function fromEloquent(Season $season, array $with = []): self
     {
         self::assertRelationsLoaded($season, $with, self::RELATIONS);
@@ -57,7 +42,7 @@ class SeasonDomain
             endDate: $season->end_date,
             updatedAt: $season->updated_at,
             admins: in_array('admins', $with)
-                ? $season->admins->map(fn($user) => [
+                ? $season->admins->map(fn ($user) => [
                     'id' => $user->id,
                     'name' => $user->player->name,
                 ])->toArray()
@@ -66,18 +51,18 @@ class SeasonDomain
                 ? OrganizationDomain::fromEloquent($season->organization)
                 : null,
             relatedUsers: in_array('relatedUsers', $with)
-                ? $season->relatedUsers->map(fn($user) => [
+                ? $season->relatedUsers->map(fn ($user) => [
                     'id' => $user->id,
                     'name' => $user->player->name,
                 ])->toArray()
                 : [],
             tournaments: in_array('tournaments', $with)
-                ? $season->tournaments->map(fn($tournament) => TournamentDomain::fromEloquent($tournament))->values()
+                ? $season->tournaments->map(fn ($tournament) => TournamentDomain::fromEloquent($tournament))->values()
                 : collect(),
             guests: in_array('guests', $with)
-                ? $season->guests->map(fn($guest) => [
+                ? $season->guests->map(fn ($guest) => [
                     'id' => $guest->id,
-                    'name' => $guest->name
+                    'name' => $guest->name,
                 ])->toArray()
                 : []
         );
@@ -129,4 +114,3 @@ class SeasonDomain
         return $this->updatedAt->format('Y-m-d');
     }
 }
-

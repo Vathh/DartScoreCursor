@@ -2,10 +2,10 @@
 
 namespace App\Services\Game;
 
+use App\Domain\Tournament\TournamentDomain;
 use App\DTO\ActiveGameDTO;
 use App\DTO\GameResultDTO;
 use App\DTO\UpdateGameDTO;
-use App\Domain\Tournament\TournamentDomain;
 use App\Enums\GameKind;
 use App\Enums\GameStage;
 use App\Enums\GameStatus;
@@ -13,47 +13,41 @@ use App\Enums\GameType;
 use App\Enums\TournamentStatus;
 use App\Models\Game\Game;
 use App\Models\PlayoffGame\PlayoffGame;
-use App\Support\GameScoring\GameScoringContext;
 use App\Repositories\Game\GameRepository;
-use App\Repositories\PlayoffGame\PlayoffGameRepository;
 use App\Repositories\Player\PlayerRepository;
+use App\Repositories\PlayoffGame\PlayoffGameRepository;
 use App\Repositories\Tournament\TournamentRepository;
 use App\Services\Achievements\AchievementsService;
-use App\Services\Game\GameLegService;
-use App\Services\Game\GameLockService;
 use App\Services\GroupStanding\GroupStandingService;
-use App\Services\Player\PlayerStatsService;
 use App\Services\Player\PlayerOverviewService;
+use App\Services\Player\PlayerStatsService;
 use App\Services\PlayoffGame\PlayoffService;
-use App\Services\QuickGame\QuickGameService;
 use App\Services\Tournament\TournamentFinishService;
 use App\Services\Tournament\TournamentGroupMatrixLiveService;
 use App\Services\Tournament\TournamentResultService;
+use App\Support\GameScoring\GameScoringContext;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
 class GameService
 {
-
     public function __construct(
-        private GameRepository       $gameRepository,
+        private GameRepository $gameRepository,
         private PlayoffGameRepository $playoffGameRepository,
-        private PlayerRepository    $playerRepository,
+        private PlayerRepository $playerRepository,
         private GroupStandingService $groupStandingService,
-        private AchievementsService  $achievementsService,
-        private PlayoffService       $playoffService,
+        private AchievementsService $achievementsService,
+        private PlayoffService $playoffService,
         private TournamentRepository $tournamentRepository,
-        private TournamentResultService  $tournamentResultService,
+        private TournamentResultService $tournamentResultService,
         private TournamentFinishService $tournamentFinishService,
-        private GameLegService      $gameLegService,
-        private PlayerStatsService   $playerStatsService,
+        private GameLegService $gameLegService,
+        private PlayerStatsService $playerStatsService,
         private PlayerOverviewService $playerOverviewService,
-        private GameLockService     $gameLockService,
+        private GameLockService $gameLockService,
         private TournamentGroupMatrixLiveService $groupMatrixLiveService,
-    )
-    {
-    }
+    ) {}
 
     public function setStatusInProgress(int $gameId): void
     {
@@ -158,7 +152,6 @@ class GameService
     }
 
     /**
-     * @param int $tournamentId
      * @return Collection<ActiveGameDTO>
      */
     public function getActiveGames(int $tournamentId): Collection
@@ -167,26 +160,26 @@ class GameService
             $games = $this->gameRepository->getActive($tournamentId);
             $playoffGames = $this->playoffGameRepository->getActive($tournamentId);
 
-            return collect($games->map(fn($game) => ActiveGameDTO::fromGame($game)))
-                    ->merge(
-                        $playoffGames
-                            ->map(fn($game) => ActiveGameDTO::fromPlayoffGameDomain($game))
-                            ->filter(),
-                    );
+            return collect($games->map(fn ($game) => ActiveGameDTO::fromGame($game)))
+                ->merge(
+                    $playoffGames
+                        ->map(fn ($game) => ActiveGameDTO::fromPlayoffGameDomain($game))
+                        ->filter(),
+                );
         } catch (Throwable $e) {
             return collect();
         }
     }
 
     private function handleTournamentResultCreating(int $winnerId,
-                                                   int $player1Id,
-                                                   int $player2Id,
-                                                   int $tournamentId,
-                                                   GameStage $stage,
-                                                   ?int $winnerPlace): void
+        int $player1Id,
+        int $player2Id,
+        int $tournamentId,
+        GameStage $stage,
+        ?int $winnerPlace): void
     {
-        if($winnerPlace === null) {
-            switch($winnerId){
+        if ($winnerPlace === null) {
+            switch ($winnerId) {
                 case $player1Id:
                     $this->tournamentResultService->createForPlayoff($tournamentId,
                         $player2Id,
@@ -201,7 +194,7 @@ class GameService
                     break;
             }
         } else {
-            switch($winnerId){
+            switch ($winnerId) {
                 case $player1Id:
                     $this->tournamentResultService->createForPlayoff($tournamentId,
                         $player1Id,
@@ -245,7 +238,7 @@ class GameService
 
                 $this->achievementsService->createMany($dto->achievementsDTOs);
 
-                if (!empty($dto->legsDTOs)) {
+                if (! empty($dto->legsDTOs)) {
                     $this->gameLegService->createMany(
                         $dto->legsDTOs,
                         gameId: null,
@@ -261,8 +254,9 @@ class GameService
             \Log::error('Playoff game update failed', [
                 'gameId' => $dto->gameResultDTO->gameId,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
+
             return false;
         }
     }
@@ -410,17 +404,17 @@ class GameService
             DB::transaction(function () use ($dto) {
                 $gameToUpdate = $this->gameRepository->find($dto->gameResultDTO->gameId);
                 $gameToUpdate->checkUpdateDataAccuracy($dto->gameResultDTO->player1Id,
-                                                        $dto->gameResultDTO->player2Id,
-                                                        $dto->gameResultDTO->winnerId);
+                    $dto->gameResultDTO->player2Id,
+                    $dto->gameResultDTO->winnerId);
 
                 $this->groupStandingService->updateStandingsDetails($dto->gameResultDTO);
                 $this->gameRepository->finish($dto->gameResultDTO);
                 $this->achievementsService->createMany($dto->achievementsDTOs);
                 $this->groupStandingService->updateGroupStandings($dto->gameResultDTO->tournamentId,
-                                                                    $dto->gameResultDTO->groupNumber);
+                    $dto->gameResultDTO->groupNumber);
 
                 // Zapisz szczegóły legów jeśli są dostępne
-                if (!empty($dto->legsDTOs)) {
+                if (! empty($dto->legsDTOs)) {
                     $this->gameLegService->createMany(
                         $dto->legsDTOs,
                         gameId: $dto->gameResultDTO->gameId,
@@ -541,8 +535,7 @@ class GameService
 
     private function handlePlayoffStart(int $tournamentId): void
     {
-        if($this->gameRepository->checkIfPlayoffShouldBeStarted($tournamentId))
-        {
+        if ($this->gameRepository->checkIfPlayoffShouldBeStarted($tournamentId)) {
             $this->tournamentResultService->createForGroupLosers($tournamentId);
             $this->playoffService->generateBracket($tournamentId);
             try {
@@ -556,15 +549,3 @@ class GameService
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-

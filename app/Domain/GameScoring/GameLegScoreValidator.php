@@ -58,9 +58,6 @@ final class GameLegScoreValidator
         return [0, $win];
     }
 
-    /**
-     * @return int|null
-     */
     private static function validateBestOfLegs(
         int $player1Id,
         int $player2Id,

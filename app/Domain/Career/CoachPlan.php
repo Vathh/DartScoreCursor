@@ -50,8 +50,7 @@ final class CoachPlan
         public readonly string $headline,
         public readonly string $focus,
         public readonly array $cards,
-    ) {
-    }
+    ) {}
 
     /**
      * @param  array<string, mixed>  $payload

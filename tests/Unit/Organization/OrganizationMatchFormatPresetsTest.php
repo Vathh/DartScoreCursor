@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Organization;
 
-use App\Enums\GameStage;
 use App\Domain\GameScoring\MatchFormat;
+use App\Enums\GameStage;
 use App\Support\Organization\OrganizationMatchFormatPresets;
 use Illuminate\Validation\ValidationException;
 use Tests\TestCase;

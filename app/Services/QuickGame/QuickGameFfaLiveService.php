@@ -2,10 +2,10 @@
 
 namespace App\Services\QuickGame;
 
+use App\Domain\GameScoring\MatchFormat;
 use App\Models\QuickGame\QuickGameFfaSession;
 use App\Repositories\QuickGame\QuickGameFfaSessionRepository;
 use App\Support\Broadcasting\ReverbClientConfig;
-use App\Domain\GameScoring\MatchFormat;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class QuickGameFfaLiveService
@@ -13,8 +13,7 @@ class QuickGameFfaLiveService
     public function __construct(
         private QuickGameFfaSessionRepository $sessionRepository,
         private QuickGameFfaScoringService $ffaScoringService,
-    ) {
-    }
+    ) {}
 
     /**
      * Dane pod stronę live. Gdy mecz skończony: finished=true + opcjonalny showUrl.

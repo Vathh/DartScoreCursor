@@ -2,15 +2,15 @@
 
 namespace App\Services\Tournament;
 
+use App\Domain\GameScoring\MatchFormat;
 use App\Domain\Tournament\TournamentDomain;
+use App\Domain\Tournament\TournamentStartRules;
 use App\Enums\GameStage;
 use App\Enums\TournamentInvitationStatus;
 use App\Enums\TournamentStatus;
 use App\Repositories\Tournament\TournamentRepository;
 use App\Services\Player\PlayerService;
-use App\Domain\GameScoring\MatchFormat;
 use App\Support\Organization\OrganizationMatchFormatPresets;
-use App\Domain\Tournament\TournamentStartRules;
 use Illuminate\Http\Request;
 
 /**
@@ -24,8 +24,7 @@ class TournamentStartPageService
         private TournamentInvitationService $invitationService,
         private TournamentJoinRequestService $joinRequestService,
         private PlayerService $playerService,
-    ) {
-    }
+    ) {}
 
     /**
      * @return array<string, mixed>

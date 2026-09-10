@@ -29,4 +29,3 @@ class UniquePlayerNameForRegistered implements ValidationRule
         }
     }
 }
-

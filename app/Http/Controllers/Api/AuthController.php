@@ -12,19 +12,17 @@ use Illuminate\Http\Request;
 
 class AuthController
 {
-
     public function __construct(
         private UserRegistrationService $registrationService,
         private AccountAuthService $accountAuthService,
         private MobileAppTokenService $mobileAppTokenService,
         private PasswordChangeService $passwordChangeService,
-    ) {
-    }
+    ) {}
 
     public function tournamentLogin(Request $request): JsonResponse
     {
         $validated = $request->validate([
-           'code' => 'required|string',
+            'code' => 'required|string',
         ]);
 
         try {

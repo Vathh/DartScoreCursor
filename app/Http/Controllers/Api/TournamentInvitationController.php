@@ -10,8 +10,7 @@ class TournamentInvitationController
 {
     public function __construct(
         private TournamentInvitationService $invitationService,
-    ) {
-    }
+    ) {}
 
     /**
      * GET /api/tournaments/invitations/received

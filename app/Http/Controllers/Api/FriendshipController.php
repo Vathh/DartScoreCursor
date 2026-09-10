@@ -12,9 +12,7 @@ class FriendshipController
     public function __construct(
         private FriendshipService $friendshipService,
         private UserService $userService
-    )
-    {
-    }
+    ) {}
 
     /**
      * Dodaje znajomego
@@ -32,14 +30,14 @@ class FriendshipController
         // Nie można dodać siebie jako znajomego
         if ($userId === $friendId) {
             return response()->json([
-                'message' => 'Nie możesz dodać siebie jako znajomego'
+                'message' => 'Nie możesz dodać siebie jako znajomego',
             ], 400);
         }
 
         $this->friendshipService->addFriend($userId, $friendId);
 
         return response()->json([
-            'message' => 'Znajomy został dodany'
+            'message' => 'Znajomy został dodany',
         ], 201);
     }
 
@@ -59,7 +57,7 @@ class FriendshipController
         $this->friendshipService->removeFriend($userId, $friendId);
 
         return response()->json([
-            'message' => 'Znajomy został usunięty'
+            'message' => 'Znajomy został usunięty',
         ]);
     }
 
@@ -79,7 +77,7 @@ class FriendshipController
                     'name' => $friendship->friendPlayer->name,
                     'playerId' => $friendship->friendPlayer->id,
                 ];
-            })
+            }),
         ]);
     }
 
@@ -107,7 +105,7 @@ class FriendshipController
                     'name' => $user['player']?->name ?? 'Brak nazwy',
                     'playerId' => $user['player']?->id ?? null,
                 ];
-            })
+            }),
         ]);
     }
 
@@ -127,7 +125,7 @@ class FriendshipController
         // Nie można wysłać zaproszenia do siebie
         if ($userId === $receiverId) {
             return response()->json([
-                'message' => 'Nie możesz wysłać zaproszenia do siebie'
+                'message' => 'Nie możesz wysłać zaproszenia do siebie',
             ], 400);
         }
 
@@ -149,11 +147,11 @@ class FriendshipController
                         'playerId' => $invitation->receiverPlayer?->id ?? null,
                     ],
                     'status' => $invitation->status,
-                ]
+                ],
             ], 201);
         } catch (\RuntimeException $e) {
             return response()->json([
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 400);
         }
     }
@@ -174,11 +172,11 @@ class FriendshipController
             $this->friendshipService->acceptInvitation($validated['invitationId'], $userId);
 
             return response()->json([
-                'message' => 'Zaproszenie zostało zaakceptowane'
+                'message' => 'Zaproszenie zostało zaakceptowane',
             ]);
         } catch (\RuntimeException $e) {
             return response()->json([
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 400);
         }
     }
@@ -199,11 +197,11 @@ class FriendshipController
             $this->friendshipService->rejectInvitation($validated['invitationId'], $userId);
 
             return response()->json([
-                'message' => 'Zaproszenie zostało odrzucone'
+                'message' => 'Zaproszenie zostało odrzucone',
             ]);
         } catch (\RuntimeException $e) {
             return response()->json([
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 400);
         }
     }
@@ -229,7 +227,7 @@ class FriendshipController
                     'status' => $invitation->status,
                     'createdAt' => $invitation->createdAt->toIso8601String(),
                 ];
-            })
+            }),
         ]);
     }
 
@@ -254,17 +252,7 @@ class FriendshipController
                     'status' => $invitation->status,
                     'createdAt' => $invitation->createdAt->toIso8601String(),
                 ];
-            })
+            }),
         ]);
     }
 }
-
-
-
-
-
-
-
-
-
-

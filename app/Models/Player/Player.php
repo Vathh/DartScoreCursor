@@ -69,5 +69,3 @@ class Player extends Model
         return $this->hasOne(PlayerOverviewStat::class);
     }
 }
-
-

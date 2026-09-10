@@ -16,8 +16,7 @@ class PlayerOverviewService
         private PlayerOverviewStatRepository $overviewStatRepository,
         private PlayerRepository $playerRepository,
         private FriendshipService $friendshipService,
-    ) {
-    }
+    ) {}
 
     public function rebuild(int $playerId): void
     {

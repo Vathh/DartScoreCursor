@@ -6,7 +6,6 @@ use App\Enums\GameType;
 
 class GameResultDTO
 {
-
     public function __construct(
         public int $gameId,
         public GameType $type,
@@ -17,9 +16,7 @@ class GameResultDTO
         public int $winnerId,
         public ?int $tournamentId = null,
         public int $groupNumber = 0
-    )
-    {
-    }
+    ) {}
 
     public static function fromArray(array $data): GameResultDTO
     {
@@ -39,4 +36,3 @@ class GameResultDTO
         );
     }
 }
-

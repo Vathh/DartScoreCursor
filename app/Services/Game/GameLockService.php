@@ -19,8 +19,7 @@ class GameLockService
         private PlayoffGameRepository $playoffGameRepository,
         private GameLegRepository $gameLegRepository,
         private GameVisitRepository $gameVisitRepository,
-    ) {
-    }
+    ) {}
 
     public function lock(int $gameId, GameType $type): void
     {

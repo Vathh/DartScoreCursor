@@ -20,8 +20,7 @@ class PlayerController extends Controller
         private FriendshipService $friendshipService,
         private PlayerProfileService $playerProfileService,
         private PlayerService $playerService,
-    ) {
-    }
+    ) {}
 
     public function search(Request $request): View
     {

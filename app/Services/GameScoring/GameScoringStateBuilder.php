@@ -2,7 +2,7 @@
 
 namespace App\Services\GameScoring;
 
-use App\Enums\GameStatus;
+use App\Domain\GameScoring\VisitRecorder;
 use App\Models\Game\Game;
 use App\Models\Game\GameLeg;
 use App\Models\League\LeagueGame;
@@ -13,7 +13,6 @@ use App\Repositories\Game\GameLegRepository;
 use App\Repositories\Game\GameVisitRepository;
 use App\Support\GameScoring\GameScoringContext;
 use App\Support\GameScoring\GameStatisticsCalculator;
-use App\Domain\GameScoring\VisitRecorder;
 use App\Support\GameScoring\ScoringStateContract;
 
 class GameScoringStateBuilder
@@ -22,8 +21,7 @@ class GameScoringStateBuilder
         private GameLegRepository $gameLegRepository,
         private GameVisitRepository $gameVisitRepository,
         private GameLegPlayerStatRepository $gameLegPlayerStatRepository,
-    ) {
-    }
+    ) {}
 
     /**
      * @return array<string, mixed>

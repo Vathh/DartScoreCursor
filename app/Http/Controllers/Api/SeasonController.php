@@ -16,8 +16,7 @@ class SeasonController
     public function __construct(
         private SeasonService $seasonService,
         private CompetitionShowSerializer $showSerializer,
-    ) {
-    }
+    ) {}
 
     /**
      * GET /api/seasons?page=

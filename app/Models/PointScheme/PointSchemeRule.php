@@ -12,7 +12,7 @@ class PointSchemeRule extends Model
         'point_scheme_id',
         'elimination_stage',
         'place',
-        'points'
+        'points',
     ];
 
     protected $casts = [
@@ -24,5 +24,3 @@ class PointSchemeRule extends Model
         return $this->belongsTo(PointScheme::class);
     }
 }
-
-

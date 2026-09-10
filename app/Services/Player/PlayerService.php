@@ -11,7 +11,6 @@ use App\Repositories\Tournament\TournamentInvitationRepository;
 use Illuminate\Support\Collection;
 use RuntimeException;
 use Throwable;
-use function Laravel\Prompts\error;
 
 class PlayerService
 {
@@ -19,8 +18,7 @@ class PlayerService
         private PlayerRepository $playerRepository,
         private TournamentInvitationRepository $tournamentInvitationRepository,
         private TournamentGuestParticipantRepository $tournamentGuestParticipantRepository,
-    ) {
-    }
+    ) {}
 
     public function create(string $name, int $userId): void
     {
@@ -109,9 +107,6 @@ class PlayerService
 
     /**
      * Zmienia nazwę gościa, aby uniknąć konfliktu z zarejestrowanym graczem
-     * @param int $playerId
-     * @param string $newName
-     * @return void
      */
     public function updateGuestName(int $playerId, string $newName): void
     {
@@ -120,10 +115,6 @@ class PlayerService
 
     /**
      * Znajduje gościa o danej nazwie w sezonie lub organizacji
-     * @param string $name
-     * @param int|null $seasonId
-     * @param int|null $organizationId
-     * @return PlayerDomain|null
      */
     public function findGuestByName(string $name, ?int $seasonId = null, ?int $organizationId = null, ?int $leagueId = null): ?PlayerDomain
     {
@@ -143,15 +134,3 @@ class PlayerService
         return $this->playerRepository->generateUniqueGuestName($baseName, $seasonId, $organizationId, $leagueId);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-

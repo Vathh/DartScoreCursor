@@ -7,12 +7,11 @@ use App\DTO\GameAchievementDTO;
 class QuickGameResultDTO
 {
     /**
-     * @param GameAchievementDTO[] $achievements
+     * @param  GameAchievementDTO[]  $achievements
      */
     public function __construct(
         public array $achievements,
-    ) {
-    }
+    ) {}
 
     public static function fromArray(array $data): self
     {

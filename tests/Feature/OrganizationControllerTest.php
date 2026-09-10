@@ -16,9 +16,13 @@ class OrganizationControllerTest extends TestCase
     use RefreshDatabase;
 
     private User $adminUser;
+
     private User $regularUser;
+
     private User $otherUser;
+
     private Player $adminPlayer;
+
     private Player $regularPlayer;
 
     protected function setUp(): void
@@ -53,7 +57,7 @@ class OrganizationControllerTest extends TestCase
     public function test_user_can_view_organizations_index(): void
     {
         $this->markTestSkipped('Test wymaga Vite manifest - problem konfiguracyjny, nie logika biznesowa');
-        
+
         Organization::create(['name' => 'Test Organization', 'description' => 'Test']);
 
         $response = $this->get('/organizations');
@@ -316,4 +320,3 @@ class OrganizationControllerTest extends TestCase
         $response->assertSessionHasErrors('name');
     }
 }
-

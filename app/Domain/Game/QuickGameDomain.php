@@ -13,15 +13,7 @@ class QuickGameDomain extends GameDomain
 
     /** @var list<string> */
     private const RELATIONS = ['player1', 'player2', 'winner'];
-    /**
-     * @param int|null $id
-     * @param PlayerDomain|null $player1
-     * @param PlayerDomain|null $player2
-     * @param int|null $player1Score
-     * @param int|null $player2Score
-     * @param PlayerDomain|null $winner
-     * @param GameStatus $status
-     */
+
     public function __construct(
         ?int $id,
         ?PlayerDomain $player1,
@@ -30,8 +22,7 @@ class QuickGameDomain extends GameDomain
         ?int $player2Score,
         ?PlayerDomain $winner,
         GameStatus $status
-    )
-    {
+    ) {
         parent::__construct(
             id: $id,
             player1: $player1,
@@ -43,11 +34,6 @@ class QuickGameDomain extends GameDomain
         );
     }
 
-    /**
-     * @param QuickGame $quickGame
-     * @param array $with
-     * @return QuickGameDomain
-     */
     public static function fromEloquent(QuickGame $quickGame, array $with = []): QuickGameDomain
     {
         self::assertRelationsLoaded($quickGame, $with, self::RELATIONS);
@@ -80,4 +66,3 @@ class QuickGameDomain extends GameDomain
         $this->validateNotFinished();
     }
 }
-

@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\Organization\Organization;
 use App\Models\Users\User;
-use Illuminate\Auth\Access\Response;
 
 class OrganizationPolicy
 {

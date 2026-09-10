@@ -4,7 +4,6 @@ namespace App\Repositories\PointScheme;
 
 use App\Domain\Tournament\PointSchemeDomain;
 use App\Models\PointScheme\PointScheme;
-use App\Models\Tournament\Tournament;
 use Illuminate\Support\Collection;
 
 class PointSchemeRepository
@@ -14,18 +13,6 @@ class PointSchemeRepository
      */
     public function findAll(): Collection
     {
-        return PointScheme::all()->map(fn($scheme) => PointSchemeDomain::fromEloquent($scheme));
+        return PointScheme::all()->map(fn ($scheme) => PointSchemeDomain::fromEloquent($scheme));
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-

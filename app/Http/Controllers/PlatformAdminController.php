@@ -11,8 +11,7 @@ class PlatformAdminController extends Controller
 {
     public function __construct(
         private PlatformAdminService $platformAdminService,
-    ) {
-    }
+    ) {}
 
     public function dashboard(): View
     {

@@ -11,8 +11,7 @@ class QuickGameController
 {
     public function __construct(
         private QuickGameService $quickGameService,
-    ) {
-    }
+    ) {}
 
     /**
      * POST /api/quick-game/update

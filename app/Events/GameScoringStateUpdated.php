@@ -19,8 +19,7 @@ class GameScoringStateUpdated implements ShouldBroadcastNow
     public function __construct(
         public GameScoringContext $context,
         public array $state,
-    ) {
-    }
+    ) {}
 
     /**
      * @return array<int, Channel>

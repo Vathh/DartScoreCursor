@@ -23,8 +23,7 @@ class TournamentJoinRequestService
         private TournamentJoinRequestRepository $joinRequestRepository,
         private TournamentInvitationRepository $invitationRepository,
         private TournamentRepository $tournamentRepository,
-    ) {
-    }
+    ) {}
 
     public function ensureJoinCode(Tournament $tournament): Tournament
     {

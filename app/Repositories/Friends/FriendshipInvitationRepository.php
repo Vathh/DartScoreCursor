@@ -11,9 +11,7 @@ class FriendshipInvitationRepository
 {
     /**
      * Tworzy zaproszenie do znajomych
-     * @param int $senderId
-     * @param int $receiverId
-     * @return FriendshipInvitationDomain
+     *
      * @throws \RuntimeException jeśli zaproszenie już istnieje
      */
     public function create(int $senderId, int $receiverId): FriendshipInvitationDomain
@@ -51,9 +49,9 @@ class FriendshipInvitationRepository
 
     /**
      * Akceptuje zaproszenie
-     * @param int $invitationId
-     * @param int $receiverId ID użytkownika który akceptuje (musi być receiverem)
-     * @return void
+     *
+     * @param  int  $receiverId  ID użytkownika który akceptuje (musi być receiverem)
+     *
      * @throws \RuntimeException
      */
     public function accept(int $invitationId, int $receiverId): void
@@ -87,9 +85,9 @@ class FriendshipInvitationRepository
 
     /**
      * Odrzuca zaproszenie
-     * @param int $invitationId
-     * @param int $receiverId ID użytkownika który odrzuca (musi być receiverem)
-     * @return void
+     *
+     * @param  int  $receiverId  ID użytkownika który odrzuca (musi być receiverem)
+     *
      * @throws \RuntimeException
      */
     public function reject(int $invitationId, int $receiverId): void
@@ -112,7 +110,7 @@ class FriendshipInvitationRepository
 
     /**
      * Pobiera zaproszenia otrzymane przez użytkownika
-     * @param int $userId
+     *
      * @return Collection<int, FriendshipInvitationDomain>
      */
     public function getReceivedInvitations(int $userId): Collection
@@ -121,12 +119,12 @@ class FriendshipInvitationRepository
             ->where('status', 'pending')
             ->with(['sender.player', 'receiver.player'])
             ->get()
-            ->map(fn($invitation) => FriendshipInvitationDomain::fromEloquent($invitation));
+            ->map(fn ($invitation) => FriendshipInvitationDomain::fromEloquent($invitation));
     }
 
     /**
      * Pobiera zaproszenia wysłane przez użytkownika
-     * @param int $userId
+     *
      * @return Collection<int, FriendshipInvitationDomain>
      */
     public function getSentInvitations(int $userId): Collection
@@ -135,7 +133,7 @@ class FriendshipInvitationRepository
             ->where('status', 'pending')
             ->with(['sender.player', 'receiver.player'])
             ->get()
-            ->map(fn($invitation) => FriendshipInvitationDomain::fromEloquent($invitation));
+            ->map(fn ($invitation) => FriendshipInvitationDomain::fromEloquent($invitation));
     }
 
     public function findPending(int $senderId, int $receiverId): ?FriendshipInvitationDomain
@@ -154,33 +152,18 @@ class FriendshipInvitationRepository
 
     /**
      * Sprawdza czy istnieje zaproszenie między użytkownikami
-     * @param int $userId1
-     * @param int $userId2
-     * @return bool
      */
     public function hasPendingInvitation(int $userId1, int $userId2): bool
     {
         return FriendshipInvitation::where(function ($query) use ($userId1, $userId2) {
             $query->where('sender_id', $userId1)
-                  ->where('receiver_id', $userId2);
+                ->where('receiver_id', $userId2);
         })
-        ->orWhere(function ($query) use ($userId1, $userId2) {
-            $query->where('sender_id', $userId2)
-                  ->where('receiver_id', $userId1);
-        })
-        ->where('status', 'pending')
-        ->exists();
+            ->orWhere(function ($query) use ($userId1, $userId2) {
+                $query->where('sender_id', $userId2)
+                    ->where('receiver_id', $userId1);
+            })
+            ->where('status', 'pending')
+            ->exists();
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-

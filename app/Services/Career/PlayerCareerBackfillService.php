@@ -18,8 +18,7 @@ class PlayerCareerBackfillService
         private LeagueGameRepository $leagueGameRepository,
         private QuickGameRepository $quickGameRepository,
         private QuickGameFfaSessionRepository $ffaSessionRepository,
-    ) {
-    }
+    ) {}
 
     public function backfillAll(): int
     {

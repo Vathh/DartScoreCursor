@@ -11,8 +11,7 @@ class EmailVerificationController extends Controller
 {
     public function __construct(
         private AccountAuthService $accountAuthService,
-    ) {
-    }
+    ) {}
 
     public function verify(Request $request, int $id, string $hash): RedirectResponse
     {

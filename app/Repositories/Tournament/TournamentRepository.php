@@ -3,7 +3,6 @@
 namespace App\Repositories\Tournament;
 
 use App\Domain\AdminRoster;
-use App\Domain\Tournament\PointSchemeDomain;
 use App\Domain\Tournament\TournamentDomain;
 use App\Enums\TournamentStatus;
 use App\Models\Season\Season;
@@ -49,10 +48,10 @@ class TournamentRepository
     }
 
     public function create(
-        ?int    $seasonId,
-        string  $name,
+        ?int $seasonId,
+        string $name,
         ?string $date,
-        ?int    $createdByUserId = null,
+        ?int $createdByUserId = null,
     ): int {
         $tournament = Tournament::create([
             'season_id' => $seasonId,
@@ -130,11 +129,6 @@ class TournamentRepository
         return TournamentDomain::fromEloquent($tournament)->canTransitionTo(TournamentStatus::GROUP);
     }
 
-
-    /**
-     * @param int $tournamentId
-     * @return TournamentDomain|null
-     */
     public function findWithSeasonAndPointSchemeRules(int $tournamentId): ?TournamentDomain
     {
         $tournament = Tournament::with(['season.organization', 'pointScheme.rules'])->findOrFail($tournamentId);
@@ -156,7 +150,7 @@ class TournamentRepository
     {
         $tournament = Tournament::with(['games', 'playoffGames'])->findOrFail($tournamentId);
 
-        if($tournament->games->count() === 0 && $tournament->playoffGames->count() === 0) {
+        if ($tournament->games->count() === 0 && $tournament->playoffGames->count() === 0) {
             $this->changeStatus($tournamentId, TournamentStatus::FINISHED);
         }
     }
@@ -232,6 +226,7 @@ class TournamentRepository
     public function getOrganizationIdForTournament(int $tournamentId): ?int
     {
         $tournament = Tournament::with('season')->find($tournamentId);
+
         return $tournament?->season?->organization_id;
     }
 
@@ -273,14 +268,3 @@ class TournamentRepository
         return $tournament->fresh();
     }
 }
-
-
-
-
-
-
-
-
-
-
-

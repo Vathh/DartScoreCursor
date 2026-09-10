@@ -2,7 +2,6 @@
 
 namespace App\Rules;
 
-use App\Models\Player\Player;
 use App\Models\Season\Season;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -15,6 +14,7 @@ use Illuminate\Translation\PotentiallyTranslatedString;
 class UniquePlayerNameInSeason implements ValidationRule
 {
     private int $seasonId;
+
     private int $organizationId;
 
     public function __construct(int $seasonId, int $organizationId)
@@ -37,11 +37,11 @@ class UniquePlayerNameInSeason implements ValidationRule
         // Zbierz wszystkich graczy związanych z sezonem i organizacją
         $allPlayers = collect()
             // Zarejestrowani gracze z sezonu
-            ->merge($season->relatedUsers->map(fn($user) => $user->player)->filter())
+            ->merge($season->relatedUsers->map(fn ($user) => $user->player)->filter())
             // Goście z sezonu
             ->merge($season->guests)
             // Zarejestrowani gracze z organizacji
-            ->merge($season->organization->relatedUsers->map(fn($user) => $user->player)->filter())
+            ->merge($season->organization->relatedUsers->map(fn ($user) => $user->player)->filter())
             // Goście z organizacji
             ->merge($season->organization->guests)
             ->unique('id');
@@ -54,4 +54,3 @@ class UniquePlayerNameInSeason implements ValidationRule
         }
     }
 }
-

@@ -103,7 +103,7 @@ class CompetitionCatalogApiTest extends TestCase
                 ],
                 'has_more',
             ])
-			->assertJsonPath('items.0.title', 'L - Turniej 1')
+            ->assertJsonPath('items.0.title', 'L - Turniej 1')
             ->assertJsonMissingPath('items.0.url');
     }
 }

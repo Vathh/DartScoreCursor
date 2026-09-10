@@ -24,8 +24,7 @@ class CompetitionShowSerializer
     public function __construct(
         private SeasonStatsService $seasonStatsService,
         private GetTournamentData $getTournamentData,
-    ) {
-    }
+    ) {}
 
     /**
      * @return array{organization: array, seasons: list<array>, leagues: list<array>}
@@ -396,7 +395,6 @@ class CompetitionShowSerializer
     }
 
     /**
-     * @param  GroupGameDomain|PlayoffGameDomain  $game
      * @return array<string, mixed>
      */
     private function mapGame(GroupGameDomain|PlayoffGameDomain $game): array

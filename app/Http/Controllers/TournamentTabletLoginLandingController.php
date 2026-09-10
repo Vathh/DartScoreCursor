@@ -13,8 +13,7 @@ class TournamentTabletLoginLandingController
 {
     public function __construct(
         private LoginCodeService $loginCodeService,
-    ) {
-    }
+    ) {}
 
     public function show(string $code): Factory|View
     {

@@ -2,9 +2,9 @@
 
 namespace App\Repositories\Tournament;
 
+use App\Domain\GameScoring\MatchFormat;
 use App\Enums\GameStage;
 use App\Models\Tournament\TournamentMatchFormat;
-use App\Domain\GameScoring\MatchFormat;
 use Illuminate\Support\Collection;
 
 class TournamentMatchFormatRepository

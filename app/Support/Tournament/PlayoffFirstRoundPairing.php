@@ -10,7 +10,7 @@ final class PlayoffFirstRoundPairing
     /**
      * Losuje pary pierwszej rundy bez zawodników z tej samej grupy.
      *
-     * @param list<array{player_id: int, group_number: int}> $advancingPlayers
+     * @param  list<array{player_id: int, group_number: int}>  $advancingPlayers
      * @return list<array{0: int, 1: int}>
      */
     public static function pair(array $advancingPlayers): array
@@ -57,7 +57,7 @@ final class PlayoffFirstRoundPairing
     }
 
     /**
-     * @param list<array{player_id: int, group_number: int}> $pool
+     * @param  list<array{player_id: int, group_number: int}>  $pool
      * @return list<array{0: int, 1: int}>|null
      */
     private static function tryGreedyPairing(array $pool): ?array
@@ -89,7 +89,7 @@ final class PlayoffFirstRoundPairing
     }
 
     /**
-     * @param list<array{player_id: int, group_number: int}> $players
+     * @param  list<array{player_id: int, group_number: int}>  $players
      * @return list<array{0: int, 1: int}>|null
      */
     private static function pairWithBacktracking(array $players): ?array
@@ -101,8 +101,8 @@ final class PlayoffFirstRoundPairing
     }
 
     /**
-     * @param list<array{player_id: int, group_number: int}> $remaining
-     * @param list<array{0: int, 1: int}> $pairs
+     * @param  list<array{player_id: int, group_number: int}>  $remaining
+     * @param  list<array{0: int, 1: int}>  $pairs
      * @return list<array{0: int, 1: int}>|null
      */
     private static function backtrack(array $remaining, array $pairs): ?array
@@ -144,8 +144,8 @@ final class PlayoffFirstRoundPairing
     }
 
     /**
-     * @param list<array{0: int, 1: int}> $pairs
-     * @param array<int, int> $groupByPlayerId
+     * @param  list<array{0: int, 1: int}>  $pairs
+     * @param  array<int, int>  $groupByPlayerId
      */
     public static function pairsSatisfyGroupConstraint(array $pairs, array $groupByPlayerId): bool
     {

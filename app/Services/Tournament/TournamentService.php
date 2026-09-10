@@ -2,7 +2,11 @@
 
 namespace App\Services\Tournament;
 
+use App\Domain\GameScoring\MatchFormat;
 use App\Domain\Tournament\TournamentDomain;
+use App\Domain\Tournament\TournamentGroupAdvanceDistribution;
+use App\Domain\Tournament\TournamentGroupDistribution;
+use App\Domain\Tournament\TournamentStartRules;
 use App\Enums\GameStage;
 use App\Enums\GameStatus;
 use App\Enums\GrandFinalMode;
@@ -11,19 +15,14 @@ use App\Enums\TournamentStatus;
 use App\Models\Tournament\Tournament;
 use App\Repositories\Game\GameRepository;
 use App\Repositories\GroupStanding\GroupStandingRepository;
+use App\Repositories\Season\SeasonRepository;
 use App\Repositories\Tournament\TournamentMatchFormatRepository;
 use App\Repositories\Tournament\TournamentRepository;
-use App\Repositories\Season\SeasonRepository;
 use App\Services\GameScoring\GameAuthorizationService;
-use App\Domain\GameScoring\MatchFormat;
-use App\Domain\Tournament\TournamentGroupAdvanceDistribution;
-use App\Domain\Tournament\TournamentGroupDistribution;
-use App\Support\Tournament\TournamentMatchFormatRequestParser;
-use App\Domain\Tournament\TournamentStartRules;
-use App\Services\Tournament\LoginCodeService;
-use App\Services\PointScheme\PointSchemeService;
 use App\Services\Player\PlayerService;
+use App\Services\PointScheme\PointSchemeService;
 use App\Support\Tournament\PlayoffByePairing;
+use App\Support\Tournament\TournamentMatchFormatRequestParser;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -34,22 +33,19 @@ use Throwable;
 
 class TournamentService
 {
-
     public function __construct(
-        private TournamentRepository      $tournamentRepository,
-        private GameRepository            $gameRepository,
-        private GroupStandingRepository   $groupStandingRepository,
-        private LoginCodeService          $loginCodeService,
-        private PointSchemeService        $pointSchemeService,
-        private TournamentStartValidator  $startValidator,
+        private TournamentRepository $tournamentRepository,
+        private GameRepository $gameRepository,
+        private GroupStandingRepository $groupStandingRepository,
+        private LoginCodeService $loginCodeService,
+        private PointSchemeService $pointSchemeService,
+        private TournamentStartValidator $startValidator,
         private TournamentMatchFormatRepository $matchFormatRepository,
-        private GameAuthorizationService  $gameAuthorizationService,
+        private GameAuthorizationService $gameAuthorizationService,
         private \App\Services\PlayoffGame\PlayoffService $playoffService,
         private SeasonRepository $seasonRepository,
         private PlayerService $playerService,
-    )
-    {
-    }
+    ) {}
 
     public function assertCanCreate(?int $seasonId): void
     {
@@ -66,7 +62,7 @@ class TournamentService
     /**
      * Ładuje turniej (z relacjami do autoryzacji) i weryfikuje, że aktualny użytkownik może nim zarządzać.
      *
-     * @param list<string> $additionalRelations
+     * @param  list<string>  $additionalRelations
      */
     public function loadAndAuthorize(int $tournamentId, array $additionalRelations = []): TournamentDomain
     {
@@ -122,10 +118,10 @@ class TournamentService
     }
 
     public function create(
-        ?int    $seasonId,
-        string  $name,
+        ?int $seasonId,
+        string $name,
         ?string $date = null,
-        ?int    $createdByUserId = null,
+        ?int $createdByUserId = null,
     ): int {
         return $this->tournamentRepository->create($seasonId, $name, $date, $createdByUserId);
     }
@@ -478,15 +474,3 @@ class TournamentService
         $this->tournamentRepository->updatePointSchemeId($tournamentId, $pointScheme->id);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-

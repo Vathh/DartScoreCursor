@@ -50,16 +50,15 @@ class UserRepository
 
     /**
      * Wyszukuje użytkowników po nazwie gracza (dla wyszukiwania znajomych)
-     * @param string $searchTerm
-     * @param int $excludeUserId Użytkownik do wykluczenia z wyników
-     * @param int $limit
+     *
+     * @param  int  $excludeUserId  Użytkownik do wykluczenia z wyników
      * @return Collection<int, array{id: int, email: string, player: PlayerDomain}>
      */
     public function searchByPlayerName(string $searchTerm, int $excludeUserId, int $limit = 20): Collection
     {
         $users = User::with('player')
             ->whereHas('player', function ($query) use ($searchTerm) {
-                $query->where('name', 'like', '%' . $searchTerm . '%');
+                $query->where('name', 'like', '%'.$searchTerm.'%');
             })
             ->where('id', '!=', $excludeUserId)
             ->limit($limit)
@@ -74,15 +73,3 @@ class UserRepository
         });
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-

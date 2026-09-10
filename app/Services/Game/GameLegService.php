@@ -9,16 +9,10 @@ class GameLegService
 {
     public function __construct(
         private GameLegRepository $gameLegRepository
-    )
-    {
-    }
+    ) {}
 
     /**
-     * @param GameLegDTO[] $legs
-     * @param int|null $gameId
-     * @param int|null $playoffGameId
-     * @param int|null $quickGameId
-     * @return void
+     * @param  GameLegDTO[]  $legs
      */
     public function createMany(array $legs, ?int $gameId = null, ?int $playoffGameId = null, ?int $quickGameId = null): void
     {
@@ -29,15 +23,3 @@ class GameLegService
         $this->gameLegRepository->createMany($legs, $gameId, $playoffGameId, $quickGameId);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-

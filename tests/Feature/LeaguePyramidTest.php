@@ -22,7 +22,9 @@ class LeaguePyramidTest extends TestCase
     use RefreshDatabase;
 
     private User $admin;
+
     private Organization $organization;
+
     /** @var list<Player> */
     private array $players = [];
 

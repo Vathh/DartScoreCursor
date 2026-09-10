@@ -269,6 +269,7 @@ final class LeagueStandingCalculator
         foreach ($groups as $groupRows) {
             if (count($groupRows) === 1) {
                 $ordered[] = $groupRows[0]->withPlace(0, false, null);
+
                 continue;
             }
             usort($groupRows, static function (LeagueStandingRow $a, LeagueStandingRow $b) use ($seed): int {
@@ -289,6 +290,6 @@ final class LeagueStandingCalculator
 
     public static function lotteryScore(int $seed, int $playerId): int
     {
-        return crc32($seed.'-'.$playerId) & 0x7fffffff;
+        return crc32($seed.'-'.$playerId) & 0x7FFFFFFF;
     }
 }

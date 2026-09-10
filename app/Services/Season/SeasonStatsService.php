@@ -11,8 +11,7 @@ class SeasonStatsService
 
     public function __construct(
         private TournamentAggregateRepository $tournamentAggregateRepository,
-    ) {
-    }
+    ) {}
 
     /**
      * Ranking sezonu: suma punktów (i achievementów) z turniejów tego sezonu.

@@ -35,24 +35,21 @@ class GroupStandingRepository
     }
 
     /**
-     * @param int $groupNumber
-     * @param int $tournamentId
      * @return Collection<int, GroupStandingDomain>
      */
     public function getByGroupNumberAndTournamentId(int $groupNumber, int $tournamentId): Collection
     {
 
         return GroupStanding::with(['tournament', 'player'])
-                ->where('tournament_id', $tournamentId)
-                ->where('group_number', $groupNumber)
-                ->get()
-                ->map(fn($standing) => GroupStandingDomain::fromEloquent($standing, ['tournament', 'player']))
-                ->values();
+            ->where('tournament_id', $tournamentId)
+            ->where('group_number', $groupNumber)
+            ->get()
+            ->map(fn ($standing) => GroupStandingDomain::fromEloquent($standing, ['tournament', 'player']))
+            ->values();
     }
 
     /**
-     * @param Collection<int, GroupStandingDomain> $standings
-     * @return void
+     * @param  Collection<int, GroupStandingDomain>  $standings
      */
     public function updatePlaces(Collection $standings): void
     {
@@ -83,7 +80,7 @@ class GroupStandingRepository
             ->update([
                 'games_played' => DB::raw('games_played + 1'),
                 'games_won' => $hasWon ? DB::raw('games_won + 1') : DB::raw('games_won'),
-                'games_lost' => !$hasWon ? DB::raw('games_lost + 1') : DB::raw('games_lost'),
+                'games_lost' => ! $hasWon ? DB::raw('games_lost + 1') : DB::raw('games_lost'),
                 'match_units_won' => DB::raw("match_units_won + $matchUnitsWon"),
                 'match_units_lost' => DB::raw("match_units_lost + $matchUnitsLost"),
                 'points' => $hasWon ? DB::raw('points + 1') : DB::raw('points'),
@@ -99,7 +96,7 @@ class GroupStandingRepository
     /**
      * Awansujący z numerem grupy (do losowania pierwszej rundy playoff).
      *
-     * @param array<int, int> $advancesByGroupNumber group_number => liczba awansujących
+     * @param  array<int, int>  $advancesByGroupNumber  group_number => liczba awansujących
      * @return Collection<int, array{player_id: int, group_number: int}>
      */
     public function getAdvancingPlayersWithGroups(int $tournamentId, array $advancesByGroupNumber): Collection
@@ -144,7 +141,7 @@ class GroupStandingRepository
     }
 
     /**
-     * @param array<int, int> $advancesByGroupNumber group_number => liczba awansujących
+     * @param  array<int, int>  $advancesByGroupNumber  group_number => liczba awansujących
      * @return Collection<GroupStandingDomain>
      */
     public function getGroupLosers(int $tournamentId, array $advancesByGroupNumber): Collection
@@ -156,19 +153,7 @@ class GroupStandingRepository
             ->filter(
                 fn (GroupStanding $standing) => $standing->place > ($advancesByGroupNumber[$standing->group_number] ?? 0),
             )
-            ->map(fn($standing) => GroupStandingDomain::fromEloquent($standing, ['tournament', 'player']))
+            ->map(fn ($standing) => GroupStandingDomain::fromEloquent($standing, ['tournament', 'player']))
             ->values();
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-

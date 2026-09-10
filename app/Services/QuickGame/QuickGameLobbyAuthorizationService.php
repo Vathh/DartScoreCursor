@@ -15,8 +15,7 @@ class QuickGameLobbyAuthorizationService
         private PlayerRepository $playerRepository,
         private QuickGameFfaSessionRepository $ffaSessionRepository,
         private QuickGameFfaPresenceRepository $ffaPresenceRepository,
-    ) {
-    }
+    ) {}
 
     /**
      * @return false|array{id: int}

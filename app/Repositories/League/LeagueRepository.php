@@ -123,6 +123,7 @@ class LeagueRepository
                 if ($id > 0 && $existing->has($id)) {
                     $existing->get($id)->update($payload);
                     $keptIds[] = $id;
+
                     continue;
                 }
 

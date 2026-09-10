@@ -10,7 +10,7 @@ final class TournamentGroupDistribution
      * Losuje zawodników i dzieli do grup od nr 1 w górę.
      * Większe grupy mają niższe numery (wcześniejsze), mniejsze — wyższe.
      *
-     * @param list<int> $playerIds
+     * @param  list<int>  $playerIds
      * @return list<list<int>>
      */
     public static function distribute(array $playerIds, int $groupsCount): array

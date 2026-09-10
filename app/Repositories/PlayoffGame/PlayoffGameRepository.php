@@ -4,18 +4,17 @@ namespace App\Repositories\PlayoffGame;
 
 use App\Domain\Game\PlayoffGameDomain;
 use App\Domain\Game\WinnerDestination;
+use App\Domain\GameScoring\MatchFormat;
 use App\DTO\GameResultDTO;
 use App\Enums\GameStatus;
-use App\Enums\PlayerSlot;
 use App\Models\PlayoffGame\PlayoffGame;
-use App\Domain\GameScoring\MatchFormat;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class PlayoffGameRepository
 {
     /**
-     * @param Collection<PlayoffGameDomain> $games
+     * @param  Collection<PlayoffGameDomain>  $games
      * @param  array<string, MatchFormat>  $formatsByStage
      */
     public function createMany(Collection $games, array $formatsByStage = []): void
@@ -99,16 +98,15 @@ class PlayoffGameRepository
     }
 
     /**
-     * @param int $tournamentId
      * @return Collection<PlayoffGameDomain>
      */
     public function getActive(int $tournamentId): Collection
     {
         return PlayoffGame::with(['tournament', 'player1', 'player2'])
-                            ->where('tournament_id', $tournamentId)
-                            ->whereIn('status', [GameStatus::SCHEDULED, GameStatus::IN_PROGRESS])
-                            ->get()
-                            ->map(fn ($game) => PlayoffGameDomain::fromEloquent($game, ['tournament', 'player1', 'player2']));
+            ->where('tournament_id', $tournamentId)
+            ->whereIn('status', [GameStatus::SCHEDULED, GameStatus::IN_PROGRESS])
+            ->get()
+            ->map(fn ($game) => PlayoffGameDomain::fromEloquent($game, ['tournament', 'player1', 'player2']));
     }
 
     public function find(int $id): ?PlayoffGameDomain

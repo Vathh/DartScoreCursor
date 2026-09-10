@@ -8,7 +8,7 @@ use Illuminate\Support\Collection;
 final class TournamentOverallPlaceCalculator
 {
     /**
-     * @param Collection<int, array{player_id: int, elimination_stage: GameStage, group_place: ?int, current_place: ?int}> $eliminated
+     * @param  Collection<int, array{player_id: int, elimination_stage: GameStage, group_place: ?int, current_place: ?int}>  $eliminated
      * @return array<int, int> player_id => miejsce w turnieju
      */
     public function calculate(int $playoffBracketSize, Collection $eliminated): array

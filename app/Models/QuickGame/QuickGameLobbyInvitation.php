@@ -24,5 +24,3 @@ class QuickGameLobbyInvitation extends Model
         return $this->belongsTo(Player::class, 'invited_player_id');
     }
 }
-
-

@@ -14,8 +14,7 @@ class TournamentFinishService
     public function __construct(
         private TournamentRepository $tournamentRepository,
         private LoginCodeService $loginCodeService,
-    ) {
-    }
+    ) {}
 
     /**
      * Zamyka turniej, gdy wszystkie mecze playoff są zakończone.

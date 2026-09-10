@@ -21,8 +21,7 @@ class PlayerLiveGameService
         private QuickGameRepository $quickGameRepository,
         private QuickGameFfaSessionRepository $quickGameFfaSessionRepository,
         private PlayerRepository $playerRepository,
-    ) {
-    }
+    ) {}
 
     /**
      * Mecze w trakcie z linkiem do webowego podglądu live

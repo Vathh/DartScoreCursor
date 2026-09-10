@@ -18,8 +18,7 @@ class TournamentStartRosterUpdated implements ShouldBroadcastNow
     public function __construct(
         public int $tournamentId,
         public array $payload,
-    ) {
-    }
+    ) {}
 
     /**
      * @return array<int, Channel>

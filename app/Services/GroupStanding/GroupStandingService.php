@@ -12,14 +12,11 @@ use Illuminate\Support\Collection;
 
 class GroupStandingService
 {
-
     public function __construct(
-        private GameRepository          $gameRepository,
+        private GameRepository $gameRepository,
         private GroupStandingRepository $groupStandingRepository,
-        private TournamentRepository    $tournamentRepository,
-    )
-    {
-    }
+        private TournamentRepository $tournamentRepository,
+    ) {}
 
     public function updateGroupStandings(int $tournamentId, int $groupNumber): void
     {
@@ -31,10 +28,8 @@ class GroupStandingService
         $this->groupStandingRepository->updatePlaces($sortedStandings);
     }
 
-
     /**
-     * @param GameResultDTO $dto
-     * @return void
+     * @param  GameResultDTO  $dto
      */
     public function recalculateGroupFromFinishedGames(int $tournamentId, int $groupNumber): void
     {
@@ -83,19 +78,19 @@ class GroupStandingService
     }
 
     /**
-     * @param Collection<int, GroupStandingDomain> $groupStandings
-     * @param Collection<int, \App\Domain\Game\GroupGameDomain> $finishedGames
+     * @param  Collection<int, GroupStandingDomain>  $groupStandings
+     * @param  Collection<int, \App\Domain\Game\GroupGameDomain>  $finishedGames
      * @return Collection<int, GroupStandingDomain>
      */
     public function sortStandings(Collection $groupStandings, Collection $finishedGames): Collection
     {
         $sortedStandings = $groupStandings->sortByDesc(function ($standing) {
-                                                return [$standing->points, $standing->matchUnitsDifference];
-                                            })->values()
-                                            ->map(fn ($standing, $index) => $standing->withPlace($index + 1));
+            return [$standing->points, $standing->matchUnitsDifference];
+        })->values()
+            ->map(fn ($standing, $index) => $standing->withPlace($index + 1));
 
         $sortedStandingsGroupedByPointsAndLegsDifference = $sortedStandings->groupBy(function ($standing) {
-            return $standing->points . '-' . $standing->matchUnitsDifference;
+            return $standing->points.'-'.$standing->matchUnitsDifference;
         });
 
         $result = collect();
@@ -106,6 +101,7 @@ class GroupStandingService
             if ($group->count() === 1) {
                 $result->push($group->first()->withPlace($index));
                 $index++;
+
                 continue;
             }
 
@@ -118,13 +114,12 @@ class GroupStandingService
         }
 
         return $result->values()
-                      ->map(fn($standing, $i) => $standing->withPlace($i + 1));
+            ->map(fn ($standing, $i) => $standing->withPlace($i + 1));
     }
 
-
     /**
-     * @param Collection<int, GroupStandingDomain> $standingsToCompare
-     * @param Collection<int, GroupGameDomain> $finishedGames
+     * @param  Collection<int, GroupStandingDomain>  $standingsToCompare
+     * @param  Collection<int, GroupGameDomain>  $finishedGames
      * @return Collection<int, GroupStandingDomain>
      */
     public function compareByDirectGame(Collection $standingsToCompare, Collection $finishedGames): Collection
@@ -136,10 +131,10 @@ class GroupStandingService
                 && in_array($game->player2->id, $playerIds);
         })->values();
 
-        if($directGames->count() === 0) {
+        if ($directGames->count() === 0) {
             return $standingsToCompare
-                    ->shuffle()
-                    ->values();
+                ->shuffle()
+                ->values();
         }
 
         $playerWinsMap = $standingsToCompare->mapWithKeys(function ($standing) use ($directGames) {
@@ -155,28 +150,27 @@ class GroupStandingService
         if ($playerWinsMap->unique()->count() === 1) {
 
             return $standingsToCompare
-                    ->shuffle()
-                    ->values();
+                ->shuffle()
+                ->values();
         }
 
-        $groups = $playerWinsMap->mapToGroups(fn($wins, $playerId) => [$wins => $playerId])->sortKeysDesc();
+        $groups = $playerWinsMap->mapToGroups(fn ($wins, $playerId) => [$wins => $playerId])->sortKeysDesc();
 
         $result = collect();
 
         foreach ($groups as $playersWithSameWins) {
 
             $subset = $standingsToCompare->filter(
-                fn($standing) => $playersWithSameWins->contains($standing->player->id)
+                fn ($standing) => $playersWithSameWins->contains($standing->player->id)
             );
 
             if ($playersWithSameWins->count() === 1) {
                 $result->push($subset->first());
-            }
-            else {
+            } else {
                 $resolved = $this->compareByDirectGame(
-                                        $subset,
-                                        $directGames
-                                    );
+                    $subset,
+                    $directGames
+                );
 
                 $result = $result->merge($resolved);
             }
@@ -192,15 +186,3 @@ class GroupStandingService
         return $this->groupStandingRepository->getGroupLosers($tournamentId, $advancesByGroup);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-

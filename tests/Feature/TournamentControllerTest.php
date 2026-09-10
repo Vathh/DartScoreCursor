@@ -23,14 +23,23 @@ class TournamentControllerTest extends TestCase
     use SeedsTournamentParticipants;
 
     private User $adminUser;
+
     private User $regularUser;
+
     private Organization $organization;
+
     private Season $season;
+
     private Player $player1;
+
     private Player $player2;
+
     private Player $player3;
+
     private Player $player4;
+
     private Player $player5;
+
     private Player $player6;
 
     protected function setUp(): void
@@ -62,15 +71,15 @@ class TournamentControllerTest extends TestCase
         // Utwórz graczy dla użytkowników (będą mieli user_id)
         $playerService->create('Admin', $this->adminUser->id);
         $playerService->create('User', $this->regularUser->id);
-        
+
         // Pobierz utworzonych graczy
         $this->player1 = Player::where('user_id', $this->adminUser->id)->first();
         $this->player2 = Player::where('user_id', $this->regularUser->id)->first();
-        
+
         // Zaktualizuj graczy, aby byli przypisani do sezonu i organizacji
         $this->player1->update(['season_id' => $this->season->id, 'organization_id' => $this->organization->id]);
         $this->player2->update(['season_id' => $this->season->id, 'organization_id' => $this->organization->id]);
-        
+
         // Utwórz gości (bez user_id)
         $this->player3 = Player::create(['name' => 'Player3', 'season_id' => $this->season->id, 'organization_id' => $this->organization->id]);
         $this->player4 = Player::create(['name' => 'Player4', 'season_id' => $this->season->id, 'organization_id' => $this->organization->id]);
@@ -97,7 +106,7 @@ class TournamentControllerTest extends TestCase
     public function test_user_can_view_tournaments_index(): void
     {
         $this->markTestSkipped('Test wymaga Vite manifest - problem konfiguracyjny, nie logika biznesowa');
-        
+
         Tournament::create([
             'name' => 'Test Tournament',
             'season_id' => $this->season->id,
@@ -130,7 +139,7 @@ class TournamentControllerTest extends TestCase
     public function test_non_admin_cannot_create_tournament(): void
     {
         $this->markTestSkipped('Test oczekuje 403, ale otrzymuje 302 redirect - wymaga decyzji o zachowaniu');
-        
+
         $this->actingAs($this->regularUser);
 
         $response = $this->post("/tournaments?seasonId={$this->season->id}", [
@@ -144,7 +153,7 @@ class TournamentControllerTest extends TestCase
     public function test_season_admin_can_start_tournament(): void
     {
         $this->markTestSkipped('Test wymaga Vite manifest - problem konfiguracyjny, nie logika biznesowa');
-        
+
         $this->actingAs($this->adminUser);
         $tournament = Tournament::create([
             'name' => 'Test Tournament',
@@ -484,4 +493,3 @@ class TournamentControllerTest extends TestCase
         );
     }
 }
-

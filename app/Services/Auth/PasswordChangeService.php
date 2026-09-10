@@ -11,9 +11,7 @@ use Illuminate\Validation\ValidationException;
 
 class PasswordChangeService
 {
-    public function __construct(private UserRepository $userRepository)
-    {
-    }
+    public function __construct(private UserRepository $userRepository) {}
 
     /**
      * @param  array{current_password: string, password: string, password_confirmation?: string}  $data

@@ -17,8 +17,7 @@ class TournamentInvitationService
         private TournamentInvitationRepository $invitationRepository,
         private InvitationPushService $invitationPushService,
         private TournamentRepository $tournamentRepository,
-    ) {
-    }
+    ) {}
 
     /**
      * @return Collection<int, TournamentInvitationDomain>

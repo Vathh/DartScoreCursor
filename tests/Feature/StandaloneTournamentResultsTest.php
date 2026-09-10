@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Domain\GameScoring\MatchFormat;
 use App\Enums\GameStage;
 use App\Enums\GameStatus;
 use App\Enums\TournamentStatus;
@@ -11,7 +12,6 @@ use App\Models\Player\Player;
 use App\Models\Tournament\Tournament;
 use App\Services\GroupStanding\GroupStandingService;
 use App\Services\Tournament\TournamentResultService;
-use App\Domain\GameScoring\MatchFormat;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

@@ -10,8 +10,7 @@ class WinnerDestination
     public function __construct(
         public readonly string $playoffSlot,
         public readonly PlayerSlot $playerSlot,
-    ) {
-    }
+    ) {}
 
     public static function parse(string $destinationSlot): self
     {

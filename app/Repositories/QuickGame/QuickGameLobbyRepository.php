@@ -2,13 +2,12 @@
 
 namespace App\Repositories\QuickGame;
 
+use App\Domain\GameScoring\MatchFormat;
 use App\Models\QuickGame\QuickGameLobby;
-use App\Models\QuickGame\QuickGameLobbyPlayer;
 use App\Models\QuickGame\QuickGameLobbyInvitation;
+use App\Models\QuickGame\QuickGameLobbyPlayer;
 use App\Models\QuickGame\QuickGameLobbyRematchIntent;
 use Illuminate\Support\Facades\DB;
-
-use App\Domain\GameScoring\MatchFormat;
 
 class QuickGameLobbyRepository
 {
@@ -169,13 +168,14 @@ class QuickGameLobbyRepository
         if ($lobby->status !== 'waiting') {
             throw new \RuntimeException('Nie można zmieniać ustawień po rozpoczęciu meczu');
         }
-        if (!in_array($scoringMode, ['one_device', 'each_own'], true)) {
+        if (! in_array($scoringMode, ['one_device', 'each_own'], true)) {
             throw new \RuntimeException('Nieprawidłowy tryb liczenia');
         }
         DB::table('quick_game_lobbies')->where('id', $lobbyId)->update([
             'scoring_mode' => $scoringMode,
             'updated_at' => now(),
         ]);
+
         return $this->find($lobbyId);
     }
 
@@ -351,15 +351,3 @@ class QuickGameLobbyRepository
         return $cols;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-

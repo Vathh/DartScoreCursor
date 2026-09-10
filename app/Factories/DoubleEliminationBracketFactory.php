@@ -3,9 +3,9 @@
 namespace App\Factories;
 
 use App\Domain\Game\PlayoffGameDomain;
+use App\Domain\Tournament\TournamentStartRules;
 use App\Enums\BracketSide;
 use App\Support\Tournament\PlayoffSlotIds;
-use App\Domain\Tournament\TournamentStartRules;
 use Illuminate\Support\Collection;
 use InvalidArgumentException;
 
@@ -60,7 +60,7 @@ class DoubleEliminationBracketFactory
                 if ($r < $wbRounds - 1) {
                     $nextIndex = intdiv($i - 1, 2) + 1;
                     $ab = $i % 2 === 1 ? 'A' : 'B';
-                    $winnerDest = PlayoffSlotIds::destination("W".($r + 1)."-{$nextIndex}", $ab);
+                    $winnerDest = PlayoffSlotIds::destination('W'.($r + 1)."-{$nextIndex}", $ab);
                 } else {
                     $winnerDest = PlayoffSlotIds::destination('GF1', 'A');
                 }

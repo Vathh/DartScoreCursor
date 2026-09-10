@@ -14,8 +14,7 @@ class UserRegistrationService
     public function __construct(
         private PlayerService $playerService,
         private UserRepository $userRepository,
-    ) {
-    }
+    ) {}
 
     /**
      * @param  array{name: string, email: string, password: string, password_confirmation?: string}  $data
@@ -23,7 +22,7 @@ class UserRegistrationService
     public function register(array $data, bool $requirePasswordConfirmation = false): User
     {
         $rules = [
-            'name' => ['required', 'string', 'max:20', new UniquePlayerNameForRegistered()],
+            'name' => ['required', 'string', 'max:20', new UniquePlayerNameForRegistered],
             'email' => 'required|email|max:255|unique:users',
             'password' => PasswordPolicyDomain::rules($requirePasswordConfirmation),
         ];

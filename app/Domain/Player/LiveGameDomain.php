@@ -14,8 +14,7 @@ class LiveGameDomain
         public readonly ?string $tournamentName,
         public readonly string $stageLabel,
         public readonly string $liveUrl,
-    ) {
-    }
+    ) {}
 
     /** Przeciwnik w meczu H2H to gracz inny niż $playerId spośród player1/player2. */
     public static function resolveOpponentName(

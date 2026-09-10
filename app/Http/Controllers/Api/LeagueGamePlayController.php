@@ -11,8 +11,7 @@ class LeagueGamePlayController extends Controller
 {
     public function __construct(
         private LeagueGamePlayService $leagueGamePlayService,
-    ) {
-    }
+    ) {}
 
     public function mine(Request $request): JsonResponse
     {

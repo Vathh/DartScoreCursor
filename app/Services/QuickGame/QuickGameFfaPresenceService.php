@@ -2,6 +2,7 @@
 
 namespace App\Services\QuickGame;
 
+use App\Domain\GameScoring\MatchFormat;
 use App\Domain\QuickGame\FfaSessionRulesDomain;
 use App\Models\QuickGame\QuickGameFfaPresence;
 use App\Models\QuickGame\QuickGameFfaSession;
@@ -9,7 +10,6 @@ use App\Models\QuickGame\QuickGameLobby;
 use App\Repositories\Player\PlayerRepository;
 use App\Repositories\QuickGame\QuickGameFfaPresenceRepository;
 use App\Repositories\QuickGame\QuickGameFfaSessionRepository;
-use App\Domain\GameScoring\MatchFormat;
 use DomainException;
 use Illuminate\Support\Facades\DB;
 
@@ -22,8 +22,7 @@ class QuickGameFfaPresenceService
         private QuickGameFfaPresenceRepository $presenceRepository,
         private QuickGameFfaScoringService $scoringService,
         private PlayerRepository $playerRepository,
-    ) {
-    }
+    ) {}
 
     /**
      * @return array<string, mixed>

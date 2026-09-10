@@ -36,5 +36,3 @@ class QuickGameResult extends Model
         return $this->belongsTo(Player::class);
     }
 }
-
-

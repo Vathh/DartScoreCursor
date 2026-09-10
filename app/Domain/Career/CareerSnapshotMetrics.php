@@ -25,7 +25,7 @@ final class CareerSnapshotMetrics
 
     /**
      * @param  iterable<mixed>  $visits  obiekty z score, darts_in_visit, bust
-     * @return array<string, mixed>|null  null gdy brak lotek (walkower)
+     * @return array<string, mixed>|null null gdy brak lotek (walkower)
      */
     public static function fromX01Visits(
         iterable $visits,

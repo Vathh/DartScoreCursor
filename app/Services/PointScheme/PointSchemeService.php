@@ -8,12 +8,9 @@ use DomainException;
 
 class PointSchemeService
 {
-
     public function __construct(
         private PointSchemeRepository $pointSchemeRepository,
-    )
-    {
-    }
+    ) {}
 
     public function findByPlayersAmount(int $playersAmount): PointSchemeDomain
     {
@@ -32,15 +29,3 @@ class PointSchemeService
         return $candidates->sortByDesc(fn (PointSchemeDomain $s) => $s->minPlayers)->first();
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-

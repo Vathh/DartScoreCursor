@@ -13,7 +13,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Season extends Model
 {
-
     protected static function booted(): void
     {
         static::created(function ($season) {
@@ -26,15 +25,15 @@ class Season extends Model
     }
 
     protected $fillable = [
-      'organization_id',
-      'name',
-      'start_date',
-      'end_date',
+        'organization_id',
+        'name',
+        'start_date',
+        'end_date',
     ];
 
     protected $casts = [
         'start_date' => 'date',
-        'end_date' => 'date'
+        'end_date' => 'date',
     ];
 
     public function organization(): BelongsTo
@@ -62,5 +61,3 @@ class Season extends Model
         return $this->hasMany(Player::class);
     }
 }
-
-

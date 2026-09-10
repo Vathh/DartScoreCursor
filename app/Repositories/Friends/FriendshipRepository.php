@@ -11,9 +11,6 @@ class FriendshipRepository
 {
     /**
      * Dodaje znajomość między dwoma użytkownikami (symetryczna relacja)
-     * @param int $userId
-     * @param int $friendId
-     * @return void
      */
     public function addFriendship(int $userId, int $friendId): void
     {
@@ -26,15 +23,15 @@ class FriendshipRepository
         $exists = DB::table('friendships')
             ->where(function ($query) use ($userId, $friendId) {
                 $query->where('user_id', $userId)
-                      ->where('friend_id', $friendId);
+                    ->where('friend_id', $friendId);
             })
             ->orWhere(function ($query) use ($userId, $friendId) {
                 $query->where('user_id', $friendId)
-                      ->where('friend_id', $userId);
+                    ->where('friend_id', $userId);
             })
             ->exists();
 
-        if (!$exists) {
+        if (! $exists) {
             // Dodaj relację w jedną stronę (A -> B)
             DB::table('friendships')->insert([
                 'user_id' => $userId,
@@ -47,27 +44,24 @@ class FriendshipRepository
 
     /**
      * Usuwa znajomość między dwoma użytkownikami
-     * @param int $userId
-     * @param int $friendId
-     * @return void
      */
     public function removeFriendship(int $userId, int $friendId): void
     {
         DB::table('friendships')
             ->where(function ($query) use ($userId, $friendId) {
                 $query->where('user_id', $userId)
-                      ->where('friend_id', $friendId);
+                    ->where('friend_id', $friendId);
             })
             ->orWhere(function ($query) use ($userId, $friendId) {
                 $query->where('user_id', $friendId)
-                      ->where('friend_id', $userId);
+                    ->where('friend_id', $userId);
             })
             ->delete();
     }
 
     /**
      * Pobiera listę znajomych użytkownika
-     * @param int $userId
+     *
      * @return Collection<int, FriendshipDomain>
      */
     public function getFriends(int $userId): Collection
@@ -98,31 +92,31 @@ class FriendshipRepository
         $friendshipIds = DB::table('friendships')
             ->where(function ($query) use ($userId, $friendIds) {
                 $query->where('user_id', $userId)
-                      ->whereIn('friend_id', $friendIds);
+                    ->whereIn('friend_id', $friendIds);
             })
             ->orWhere(function ($query) use ($userId, $friendIds) {
                 $query->where('friend_id', $userId)
-                      ->whereIn('user_id', $friendIds);
+                    ->whereIn('user_id', $friendIds);
             })
             ->get()
             ->keyBy(function ($friendship) use ($userId) {
                 // Zwróć friend_id jako klucz
-                return $friendship->user_id === $userId 
-                    ? $friendship->friend_id 
+                return $friendship->user_id === $userId
+                    ? $friendship->friend_id
                     : $friendship->user_id;
             });
 
         return $friends->map(function ($friend) use ($friendshipIds, $userId) {
             $friendshipRecord = $friendshipIds->get($friend->id);
             $friendshipId = $friendshipRecord ? $friendshipRecord->id : 0;
-            
+
             // Tylko użytkownicy z graczem mogą być znajomymi
-            if (!$friend->player) {
+            if (! $friend->player) {
                 return null;
             }
-            
+
             $friendPlayer = \App\Domain\PlayerDomain::fromEloquent($friend->player);
-            
+
             return FriendshipDomain::fromData(
                 $friendshipId,
                 $userId,
@@ -142,33 +136,18 @@ class FriendshipRepository
 
     /**
      * Sprawdza czy użytkownicy są znajomymi
-     * @param int $userId
-     * @param int $friendId
-     * @return bool
      */
     public function areFriends(int $userId, int $friendId): bool
     {
         return DB::table('friendships')
             ->where(function ($query) use ($userId, $friendId) {
                 $query->where('user_id', $userId)
-                      ->where('friend_id', $friendId);
+                    ->where('friend_id', $friendId);
             })
             ->orWhere(function ($query) use ($userId, $friendId) {
                 $query->where('user_id', $friendId)
-                      ->where('friend_id', $userId);
+                    ->where('friend_id', $userId);
             })
             ->exists();
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-

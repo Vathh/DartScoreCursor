@@ -39,5 +39,3 @@ class PlayerStat extends Model
         return $this->belongsTo(Player::class);
     }
 }
-
-

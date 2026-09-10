@@ -31,5 +31,3 @@ class QuickGameLobbyPlayer extends Model
         return $this->belongsTo(Player::class);
     }
 }
-
-

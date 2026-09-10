@@ -2,16 +2,16 @@
 
 namespace Tests\Feature;
 
+use App\Domain\GameScoring\MatchFormat;
 use App\Enums\GameStage;
 use App\Enums\GameStatus;
 use App\Enums\TournamentStatus;
 use App\Events\TournamentFinished;
-use App\Models\PlayoffGame\PlayoffGame;
 use App\Models\Player\Player;
+use App\Models\PlayoffGame\PlayoffGame;
 use App\Models\Tournament\LoginCode;
 use App\Models\Tournament\Tournament;
 use App\Services\Tournament\TournamentFinishService;
-use App\Domain\GameScoring\MatchFormat;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Laravel\Sanctum\PersonalAccessToken;

@@ -10,8 +10,7 @@ class PushTokenController
 {
     public function __construct(
         private PushTokenService $pushTokenService,
-    ) {
-    }
+    ) {}
 
     /**
      * PUT /api/push-tokens

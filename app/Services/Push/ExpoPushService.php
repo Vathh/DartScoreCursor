@@ -14,8 +14,7 @@ class ExpoPushService
 
     public function __construct(
         private UserPushTokenRepository $tokenRepository,
-    ) {
-    }
+    ) {}
 
     /**
      * @param  list<string>  $tokens

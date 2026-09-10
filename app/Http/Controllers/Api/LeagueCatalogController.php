@@ -11,8 +11,7 @@ class LeagueCatalogController
 {
     public function __construct(
         private LeagueService $leagueService,
-    ) {
-    }
+    ) {}
 
     /**
      * GET /api/leagues/{league}

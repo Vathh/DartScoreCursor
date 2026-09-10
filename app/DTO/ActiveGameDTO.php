@@ -1,4 +1,6 @@
-<?php /** @noinspection PhpParamsInspection */
+<?php
+
+/** @noinspection PhpParamsInspection */
 
 namespace App\DTO;
 
@@ -8,7 +10,6 @@ use App\Models\PlayoffGame\PlayoffGame;
 
 class ActiveGameDTO
 {
-
     public function __construct(
         public int $id,
         public int $tournamentId,
@@ -18,14 +19,8 @@ class ActiveGameDTO
         public ?int $groupNumber,
         public ?string $round = null,
         public ?string $roundLabel = null,
-    )
-    {
-    }
+    ) {}
 
-    /**
-     * @param GroupGameDomain $game
-     * @return ActiveGameDTO
-     */
     public static function fromGame(GroupGameDomain $game): ActiveGameDTO
     {
         return new self(
@@ -46,10 +41,6 @@ class ActiveGameDTO
         );
     }
 
-    /**
-     * @param PlayoffGame $game
-     * @return ActiveGameDTO|null
-     */
     public static function fromPlayoffGame(PlayoffGame $game): ?ActiveGameDTO
     {
         $game->loadMissing(['tournament', 'player1', 'player2']);
@@ -60,7 +51,6 @@ class ActiveGameDTO
     }
 
     /**
-     * @param PlayoffGameDomain $game
      * @return ActiveGameDTO|null null gdy brak obu graczy (slot TBD w drabince)
      */
     public static function fromPlayoffGameDomain(PlayoffGameDomain $game): ?ActiveGameDTO
@@ -87,4 +77,3 @@ class ActiveGameDTO
         );
     }
 }
-

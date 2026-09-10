@@ -2,8 +2,8 @@
 
 namespace App\Repositories\Platform;
 
-use App\Enums\TournamentStatus;
 use App\Enums\GameStatus;
+use App\Enums\TournamentStatus;
 use App\Models\Organization\Organization;
 use App\Models\QuickGame\QuickGame;
 use App\Models\QuickGame\QuickGameFfaSession;

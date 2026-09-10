@@ -14,8 +14,7 @@ class TournamentFinished implements ShouldBroadcastNow
 
     public function __construct(
         public int $tournamentId,
-    ) {
-    }
+    ) {}
 
     /**
      * @return array<int, Channel>

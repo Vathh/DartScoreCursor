@@ -2,8 +2,8 @@
 
 namespace App\Services\QuickGame;
 
-use App\DTO\QuickGame\PlayerResultDTO;
 use App\Domain\GameScoring\MatchFormat;
+use App\DTO\QuickGame\PlayerResultDTO;
 use App\Enums\GameStatus;
 use App\Models\QuickGame\QuickGameFfaSession;
 use App\Repositories\QuickGame\QuickGameLobbyRepository;
@@ -19,8 +19,7 @@ final class FfaMatchFinishService
         private QuickGameRepository $quickGameRepository,
         private QuickGameLobbyRepository $lobbyRepository,
         private PlayerCareerSnapshotService $careerSnapshotService,
-    ) {
-    }
+    ) {}
 
     /**
      * @param  list<int>  $playerIds

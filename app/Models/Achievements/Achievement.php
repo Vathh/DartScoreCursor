@@ -14,11 +14,11 @@ class Achievement extends Model
         'tournament_id',
         'player_id',
         'type',
-        'value'
+        'value',
     ];
 
     protected $casts = [
-          'type' => AchievementType::class,
+        'type' => AchievementType::class,
     ];
 
     public function tournament(): BelongsTo
@@ -31,5 +31,3 @@ class Achievement extends Model
         return $this->belongsTo(Player::class);
     }
 }
-
-

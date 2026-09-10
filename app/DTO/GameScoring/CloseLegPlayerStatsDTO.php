@@ -15,8 +15,7 @@ class CloseLegPlayerStatsDTO
         public ?int $highestFinish = null,
         public ?int $dartsThrown = null,
         public ?int $checkoutDart = null,
-    ) {
-    }
+    ) {}
 
     public static function fromArray(array $data): self
     {

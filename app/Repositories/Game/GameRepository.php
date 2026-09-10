@@ -59,39 +59,36 @@ class GameRepository
     }
 
     /**
-     * @param int $tournamentId
-     * @param int $groupNumber
      * @return Collection<int, GroupGameDomain>
      */
     public function getFinishedGroupGames(int $tournamentId, int $groupNumber): Collection
     {
         return Game::with(['player1', 'player2', 'winner'])
-                    ->where('tournament_id', $tournamentId)
-                    ->where('group_number', $groupNumber)
-                    ->where('status', GameStatus::FINISHED)
-                    ->get()
-                    ->map(fn($game) => GroupGameDomain::fromEloquent($game, ['player1', 'player2', 'winner']));
+            ->where('tournament_id', $tournamentId)
+            ->where('group_number', $groupNumber)
+            ->where('status', GameStatus::FINISHED)
+            ->get()
+            ->map(fn ($game) => GroupGameDomain::fromEloquent($game, ['player1', 'player2', 'winner']));
     }
 
     /**
-     * @param int $tournamentId
      * @return Collection<int, GroupGameDomain>
      */
     public function getActive(int $tournamentId): Collection
     {
         return Game::with(['tournament', 'player1', 'player2'])
-                    ->where('tournament_id', $tournamentId)
-                    ->whereIn('status', [GameStatus::SCHEDULED, GameStatus::IN_PROGRESS])
-                    ->get()
-                    ->map(fn($game) => GroupGameDomain::fromEloquent($game, ['tournament', 'player1', 'player2']));
+            ->where('tournament_id', $tournamentId)
+            ->whereIn('status', [GameStatus::SCHEDULED, GameStatus::IN_PROGRESS])
+            ->get()
+            ->map(fn ($game) => GroupGameDomain::fromEloquent($game, ['tournament', 'player1', 'player2']));
     }
 
     public function checkIfPlayoffShouldBeStarted(int $tournamentId): bool
     {
         return Game::where('tournament_id', $tournamentId)
-                    ->where('status', GameStatus::SCHEDULED)
-                    ->get()
-                    ->count() === 0;
+            ->where('status', GameStatus::SCHEDULED)
+            ->get()
+            ->count() === 0;
     }
 
     public function find(int $id): ?GroupGameDomain
@@ -161,15 +158,3 @@ class GameRepository
             ->get();
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-

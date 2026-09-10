@@ -26,8 +26,8 @@ use App\Repositories\Game\GameVisitRepository;
 use App\Repositories\Player\PlayerRepository;
 use App\Repositories\QuickGame\QuickGameFfaVisitRepository;
 use App\Repositories\QuickGame\QuickGameRepository;
-use App\Support\GameScoring\GameScoringContext;
 use App\Services\Player\PlayerOverviewService;
+use App\Support\GameScoring\GameScoringContext;
 use Illuminate\Database\Eloquent\Model;
 
 class PlayerCareerSnapshotService
@@ -41,8 +41,7 @@ class PlayerCareerSnapshotService
         private QuickGameFfaVisitRepository $ffaVisitRepository,
         private QuickGameRepository $quickGameRepository,
         private PlayerOverviewService $playerOverviewService,
-    ) {
-    }
+    ) {}
 
     public function recordFinishedH2h(
         GameScoringContext $context,

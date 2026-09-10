@@ -6,15 +6,12 @@ use App\Enums\AchievementType;
 
 class GameAchievementDTO
 {
-
     public function __construct(
-        public int             $playerId,
-        public ?int            $tournamentId,
-        public ?int            $value,
+        public int $playerId,
+        public ?int $tournamentId,
+        public ?int $value,
         public AchievementType $type,
-    )
-    {
-    }
+    ) {}
 
     public static function fromArray(array $data): GameAchievementDTO
     {
@@ -26,4 +23,3 @@ class GameAchievementDTO
         );
     }
 }
-

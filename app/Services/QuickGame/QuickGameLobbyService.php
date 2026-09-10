@@ -2,18 +2,18 @@
 
 namespace App\Services\QuickGame;
 
-use App\Events\QuickGameLobbyUpdated;
-use App\Events\QuickGameRematchCreated;
-use App\Events\QuickGameRematchIntentUpdated;
+use App\Domain\GameScoring\MatchFormat;
 use App\Domain\PlayerDomain;
 use App\Domain\QuickGame\FfaSessionRulesDomain;
 use App\Domain\QuickGame\LobbyHostSuccession;
+use App\Events\QuickGameLobbyUpdated;
+use App\Events\QuickGameRematchCreated;
+use App\Events\QuickGameRematchIntentUpdated;
 use App\Models\QuickGame\QuickGameLobby;
 use App\Repositories\Friends\FriendshipRepository;
 use App\Repositories\Player\PlayerRepository;
 use App\Repositories\QuickGame\QuickGameLobbyRepository;
 use App\Services\Push\InvitationPushService;
-use App\Domain\GameScoring\MatchFormat;
 use App\Support\QuickGameLobbyPayload;
 use Illuminate\Support\Facades\DB;
 
@@ -27,8 +27,7 @@ class QuickGameLobbyService
         private QuickGameFfaScoringService $ffaScoringService,
         private FriendshipRepository $friendshipRepository,
         private InvitationPushService $invitationPushService,
-    ) {
-    }
+    ) {}
 
     /**
      * Tworzy nowe lobby
@@ -703,6 +702,7 @@ class QuickGameLobbyService
                     $this->lobbyRepository->removePlayer((int) $lobby->id, $player->id, null);
                 }
                 $this->succeedOrDeleteWaitingLobby((int) $lobby->id, $userId, (int) $lobby->host_id);
+
                 continue;
             }
 

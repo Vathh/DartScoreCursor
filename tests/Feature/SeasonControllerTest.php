@@ -15,8 +15,11 @@ class SeasonControllerTest extends TestCase
     use RefreshDatabase;
 
     private User $adminUser;
+
     private User $regularUser;
+
     private Organization $organization;
+
     private Player $adminPlayer;
 
     protected function setUp(): void
@@ -46,7 +49,7 @@ class SeasonControllerTest extends TestCase
     public function test_user_can_view_seasons_index(): void
     {
         $this->markTestSkipped('Test wymaga Vite manifest - problem konfiguracyjny, nie logika biznesowa');
-        
+
         $response = $this->get('/seasons');
 
         $response->assertStatus(200);
@@ -74,7 +77,7 @@ class SeasonControllerTest extends TestCase
     public function test_non_admin_cannot_create_season(): void
     {
         $this->markTestSkipped('Test oczekuje 403, ale otrzymuje 302 redirect - wymaga decyzji o zachowaniu');
-        
+
         $this->actingAs($this->regularUser);
 
         $response = $this->post("/seasons?organizationId={$this->organization->id}", [
@@ -262,4 +265,3 @@ class SeasonControllerTest extends TestCase
         $this->assertDatabaseHas('players', ['id' => $guest->id]);
     }
 }
-

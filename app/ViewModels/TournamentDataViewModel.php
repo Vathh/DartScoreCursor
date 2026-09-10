@@ -18,12 +18,9 @@ use Illuminate\Support\Facades\DB;
 
 class TournamentDataViewModel
 {
-
     public function __construct(
         public Tournament $tournament
-    )
-    {
-    }
+    ) {}
 
     /**
      * @return array<GroupStandingDomain>
@@ -33,11 +30,10 @@ class TournamentDataViewModel
         $result = [];
 
         $standingsDomains = $this->tournament
-                                ->groupStandings
-                                ->map(fn($standing) => GroupStandingDomain::fromEloquent($standing, ['player']));
+            ->groupStandings
+            ->map(fn ($standing) => GroupStandingDomain::fromEloquent($standing, ['player']));
 
-        foreach ($standingsDomains as $standing)
-        {
+        foreach ($standingsDomains as $standing) {
             $result[$standing->groupNumber][$standing->player->id] = $standing;
         }
 
@@ -52,7 +48,7 @@ class TournamentDataViewModel
         $result = [];
 
         $gameDomains = $this->tournament
-                    ->games->map(fn($game) => GroupGameDomain::fromEloquent($game, ['player1', 'player2', 'winner']));
+            ->games->map(fn ($game) => GroupGameDomain::fromEloquent($game, ['player1', 'player2', 'winner']));
 
         foreach ($gameDomains as $game) {
             $result[$game->groupNumber][$game->player1->id][$game->player2->id] = $game;
@@ -70,8 +66,8 @@ class TournamentDataViewModel
         $result = [];
 
         $playoffGameDomains = $this->tournament
-                                    ->playoffGames
-                                    ->map(fn($game) => PlayoffGameDomain::fromEloquent($game, ['player1', 'player2', 'winner']));
+            ->playoffGames
+            ->map(fn ($game) => PlayoffGameDomain::fromEloquent($game, ['player1', 'player2', 'winner']));
 
         foreach ($playoffGameDomains as $game) {
             $result[$game->round][] = $game;
@@ -87,8 +83,7 @@ class TournamentDataViewModel
     {
         $result = [];
 
-        foreach ($this->tournament->groupStandings as $standing)
-        {
+        foreach ($this->tournament->groupStandings as $standing) {
             $result[$standing->group_number][] = PlayerDomain::fromEloquent($standing->player);
         }
 
@@ -98,11 +93,11 @@ class TournamentDataViewModel
     public function groupNumbers(): Collection
     {
         return $this->tournament
-                    ->groupStandings
-                    ->map(fn($standing) => $standing->group_number)
-                    ->unique()
-                    ->sort()
-                    ->collect();
+            ->groupStandings
+            ->map(fn ($standing) => $standing->group_number)
+            ->unique()
+            ->sort()
+            ->collect();
     }
 
     /**
@@ -168,17 +163,11 @@ class TournamentDataViewModel
         return $hasGames;
     }
 
-    /**
-     * @return \App\Domain\Tournament\TournamentDomain
-     */
     public function tournament(): TournamentDomain
     {
         return TournamentDomain::fromEloquent($this->tournament, ['pointScheme', 'season']);
     }
 
-    /**
-     * @return SeasonDomain|null
-     */
     public function season(): ?SeasonDomain
     {
         if ($this->tournament->season === null) {
@@ -194,8 +183,8 @@ class TournamentDataViewModel
     public function achievements(): Collection
     {
         $achievementDomains = $this->tournament
-                                    ->achievements
-                                    ->map(fn($achievement) => AchievementDomain::fromEloquent($achievement, ['player']));
+            ->achievements
+            ->map(fn ($achievement) => AchievementDomain::fromEloquent($achievement, ['player']));
 
         $result = [];
 
@@ -304,4 +293,3 @@ class TournamentDataViewModel
             ]);
     }
 }
-

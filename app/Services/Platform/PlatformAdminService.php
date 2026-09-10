@@ -16,8 +16,7 @@ class PlatformAdminService
         private UserRepository $userRepository,
         private MobileAppTokenService $mobileAppTokenService,
         private PlayerGameHistoryRepository $playerGameHistoryRepository,
-    ) {
-    }
+    ) {}
 
     /**
      * @return array<string, mixed>

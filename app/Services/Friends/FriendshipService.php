@@ -4,8 +4,8 @@ namespace App\Services\Friends;
 
 use App\Domain\FriendshipDomain;
 use App\Domain\FriendshipInvitationDomain;
-use App\Repositories\Friends\FriendshipRepository;
 use App\Repositories\Friends\FriendshipInvitationRepository;
+use App\Repositories\Friends\FriendshipRepository;
 use App\Services\Push\InvitationPushService;
 use Illuminate\Support\Collection;
 
@@ -15,15 +15,10 @@ class FriendshipService
         private FriendshipRepository $friendshipRepository,
         private FriendshipInvitationRepository $invitationRepository,
         private InvitationPushService $invitationPushService,
-    )
-    {
-    }
+    ) {}
 
     /**
      * Dodaje znajomość między dwoma użytkownikami
-     * @param int $userId
-     * @param int $friendId
-     * @return void
      */
     public function addFriend(int $userId, int $friendId): void
     {
@@ -32,9 +27,6 @@ class FriendshipService
 
     /**
      * Usuwa znajomość między dwoma użytkownikami
-     * @param int $userId
-     * @param int $friendId
-     * @return void
      */
     public function removeFriend(int $userId, int $friendId): void
     {
@@ -43,7 +35,7 @@ class FriendshipService
 
     /**
      * Pobiera listę znajomych użytkownika
-     * @param int $userId
+     *
      * @return Collection<int, FriendshipDomain>
      */
     public function getFriends(int $userId): Collection
@@ -58,9 +50,6 @@ class FriendshipService
 
     /**
      * Sprawdza czy użytkownicy są znajomymi
-     * @param int $userId
-     * @param int $friendId
-     * @return bool
      */
     public function areFriends(int $userId, int $friendId): bool
     {
@@ -69,9 +58,6 @@ class FriendshipService
 
     /**
      * Wysyła zaproszenie do znajomych
-     * @param int $senderId
-     * @param int $receiverId
-     * @return FriendshipInvitationDomain
      */
     public function sendInvitation(int $senderId, int $receiverId): FriendshipInvitationDomain
     {
@@ -95,9 +81,8 @@ class FriendshipService
 
     /**
      * Akceptuje zaproszenie do znajomych
-     * @param int $invitationId
-     * @param int $userId ID użytkownika który akceptuje
-     * @return void
+     *
+     * @param  int  $userId  ID użytkownika który akceptuje
      */
     public function acceptInvitation(int $invitationId, int $userId): void
     {
@@ -106,9 +91,8 @@ class FriendshipService
 
     /**
      * Odrzuca zaproszenie do znajomych
-     * @param int $invitationId
-     * @param int $userId ID użytkownika który odrzuca
-     * @return void
+     *
+     * @param  int  $userId  ID użytkownika który odrzuca
      */
     public function rejectInvitation(int $invitationId, int $userId): void
     {
@@ -117,7 +101,7 @@ class FriendshipService
 
     /**
      * Pobiera zaproszenia otrzymane przez użytkownika
-     * @param int $userId
+     *
      * @return Collection<int, FriendshipInvitationDomain>
      */
     public function getReceivedInvitations(int $userId): Collection
@@ -127,7 +111,7 @@ class FriendshipService
 
     /**
      * Pobiera zaproszenia wysłane przez użytkownika
-     * @param int $userId
+     *
      * @return Collection<int, FriendshipInvitationDomain>
      */
     public function getSentInvitations(int $userId): Collection
@@ -156,15 +140,3 @@ class FriendshipService
         return $this->invitationRepository->findPending($senderId, $receiverId);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-

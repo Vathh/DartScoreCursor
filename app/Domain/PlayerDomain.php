@@ -3,9 +3,7 @@
 namespace App\Domain;
 
 use App\Domain\Concerns\AssertsRelationsLoaded;
-use App\Models\Organization\Organization;
 use App\Models\Player\Player;
-use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
 class PlayerDomain
@@ -19,28 +17,18 @@ class PlayerDomain
     private const RELATIONS = ['achievements'];
 
     /**
-     * @param int $id
-     * @param string $name
-     * @param int|null $userId
-     * @param Collection<AchievementDomain> $achievements
+     * @param  Collection<AchievementDomain>  $achievements
      */
     public function __construct(
-        public readonly int         $id,
-        public readonly string      $name,
-        public readonly ?int        $userId = null,
-        public readonly Collection $achievements = new Collection()
-    )
-    {
-    }
+        public readonly int $id,
+        public readonly string $name,
+        public readonly ?int $userId = null,
+        public readonly Collection $achievements = new Collection
+    ) {}
 
-    /**
-     * @param Player|null $player
-     * @param array $with
-     * @return PlayerDomain|null
-     */
     public static function fromEloquent(?Player $player, array $with = []): ?PlayerDomain
     {
-        if($player === null) {
+        if ($player === null) {
             return null;
         }
 
@@ -51,7 +39,7 @@ class PlayerDomain
             name: $player->name,
             userId: $player->user_id,
             achievements: in_array('achievements', $with)
-                ? $player->achievements->map(fn($achievement) => AchievementDomain::fromEloquent($achievement))->values()
+                ? $player->achievements->map(fn ($achievement) => AchievementDomain::fromEloquent($achievement))->values()
                 : collect()
         );
     }
@@ -68,4 +56,3 @@ class PlayerDomain
         return $trimmed === '' ? null : $trimmed;
     }
 }
-

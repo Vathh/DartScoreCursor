@@ -24,7 +24,7 @@ class QuickGame extends Model
     ];
 
     protected $casts = [
-        'status' => GameStatus::class
+        'status' => GameStatus::class,
     ];
 
     public function player1(): BelongsTo
@@ -42,5 +42,3 @@ class QuickGame extends Model
         return $this->belongsTo(Player::class, 'winner_id');
     }
 }
-
-

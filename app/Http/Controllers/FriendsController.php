@@ -10,8 +10,7 @@ class FriendsController extends Controller
 {
     public function __construct(
         private FriendshipService $friendshipService,
-    ) {
-    }
+    ) {}
 
     public function panel(): View
     {

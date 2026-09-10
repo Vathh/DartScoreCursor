@@ -16,8 +16,7 @@ class OrganizationController
     public function __construct(
         private OrganizationService $organizationService,
         private CompetitionShowSerializer $showSerializer,
-    ) {
-    }
+    ) {}
 
     /**
      * GET /api/organizations?page=

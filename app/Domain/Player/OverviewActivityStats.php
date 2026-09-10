@@ -10,6 +10,7 @@ use Carbon\CarbonImmutable;
 final class OverviewActivityStats
 {
     private const WEEKDAY_LABELS = ['nd', 'pn', 'wt', 'śr', 'cz', 'pt', 'so'];
+
     /**
      * @param  list<string>  $isoDates
      * @return array{

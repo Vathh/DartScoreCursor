@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 class PlayerGameHistoryRepository
 {
     private const PER_PAGE = 5;
+
     private const MAX_STUBS = 500;
 
     /**
@@ -88,13 +89,14 @@ class PlayerGameHistoryRepository
 
         $merged = array_merge($quick, $games, $playoff, $league, $training);
         usort($merged, fn ($a, $b) => strcmp($b['date'], $a['date']));
+
         return array_slice($merged, 0, self::MAX_STUBS);
     }
 
     /**
      * Dla wycinka stubów pobiera szczegóły (przeciwnicy, wynik, turniej).
      *
-     * @param array<int, array{type: string, date: string, source_id: int, source_type: string}> $stubs
+     * @param  array<int, array{type: string, date: string, source_id: int, source_type: string}>  $stubs
      * @return list<array{type: string, id: int|null, date: string, date_formatted: string, opponents: string, result: string, score: string|null, tournament_name: string|null}>
      */
     private function resolveDetails(int $playerId, array $stubs): array
@@ -113,6 +115,7 @@ class PlayerGameHistoryRepository
                 $items[] = $this->resolvePlayoffGame($playerId, $stub['source_id'], $stub['date']);
             }
         }
+
         return $items;
     }
 
@@ -170,13 +173,13 @@ class PlayerGameHistoryRepository
                 'tournaments.name as tournament_name'
             )
             ->first();
-        if (!$row) {
+        if (! $row) {
             return $this->emptyItem($date);
         }
         $opponentName = (int) $row->player1_id === $playerId ? $row->player2_name : $row->player1_name;
         $won = (int) $row->winner_id === $playerId;
         $score = $row->player1_score !== null && $row->player2_score !== null
-            ? $row->player1_score . ' : ' . $row->player2_score
+            ? $row->player1_score.' : '.$row->player2_score
             : null;
 
         return [
@@ -209,13 +212,13 @@ class PlayerGameHistoryRepository
                 'tournaments.name as tournament_name'
             )
             ->first();
-        if (!$row) {
+        if (! $row) {
             return $this->emptyItem($date);
         }
         $opponentName = (int) $row->player1_id === $playerId ? $row->player2_name : $row->player1_name;
         $won = (int) $row->winner_id === $playerId;
         $score = $row->player1_score !== null && $row->player2_score !== null
-            ? $row->player1_score . ' : ' . $row->player2_score
+            ? $row->player1_score.' : '.$row->player2_score
             : null;
 
         return [
@@ -298,15 +301,3 @@ class PlayerGameHistoryRepository
         ];
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-

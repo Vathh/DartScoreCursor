@@ -15,8 +15,7 @@ class PlayerCareerStatsService
 {
     public function __construct(
         private PlayerGameSnapshotRepository $snapshotRepository,
-    ) {
-    }
+    ) {}
 
     /**
      * @return array<string, mixed>
@@ -311,5 +310,4 @@ class PlayerCareerStatsService
 
         return round($current - $previous, 2);
     }
-
 }

@@ -17,8 +17,7 @@ class LeagueGamePlayService
     public function __construct(
         private LeagueGameRepository $leagueGameRepository,
         private InvitationPushService $invitationPushService,
-    ) {
-    }
+    ) {}
 
     /**
      * @return array{games: list<array<string, mixed>>}

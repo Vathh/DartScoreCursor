@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Organization\Organization;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Response;
@@ -36,6 +35,7 @@ class PagesController extends Controller
             ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
             ->header('Pragma', 'no-cache');
     }
+
     public function showTournamentsPage(): Factory|View
     {
         return view('tournament.tournaments');
@@ -48,4 +48,3 @@ class PagesController extends Controller
         return view('dev.checkout-wheel');
     }
 }
-

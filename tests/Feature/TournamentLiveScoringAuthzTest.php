@@ -20,8 +20,8 @@ use Tests\TestCase;
 
 class TournamentLiveScoringAuthzTest extends TestCase
 {
-    use RefreshDatabase;
     use ActsAsTournamentTablet;
+    use RefreshDatabase;
 
     private User $user;
 

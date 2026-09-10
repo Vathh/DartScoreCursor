@@ -2,18 +2,18 @@
 
 namespace App\Services\QuickGame;
 
-use App\DTO\QuickGame\PlayerResultDTO;
+use App\Domain\GameScoring\MatchFormat;
+use App\Domain\QuickGame\CricketRules;
 use App\Domain\QuickGame\FfaLegCycle;
+use App\Domain\QuickGame\FfaMatchLog;
 use App\Domain\QuickGame\FfaTurnRotationDomain;
+use App\DTO\QuickGame\PlayerResultDTO;
 use App\Models\QuickGame\QuickGameFfaSession;
 use App\Repositories\Player\PlayerRepository;
 use App\Repositories\QuickGame\QuickGameFfaPresenceRepository;
 use App\Repositories\QuickGame\QuickGameFfaSessionRepository;
 use App\Support\QuickGameFfa\FfaStateBroadcaster;
 use App\Support\QuickGameFfa\FfaTurnNormalize;
-use App\Domain\QuickGame\CricketRules;
-use App\Domain\GameScoring\MatchFormat;
-use App\Domain\QuickGame\FfaMatchLog;
 use DomainException;
 use Illuminate\Support\Facades\DB;
 
@@ -28,8 +28,7 @@ class QuickGameFfaCricketScoringService
         private PlayerRepository $playerRepository,
         private FfaMatchFinishService $matchFinishService,
         private FfaSubmitGuard $submitGuard,
-    ) {
-    }
+    ) {}
 
     /**
      * @return array<string, mixed>

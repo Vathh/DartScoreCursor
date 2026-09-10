@@ -11,8 +11,7 @@ class QuickGameService
     public function __construct(
         private AchievementsService $achievementsService,
         private QuickGameRepository $quickGameRepository,
-    ) {
-    }
+    ) {}
 
     /**
      * Zapis achievementów po zakończeniu quick game FFA (wynik meczu już w bazie).

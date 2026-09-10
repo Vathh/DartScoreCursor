@@ -34,7 +34,7 @@ class LoginCodeRepository
             $codesToInsert[] = [
                 'code' => $code,
                 'expires_at' => null,
-                'tournament_id' => $tournamentId
+                'tournament_id' => $tournamentId,
             ];
         }
 
@@ -56,15 +56,3 @@ class LoginCodeRepository
             ->delete();
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-

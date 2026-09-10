@@ -19,8 +19,7 @@ class QuickGameRematchIntentUpdated implements ShouldBroadcastNow
         public int $sourceLobbyId,
         public int $hostId,
         public array $intents,
-    ) {
-    }
+    ) {}
 
     /**
      * @return array<int, \Illuminate\Broadcasting\Channel>

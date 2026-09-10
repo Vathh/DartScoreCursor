@@ -10,7 +10,7 @@ final class TournamentGroupAdvanceDistribution
      * Proporcjonalny podział miejsc awansujących (metoda największych reszt).
      * Większe grupy (niższe numery) dostają nadwyżkę przy remisach reszt.
      *
-     * @param list<int> $groupSizes rozmiary grup (grupa 1 = indeks 0)
+     * @param  list<int>  $groupSizes  rozmiary grup (grupa 1 = indeks 0)
      * @return list<int> liczba awansujących per grupa (indeks = nr grupy − 1)
      */
     public static function distribute(array $groupSizes, int $bracketSize): array

@@ -27,4 +27,3 @@ class GetTournamentData
         return new TournamentDataViewModel($tournament);
     }
 }
-

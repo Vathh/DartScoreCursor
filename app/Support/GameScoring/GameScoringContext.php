@@ -5,8 +5,8 @@ namespace App\Support\GameScoring;
 use App\Domain\GameScoring\MatchFormat;
 use App\Enums\GameKind;
 use App\Models\Game\Game;
-use App\Models\PlayoffGame\PlayoffGame;
 use App\Models\League\LeagueGame;
+use App\Models\PlayoffGame\PlayoffGame;
 use App\Models\QuickGame\QuickGame;
 use DomainException;
 
@@ -19,8 +19,7 @@ readonly class GameScoringContext
         public int $player2Id,
         public ?int $tournamentId,
         public MatchFormat $matchFormat,
-    ) {
-    }
+    ) {}
 
     public static function fromGroupGame(Game $game): self
     {

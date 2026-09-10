@@ -18,8 +18,7 @@ class TournamentOverallPlaceService
         private GroupStandingRepository $groupStandingRepository,
         private PlayoffGameRepository $playoffGameRepository,
         private TournamentOverallPlaceCalculator $calculator,
-    ) {
-    }
+    ) {}
 
     public function recalculateOverallPlaces(int $tournamentId): void
     {

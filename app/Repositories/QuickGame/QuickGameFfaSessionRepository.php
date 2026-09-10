@@ -3,7 +3,6 @@
 namespace App\Repositories\QuickGame;
 
 use App\Models\QuickGame\QuickGameFfaSession;
-use App\Models\QuickGame\QuickGameFfaVisit;
 use Illuminate\Support\Collection;
 
 class QuickGameFfaSessionRepository

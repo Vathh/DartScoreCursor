@@ -15,8 +15,7 @@ class OrganizationInvitationService
         private OrganizationRepository $organizationRepository,
         private OrganizationService $organizationService,
         private InvitationPushService $invitationPushService,
-    ) {
-    }
+    ) {}
 
     /**
      * @return Collection<int, OrganizationInvitationDomain>

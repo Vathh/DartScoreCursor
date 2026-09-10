@@ -12,8 +12,7 @@ class PlayerStatsService
 {
     public function __construct(
         private PlayerStatRepository $playerStatRepository
-    ) {
-    }
+    ) {}
 
     /**
      * Statystyki quick z cache (player_stats). Jeśli brak wpisu – przelicza i zapisuje.
@@ -56,6 +55,7 @@ class PlayerStatsService
     private function computeQuickStats(int $playerId): array
     {
         $data = $this->playerStatRepository->getDataForQuickStats($playerId);
+
         return $this->buildStatsArray($data['results'], $data['achievements']);
     }
 
@@ -134,8 +134,8 @@ class PlayerStatsService
     /**
      * Buduje tablicę statystyk z surowych wyników i achievementów (logika biznesowa).
      *
-     * @param object|null $results { games: int, avg_average: ?float }
-     * @param Collection<int, object> $achievements { type: string, value: ?int }
+     * @param  object|null  $results  { games: int, avg_average: ?float }
+     * @param  Collection<int, object>  $achievements  { type: string, value: ?int }
      */
     private function buildStatsArray(?object $results, Collection $achievements): array
     {
@@ -183,15 +183,3 @@ class PlayerStatsService
         ];
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-

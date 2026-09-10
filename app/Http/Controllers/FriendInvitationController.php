@@ -11,8 +11,7 @@ class FriendInvitationController extends Controller
 {
     public function __construct(
         private FriendshipService $friendshipService,
-    ) {
-    }
+    ) {}
 
     public function accept(FriendshipInvitation $invitation): RedirectResponse
     {

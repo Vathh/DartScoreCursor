@@ -15,13 +15,8 @@ class OrganizationService
         private OrganizationRepository $organizationRepository,
         private PlayerService $playerService,
         private PlayerRepository $playerRepository
-    )
-    {
-    }
+    ) {}
 
-    /**
-     * @return Collection
-     */
     public function getAll(): Collection
     {
         return $this->organizationRepository
@@ -80,7 +75,7 @@ class OrganizationService
     {
         // Pobierz gracza użytkownika (domenowy obiekt)
         $playerDomain = $this->playerRepository->findByUserId($userId);
-        
+
         // Pobierz organizację z gośćmi (domenowy obiekt)
         $organizationDomain = $this->organizationRepository->findByIdWithGuests($organizationId);
 
@@ -126,15 +121,3 @@ class OrganizationService
         $this->organizationRepository->update($organizationId, $name, $description, $matchFormatPresets);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-

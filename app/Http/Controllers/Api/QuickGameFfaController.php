@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\DTO\QuickGameFfa\RecordFfaVisitDTO;
 use App\Domain\GameScoring\VisitDartPayload;
+use App\DTO\QuickGameFfa\RecordFfaVisitDTO;
 use App\Services\QuickGame\QuickGameFfaAtcScoringService;
 use App\Services\QuickGame\QuickGameFfaBob27ScoringService;
 use App\Services\QuickGame\QuickGameFfaCatch40ScoringService;
@@ -27,8 +27,7 @@ class QuickGameFfaController
         private QuickGameFfaCricket56ScoringService $cricket56ScoringService,
         private QuickGameFfaPresenceService $presenceService,
         private QuickGameLobbyService $lobbyService,
-    ) {
-    }
+    ) {}
 
     public function state(Request $request, string $lobbyId): JsonResponse
     {

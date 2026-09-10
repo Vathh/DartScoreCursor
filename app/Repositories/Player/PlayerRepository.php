@@ -9,16 +9,10 @@ use App\Models\Organization\Organization;
 use App\Models\Player\Player;
 use App\Models\Season\Season;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class PlayerRepository
 {
-    /**
-     * @param string $name
-     * @param int $userId
-     * @return PlayerDomain
-     */
     public function create(string $name, int $userId): PlayerDomain
     {
         $player = Player::create([
@@ -107,9 +101,6 @@ class PlayerRepository
 
     /**
      * Zmienia nazwę gościa
-     * @param int $playerId
-     * @param string $newName
-     * @return void
      */
     public function updateGuestName(int $playerId, string $newName): void
     {
@@ -174,23 +165,21 @@ class PlayerRepository
 
     /**
      * Znajduje gracza po ID
-     * @param int $playerId
-     * @return PlayerDomain|null
      */
     public function findById(int $playerId): ?PlayerDomain
     {
         $player = Player::find($playerId);
+
         return $player ? PlayerDomain::fromEloquent($player) : null;
     }
 
     /**
      * Znajduje gracza po user_id
-     * @param int $userId
-     * @return PlayerDomain|null
      */
     public function findByUserId(int $userId): ?PlayerDomain
     {
         $player = Player::where('user_id', $userId)->first();
+
         return $player ? PlayerDomain::fromEloquent($player) : null;
     }
 
@@ -279,24 +268,25 @@ class PlayerRepository
     }
 
     /**
-     * @throws \Throwable
      * @return Collection<int, PlayerDomain>
+     *
+     * @throws \Throwable
      */
     public function getRelatedPlayers(int $seasonId): Collection
     {
-       $season = Season::with(['organization.relatedUsers.player', 'relatedUsers.player', 'guests'])->findOrFail($seasonId);
-       $seasonRelatedUsersPlayers = $season->relatedUsers->map(fn($user) => $user->player)->values();
-       $seasonGuests = $season->guests;
-       $organizationRelatedUsersPlayers = $season->organization->relatedUsers->map(fn($user) => $user->player)->values();
-       $organizationGuests = $season->organization->guests;
+        $season = Season::with(['organization.relatedUsers.player', 'relatedUsers.player', 'guests'])->findOrFail($seasonId);
+        $seasonRelatedUsersPlayers = $season->relatedUsers->map(fn ($user) => $user->player)->values();
+        $seasonGuests = $season->guests;
+        $organizationRelatedUsersPlayers = $season->organization->relatedUsers->map(fn ($user) => $user->player)->values();
+        $organizationGuests = $season->organization->guests;
 
         return collect()
-                ->merge($seasonRelatedUsersPlayers)
-                ->merge($seasonGuests)
-                ->merge($organizationRelatedUsersPlayers)
-                ->merge($organizationGuests)
-                ->unique('id')
-                ->map(fn($player) => PlayerDomain::fromEloquent($player));
+            ->merge($seasonRelatedUsersPlayers)
+            ->merge($seasonGuests)
+            ->merge($organizationRelatedUsersPlayers)
+            ->merge($organizationGuests)
+            ->unique('id')
+            ->map(fn ($player) => PlayerDomain::fromEloquent($player));
     }
 
     /**
@@ -338,7 +328,7 @@ class PlayerRepository
     {
         $organization = Organization::findOrFail($organizationId);
         $organization->guests()->create([
-            'name' => $name
+            'name' => $name,
         ]);
     }
 
@@ -346,7 +336,7 @@ class PlayerRepository
     {
         $season = Season::findOrFail($seasonId);
         $season->guests()->create([
-            'name' => $name
+            'name' => $name,
         ]);
     }
 
@@ -358,15 +348,3 @@ class PlayerRepository
         ]);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-

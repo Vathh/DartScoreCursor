@@ -16,8 +16,7 @@ class TournamentCatalogController
     public function __construct(
         private TournamentService $tournamentService,
         private CompetitionShowSerializer $showSerializer,
-    ) {
-    }
+    ) {}
 
     /**
      * GET /api/tournaments?page=

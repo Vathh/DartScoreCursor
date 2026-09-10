@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests;
 
-use App\DTO\GameResultDTO;
 use App\DTO\UpdateGameDTO;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -66,4 +65,3 @@ class GameResultRequest extends FormRequest
         return UpdateGameDTO::fromArray($this->validated());
     }
 }
-

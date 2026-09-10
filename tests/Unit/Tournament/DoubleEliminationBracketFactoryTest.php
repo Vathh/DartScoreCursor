@@ -14,7 +14,7 @@ class DoubleEliminationBracketFactoryTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->factory = new DoubleEliminationBracketFactory();
+        $this->factory = new DoubleEliminationBracketFactory;
     }
 
     #[DataProvider('sizeProvider')]

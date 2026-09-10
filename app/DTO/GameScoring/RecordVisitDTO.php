@@ -20,8 +20,7 @@ class RecordVisitDTO
         public bool $bust,
         public string $clientVisitId,
         public ?array $darts = null,
-    ) {
-    }
+    ) {}
 
     /**
      * @return array<string, mixed>

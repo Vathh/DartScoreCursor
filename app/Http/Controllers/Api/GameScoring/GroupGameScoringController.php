@@ -15,8 +15,7 @@ class GroupGameScoringController extends Controller
     public function __construct(
         private GameScoringService $gameScoringService,
         private GameAuthorizationService $gameAuthorizationService,
-    ) {
-    }
+    ) {}
 
     public function state(int $gameId): JsonResponse
     {

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Services\Season;
 
 use App\Domain\SeasonDomain;
@@ -13,15 +14,12 @@ use Throwable;
 
 class SeasonService
 {
-
     public function __construct(
         private SeasonRepository $seasonRepository,
         private PlayerService $playerService,
         private PlayerRepository $playerRepository,
         private OrganizationRepository $organizationRepository,
-    )
-    {
-    }
+    ) {}
 
     public function getAll(): Collection
     {
@@ -59,13 +57,12 @@ class SeasonService
     }
 
     public function create(
-        ?int     $organizationId,
-        string  $name,
-        array   $adminsIds = [],
+        ?int $organizationId,
+        string $name,
+        array $adminsIds = [],
         ?string $startDate = null,
         ?string $endDate = null
-    ): void
-    {
+    ): void {
         $organization = $this->organizationRepository->findByIdWithAdmins($organizationId);
         $organizationAdminsIds = $organization?->getAdminsIds() ?? [];
         $allAdminsIds = array_unique(array_merge($organizationAdminsIds, $adminsIds));
@@ -73,10 +70,11 @@ class SeasonService
             $this->seasonRepository->create($organizationId, $name, $allAdminsIds, $startDate, $endDate);
         } catch (Throwable $e) {
             throw ValidationException::withMessages([
-                'general' => 'Nie udało się dodać sezonu. Spróbuj ponownie.'
+                'general' => 'Nie udało się dodać sezonu. Spróbuj ponownie.',
             ]);
         }
     }
+
     /**
      * @param  list<string>  $additionalRelations
      */
@@ -98,7 +96,7 @@ class SeasonService
     {
         // Pobierz gracza użytkownika (domenowy obiekt)
         $playerDomain = $this->playerRepository->findByUserId($userId);
-        
+
         // Pobierz sezon z organizacją i gośćmi (domenowy obiekt)
         $seasonDomain = $this->seasonRepository->findByIdWithOrganizationAndGuests($seasonId);
 
@@ -145,17 +143,4 @@ class SeasonService
     {
         $this->seasonRepository->removeAdmin($seasonId, $userId);
     }
-
 }
-
-
-
-
-
-
-
-
-
-
-
-

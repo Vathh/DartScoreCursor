@@ -3,8 +3,8 @@
 namespace App\Models\Game;
 
 use App\Models\League\LeagueGame;
-use App\Models\PlayoffGame\PlayoffGame;
 use App\Models\Player\Player;
+use App\Models\PlayoffGame\PlayoffGame;
 use App\Models\QuickGame\QuickGame;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -77,5 +77,3 @@ class GameLeg extends Model
         return $this->finished_at === null;
     }
 }
-
-

@@ -5,6 +5,7 @@
  * Usage: php scripts/seed_tournament_group_results.php 13
  */
 
+use App\Domain\GameScoring\MatchFormat;
 use App\DTO\GameResultDTO;
 use App\DTO\UpdateGameDTO;
 use App\Enums\GameStatus;
@@ -13,7 +14,6 @@ use App\Models\Game\Game;
 use App\Models\Tournament\Tournament;
 use App\Services\Game\GameService;
 use App\Services\GameScoring\GameResultCorrectionService;
-use App\Domain\GameScoring\MatchFormat;
 use Illuminate\Contracts\Console\Kernel;
 
 require __DIR__.'/../vendor/autoload.php';
@@ -60,6 +60,7 @@ foreach ($groupNumbers as $groupNumber) {
 
     if ($toFinish->isEmpty()) {
         echo "Group {$groupNumber}: no open games, skip.\n";
+
         continue;
     }
 
@@ -69,6 +70,7 @@ foreach ($groupNumbers as $groupNumber) {
     foreach ($toFinish as $game) {
         if ($game->id === $leave->id) {
             $skipped++;
+
             continue;
         }
 

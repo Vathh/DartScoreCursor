@@ -11,8 +11,7 @@ class PlayerResultDTO
         public ?float $average = null, // Średnia punktowa w meczu
         public ?int $dartsThrown = null, // Łączna liczba rzuconych lotek
         public ?int $pointsEarned = null, // Łączna liczba zdobytych punktów
-    ) {
-    }
+    ) {}
 
     public static function fromArray(array $data): self
     {
@@ -20,10 +19,9 @@ class PlayerResultDTO
             playerId: $data['playerId'],
             score: $data['score'],
             place: $data['place'] ?? null,
-            average: isset($data['average']) ? (float)$data['average'] : null,
+            average: isset($data['average']) ? (float) $data['average'] : null,
             dartsThrown: $data['dartsThrown'] ?? null,
             pointsEarned: $data['pointsEarned'] ?? null,
         );
     }
 }
-

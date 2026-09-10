@@ -21,8 +21,7 @@ class TournamentGroupMatrixLiveService
         private GameRepository $gameRepository,
         private GroupStandingRepository $groupStandingRepository,
         private TournamentRepository $tournamentRepository,
-    ) {
-    }
+    ) {}
 
     /**
      * Po zmianie wyniku meczu grupowego (leg / koniec / korekta / undo).

@@ -3,21 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\Domain\Tournament\TournamentDomain;
+use App\Domain\Tournament\TournamentStartRules;
 use App\Models\Tournament\Tournament;
 use App\Queries\GetTournamentData;
 use App\Services\GameScoring\GameAuthorizationService;
 use App\Services\Tournament\LoginCodeService;
-use App\Services\Tournament\TournamentGuestParticipantService;
 use App\Services\Tournament\TournamentGroupMatrixLiveService;
+use App\Services\Tournament\TournamentGuestParticipantService;
 use App\Services\Tournament\TournamentInvitationService;
 use App\Services\Tournament\TournamentJoinRequestService;
 use App\Services\Tournament\TournamentService;
 use App\Services\Tournament\TournamentStartPageService;
-use Illuminate\Http\JsonResponse;
 use App\Services\User\UserService;
-use App\Domain\Tournament\TournamentStartRules;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -26,7 +26,6 @@ use RuntimeException;
 
 class TournamentController extends Controller
 {
-
     public function __construct(
         private TournamentService $tournamentService,
         private TournamentInvitationService $invitationService,
@@ -38,8 +37,7 @@ class TournamentController extends Controller
         private GameAuthorizationService $gameAuthorizationService,
         private TournamentGroupMatrixLiveService $groupMatrixLiveService,
         private TournamentStartPageService $startPageService,
-    ) {
-    }
+    ) {}
 
     public function index(Request $request)
     {

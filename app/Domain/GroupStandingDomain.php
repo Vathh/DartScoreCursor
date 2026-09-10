@@ -26,8 +26,7 @@ class GroupStandingDomain
         public readonly int $points,
         public readonly int $matchUnitsDifference,
         public readonly int $place,
-    ) {
-    }
+    ) {}
 
     public static function fromEloquent(GroupStanding $groupStanding, array $with = []): GroupStandingDomain
     {

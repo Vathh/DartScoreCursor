@@ -29,8 +29,7 @@ class PlayoffService
         private GroupStandingRepository $groupStandingRepository,
         private TournamentRepository $tournamentRepository,
         private TournamentMatchFormatRepository $matchFormatRepository,
-    ) {
-    }
+    ) {}
 
     public function generateBracket(int $tournamentId): void
     {

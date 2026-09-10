@@ -9,12 +9,10 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
-
     public function __construct(
         private UserRegistrationService $registrationService,
         private AccountAuthService $accountAuthService,
-    ) {
-    }
+    ) {}
 
     public function register(Request $request)
     {

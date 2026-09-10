@@ -2,8 +2,8 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EmailVerificationController;
-use App\Http\Controllers\FriendsController;
 use App\Http\Controllers\FriendInvitationController;
+use App\Http\Controllers\FriendsController;
 use App\Http\Controllers\GameViewController;
 use App\Http\Controllers\LeagueController;
 use App\Http\Controllers\LeagueSeasonController;

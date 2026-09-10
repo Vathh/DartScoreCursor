@@ -11,7 +11,7 @@ class TournamentOverallPlaceCalculatorTest extends TestCase
 {
     public function test_thirty_seven_player_tournament_assigns_ex_aequo_group_places(): void
     {
-        $calculator = new TournamentOverallPlaceCalculator();
+        $calculator = new TournamentOverallPlaceCalculator;
 
         $rows = collect([
             ['player_id' => 1, 'elimination_stage' => GameStage::FINAL, 'group_place' => null, 'current_place' => 1],
@@ -94,7 +94,7 @@ class TournamentOverallPlaceCalculatorTest extends TestCase
 
     public function test_bracket_sixteen_assigns_eight_place_to_first_round_losers(): void
     {
-        $calculator = new TournamentOverallPlaceCalculator();
+        $calculator = new TournamentOverallPlaceCalculator;
 
         $rows = Collection::make(range(1, 8))->map(fn (int $playerId) => [
             'player_id' => 100 + $playerId,

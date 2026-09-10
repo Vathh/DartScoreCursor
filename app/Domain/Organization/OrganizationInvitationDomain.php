@@ -24,8 +24,7 @@ class OrganizationInvitationDomain
         public readonly OrganizationInvitationStatus $status,
         public readonly ?Carbon $respondedAt,
         public readonly Carbon $createdAt,
-    ) {
-    }
+    ) {}
 
     public static function fromEloquent(OrganizationInvitation $invitation): self
     {

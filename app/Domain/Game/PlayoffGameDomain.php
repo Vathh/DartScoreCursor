@@ -7,8 +7,8 @@ use App\Domain\PlayerDomain;
 use App\Domain\Tournament\TournamentDomain;
 use App\DTO\GameResultDTO;
 use App\Enums\BracketSide;
-use App\Enums\GameStatus;
 use App\Enums\GameStage;
+use App\Enums\GameStatus;
 use App\Models\PlayoffGame\PlayoffGame;
 use App\Support\Tournament\PlayoffRoundLabel;
 
@@ -178,7 +178,7 @@ class PlayoffGameDomain extends GameDomain
     {
         return [
             $this->player1Id ?? 0,
-            $this->player2Id ?? 0
+            $this->player2Id ?? 0,
         ];
     }
 

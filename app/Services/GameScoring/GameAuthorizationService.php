@@ -13,8 +13,7 @@ class GameAuthorizationService
 {
     public function __construct(
         private TournamentRepository $tournamentRepository,
-    ) {
-    }
+    ) {}
 
     public function canCorrectTournamentGame(?int $tournamentId, GameKind $kind): bool
     {

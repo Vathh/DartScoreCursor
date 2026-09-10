@@ -3,7 +3,6 @@
 namespace Tests\Unit\Tournament;
 
 use App\Enums\TournamentInvitationStatus;
-use App\Models\Tournament\TournamentInvitation;
 use App\Models\Users\User;
 use App\Repositories\Tournament\TournamentInvitationRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;

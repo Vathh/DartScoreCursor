@@ -3,7 +3,6 @@
 namespace Tests\Unit\GameScoring;
 
 use App\Support\GameScoring\GameStatisticsCalculator;
-use Illuminate\Support\Collection;
 use PHPUnit\Framework\TestCase;
 
 class GameStatisticsCalculatorTest extends TestCase

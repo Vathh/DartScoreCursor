@@ -10,9 +10,7 @@ use Illuminate\View\View;
 
 class SettingsController extends Controller
 {
-    public function __construct(private PasswordChangeService $passwordChangeService)
-    {
-    }
+    public function __construct(private PasswordChangeService $passwordChangeService) {}
 
     public function index(): RedirectResponse
     {

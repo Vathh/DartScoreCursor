@@ -11,8 +11,7 @@ class MyCompetitionsController extends Controller
 {
     public function __construct(
         private UserCompetitionsService $userCompetitionsService,
-    ) {
-    }
+    ) {}
 
     public function index(Request $request): JsonResponse
     {

@@ -2,10 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Models\Player\Player;
 use App\Models\Users\User;
 use App\Notifications\VerifyEmailNotification;
-use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;

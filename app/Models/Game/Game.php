@@ -29,7 +29,7 @@ class Game extends Model
     ];
 
     protected $casts = [
-        'status' => GameStatus::class
+        'status' => GameStatus::class,
     ];
 
     public function tournament(): BelongsTo
@@ -52,5 +52,3 @@ class Game extends Model
         return $this->belongsTo(Player::class, 'winner_id');
     }
 }
-
-

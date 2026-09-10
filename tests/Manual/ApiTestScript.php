@@ -2,19 +2,20 @@
 
 /**
  * Manual API Testing Script
- * 
+ *
  * Ten skrypt pozwala na ręczne testowanie API bez uruchamiania pełnych testów PHPUnit.
  * Uruchom: php tests/Manual/ApiTestScript.php
- * 
+ *
  * Wymaga:
  * - Uruchomiony serwer Laravel: php artisan serve
  * - Utworzone użytkowniki i dane testowe w bazie
  */
-
 class ApiTestScript
 {
     private string $baseUrl;
+
     private ?string $token = null;
+
     private array $headers = [];
 
     public function __construct(string $baseUrl = 'http://localhost:8000')
@@ -36,7 +37,7 @@ class ApiTestScript
 
         if (isset($response['token'])) {
             $this->token = $response['token'];
-            $this->headers['Authorization'] = 'Bearer ' . $this->token;
+            $this->headers['Authorization'] = 'Bearer '.$this->token;
         }
 
         return $response;
@@ -51,7 +52,7 @@ class ApiTestScript
 
         if (isset($response['token'])) {
             $this->token = $response['token'];
-            $this->headers['Authorization'] = 'Bearer ' . $this->token;
+            $this->headers['Authorization'] = 'Bearer '.$this->token;
         }
 
         return $response;
@@ -61,8 +62,9 @@ class ApiTestScript
     {
         $url = '/api/game/active';
         if ($tournamentId) {
-            $url .= '?tournamentId=' . $tournamentId;
+            $url .= '?tournamentId='.$tournamentId;
         }
+
         return $this->get($url);
     }
 
@@ -77,7 +79,7 @@ class ApiTestScript
 
     private function get(string $endpoint): array
     {
-        $ch = curl_init($this->baseUrl . $endpoint);
+        $ch = curl_init($this->baseUrl.$endpoint);
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_HTTPHEADER => $this->buildHeaders(),
@@ -95,7 +97,7 @@ class ApiTestScript
 
     private function post(string $endpoint, array $data): array
     {
-        $ch = curl_init($this->baseUrl . $endpoint);
+        $ch = curl_init($this->baseUrl.$endpoint);
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POST => true,
@@ -119,14 +121,15 @@ class ApiTestScript
         foreach ($this->headers as $key => $value) {
             $headers[] = "$key: $value";
         }
+
         return $headers;
     }
 
     public function printResponse(string $title, array $response): void
     {
-        echo "\n" . str_repeat('=', 60) . "\n";
+        echo "\n".str_repeat('=', 60)."\n";
         echo "  $title\n";
-        echo str_repeat('=', 60) . "\n";
+        echo str_repeat('=', 60)."\n";
         echo "Status: {$response['status']}\n";
         echo "Response:\n";
         print_r($response['data']);
@@ -139,7 +142,7 @@ if (php_sapi_name() === 'cli') {
     echo "=== Manual API Test Script ===\n";
     echo "Upewnij się, że serwer Laravel jest uruchomiony: php artisan serve\n\n";
 
-    $api = new ApiTestScript();
+    $api = new ApiTestScript;
 
     // Przykład 1: Rejestracja użytkownika
     echo "1. Test rejestracji użytkownika...\n";

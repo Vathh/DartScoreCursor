@@ -20,8 +20,7 @@ final class CareerWindow
     public function __construct(
         public readonly string $key,
         public readonly ?int $days,
-    ) {
-    }
+    ) {}
 
     public static function fromQuery(?string $window): self
     {

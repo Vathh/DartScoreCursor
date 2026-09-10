@@ -23,14 +23,13 @@ use App\Models\Users\User;
 use App\Services\Player\PlayerService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
-use Laravel\Sanctum\Sanctum;
 use Tests\Concerns\ActsAsTournamentTablet;
 use Tests\TestCase;
 
 class TournamentGameScoringFinalizeTest extends TestCase
 {
-    use RefreshDatabase;
     use ActsAsTournamentTablet;
+    use RefreshDatabase;
 
     private User $user;
 

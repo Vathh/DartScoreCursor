@@ -17,12 +17,11 @@ final readonly class LeagueSeasonStartReadiness
         public bool $canStart,
         public ?string $reason,
         public array $unfilledLabels,
-    ) {
-    }
+    ) {}
 
     /**
      * @param  list<array{name: string, capacity: int, memberCount: int}>  $divisions
-     *         Od najwyższego szczebla (position 0) do najniższego.
+     *                                                                                 Od najwyższego szczebla (position 0) do najniższego.
      */
     public static function inspect(array $divisions): self
     {

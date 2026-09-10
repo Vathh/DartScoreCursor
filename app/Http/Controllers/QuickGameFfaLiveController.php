@@ -11,8 +11,7 @@ class QuickGameFfaLiveController extends Controller
 {
     public function __construct(
         private QuickGameFfaLiveService $liveService,
-    ) {
-    }
+    ) {}
 
     public function live(int $lobbyId): View|RedirectResponse
     {

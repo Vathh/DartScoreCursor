@@ -16,7 +16,7 @@ class TournamentResult extends Model
         'player_id',
         'points',
         'place',
-        'elimination_stage'
+        'elimination_stage',
     ];
 
     protected $casts = [
@@ -38,5 +38,3 @@ class TournamentResult extends Model
         return $this->belongsTo(Player::class);
     }
 }
-
-

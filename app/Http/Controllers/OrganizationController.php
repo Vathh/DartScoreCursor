@@ -2,16 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Domain\GameScoring\MatchFormat;
 use App\Domain\OrganizationDomain;
 use App\Enums\AssignableEntityType;
 use App\Models\Organization\Organization;
-use App\Models\Users\User;
 use App\Services\League\LeagueService;
 use App\Services\Organization\OrganizationInvitationService;
 use App\Services\Organization\OrganizationService;
 use App\Services\Player\PlayerService;
 use App\Services\User\UserService;
-use App\Domain\GameScoring\MatchFormat;
 use App\Support\Organization\OrganizationMatchFormatPresets;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -19,7 +18,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class OrganizationController extends Controller
@@ -64,8 +62,8 @@ class OrganizationController extends Controller
         $this->organizationService->create($validated['organizationName'], $validated['description'], Auth::id());
 
         return redirect()
-                    ->route('organizations.index')
-                    ->with('success', 'Pomyślnie stworzono organizację!');
+            ->route('organizations.index')
+            ->with('success', 'Pomyślnie stworzono organizację!');
     }
 
     public function show(Organization $organization): Factory|View
@@ -73,7 +71,7 @@ class OrganizationController extends Controller
         $organization->loadMissing(['admins', 'seasons']);
         $organizationDomain = OrganizationDomain::fromEloquent($organization, ['admins', 'seasons']);
         $seasons = collect($organizationDomain->seasons)
-            ->sortByDesc(fn($season) => $season->updatedAt)
+            ->sortByDesc(fn ($season) => $season->updatedAt)
             ->values();
 
         return view('organizations.show', [
@@ -263,7 +261,7 @@ class OrganizationController extends Controller
         return view('organizations.admins', [
             'organization' => $organization,
             'admins' => $admins,
-            'relatedUsers' => $relatedUsers
+            'relatedUsers' => $relatedUsers,
         ]);
     }
 
@@ -278,8 +276,8 @@ class OrganizationController extends Controller
         $this->organizationService->addAdmin($organizationId, $validated['user_id']);
 
         return redirect()
-                    ->route('organizations.admins', $organizationId)
-                    ->with('success', 'Uprawnienie administratora nadano pomyślnie');
+            ->route('organizations.admins', $organizationId)
+            ->with('success', 'Uprawnienie administratora nadano pomyślnie');
     }
 
     public function removeAdmin(Request $request, int $organizationId)
@@ -293,8 +291,8 @@ class OrganizationController extends Controller
         $this->organizationService->removeAdmin($organizationId, $validated['user_id']);
 
         return redirect()
-                    ->route('organizations.admins', $organizationId)
-                    ->with('success', 'Uprawnienie administratora usunięto pomyślnie');
+            ->route('organizations.admins', $organizationId)
+            ->with('success', 'Uprawnienie administratora usunięto pomyślnie');
     }
 
     public function guests(int $organizationId): Factory|View
@@ -305,7 +303,7 @@ class OrganizationController extends Controller
 
         return view('organizations.guests', [
             'organization' => $organization,
-            'guests' => $guests
+            'guests' => $guests,
         ]);
     }
 
@@ -325,8 +323,8 @@ class OrganizationController extends Controller
         $this->playerService->createGuest($validated['name'], $organizationId, AssignableEntityType::ORGANIZATION);
 
         return redirect()
-                    ->route('organizations.guests', $organizationId)
-                    ->with('success', 'Pomyślnie dodano gościa');
+            ->route('organizations.guests', $organizationId)
+            ->with('success', 'Pomyślnie dodano gościa');
     }
 
     public function removeGuest(Request $request, int $organizationId)
@@ -349,13 +347,3 @@ class OrganizationController extends Controller
         return $this->organizationService->loadAndAuthorize($organizationId, $additionalRelations);
     }
 }
-
-
-
-
-
-
-
-
-
-

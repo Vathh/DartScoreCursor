@@ -2,8 +2,8 @@
 
 namespace App\Services\GameScoring;
 
-use App\Enums\GameStatus;
 use App\Enums\GameKind;
+use App\Enums\GameStatus;
 use App\Models\Game\Game;
 use App\Models\League\LeagueGame;
 use App\Models\PlayoffGame\PlayoffGame;
@@ -15,8 +15,8 @@ use App\Repositories\Game\GameVisitRepository;
 use App\Repositories\League\LeagueGameRepository;
 use App\Repositories\PlayoffGame\PlayoffGameRepository;
 use App\Repositories\QuickGame\QuickGameRepository;
-use App\Support\GameScoring\GameScoringContext;
 use App\Support\GameScoring\GameLegsSetGrouper;
+use App\Support\GameScoring\GameScoringContext;
 use App\Support\GameScoring\GameStatisticsCalculator;
 use App\Support\Tournament\PlayoffRoundLabel;
 use DomainException;
@@ -33,8 +33,7 @@ class GameDetailService
         private GameVisitRepository $gameVisitRepository,
         private GameLegPlayerStatRepository $gameLegPlayerStatRepository,
         private GameAuthorizationService $gameAuthorizationService,
-    ) {
-    }
+    ) {}
 
     /**
      * Pełny detal (strona meczu) — wizyty + stats.

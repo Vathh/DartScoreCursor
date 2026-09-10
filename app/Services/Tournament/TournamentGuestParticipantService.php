@@ -16,8 +16,7 @@ class TournamentGuestParticipantService
         private PlayerRepository $playerRepository,
         private TournamentInvitationRepository $invitationRepository,
         private TournamentRepository $tournamentRepository,
-    ) {
-    }
+    ) {}
 
     public function addFromRelatedPool(int $tournamentId, int $playerId, int $seasonId): void
     {

@@ -17,7 +17,7 @@ class PlayoffBracketFactoryTest extends TestCase
     {
         parent::setUp();
 
-        $this->factory = new PlayoffBracketFactory();
+        $this->factory = new PlayoffBracketFactory;
     }
 
     #[DataProvider('bracketSizeProvider')]

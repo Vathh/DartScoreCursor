@@ -10,8 +10,7 @@ class TournamentJoinController
 {
     public function __construct(
         private TournamentJoinRequestService $joinRequestService,
-    ) {
-    }
+    ) {}
 
     public function preview(Request $request, string $code): JsonResponse
     {

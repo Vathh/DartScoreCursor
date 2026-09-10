@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Domain\SeasonDomain;
 use App\Enums\AssignableEntityType;
 use App\Models\Season\Season;
-use App\Rules\UniquePlayerInSeasonAndOrganization;
 use App\Services\Organization\OrganizationService;
 use App\Services\Player\PlayerService;
 use App\Services\Season\SeasonService;
@@ -26,9 +25,7 @@ class SeasonController extends Controller
         private OrganizationService $organizationService,
         private UserService $userService,
         private PlayerService $playerService,
-    )
-    {
-    }
+    ) {}
 
     public function index(Request $request): Factory|View|JsonResponse
     {
@@ -56,14 +53,14 @@ class SeasonController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-           'seasonName' => 'required|string|max:25|unique:seasons,name',
-           'startDate' => 'required|date',
-           'endDate' => 'required|date',
+            'seasonName' => 'required|string|max:25|unique:seasons,name',
+            'startDate' => 'required|date',
+            'endDate' => 'required|date',
         ]);
 
         $organizationId = $request->query('organizationId');
 
-        $this->seasonService->create( $organizationId, $validated['seasonName'], (array)Auth::id(), $validated['startDate'], $validated['endDate']);
+        $this->seasonService->create($organizationId, $validated['seasonName'], (array) Auth::id(), $validated['startDate'], $validated['endDate']);
 
         return redirect()
             ->route('organizations.show', ['organization' => $organizationId])
@@ -185,16 +182,16 @@ class SeasonController extends Controller
         $season = $this->loadAndAuthorize($seasonId, ['relatedUsers']);
         $admins = $season->admins;
         $relatedUsers = $this->seasonService->getRelatedUsers($seasonId)
-                                            ->map(fn($user) => [
-                                                    'id' => $user->id,
-                                                    'name' => $user->player->name])
-                                            ->toArray();
+            ->map(fn ($user) => [
+                'id' => $user->id,
+                'name' => $user->player->name])
+            ->toArray();
         $filteredRelatedUsers = $this->userService->sortByNameAndRejectAdmins($relatedUsers, $season->admins);
 
         return view('seasons.admins', [
             'season' => $season,
             'admins' => $admins,
-            'relatedUsers' => $filteredRelatedUsers
+            'relatedUsers' => $filteredRelatedUsers,
         ]);
     }
 
@@ -236,7 +233,7 @@ class SeasonController extends Controller
 
         return view('seasons.guests', [
             'season' => $season,
-            'guests' => $guests
+            'guests' => $guests,
         ]);
     }
 
@@ -283,13 +280,3 @@ class SeasonController extends Controller
         return $this->seasonService->loadAndAuthorize($seasonId, $additionalRelations);
     }
 }
-
-
-
-
-
-
-
-
-
-

@@ -170,3 +170,20 @@ Osobne prefiksy dla: mecz grupowy, playoff, quick game — ten sam kontrakt payl
 ### Demo seed
 
 Dla pełnego turnieju 32-osobowego w `DemoDataSeeder`: fikcyjne `game_visits` + `game_leg_player_stats` (w tym duble tam, gdzie `double_tracked`).
+
+## Narzędzia
+
+### Backend
+
+- `composer lint` — Laravel Pint (`pint --test`)
+- `composer analyse` — Larastan / PHPStan (poziom 5, `phpstan-baseline.neon` na istniejący dług)
+- `composer test` — PHPUnit (`dartscore_test`)
+
+CI (GitHub Actions): Pint, PHPStan i testy na push/PR do `main`.
+
+### Mobile
+
+- `npm run lint` — ESLint (`eslint-config-expo`) na katalogu `helpers/`
+- `npm run test:game-scoring` — testy silnika scoringu
+
+CI: lint + `test:game-scoring` na push/PR do `main`.

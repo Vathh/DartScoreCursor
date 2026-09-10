@@ -15,17 +15,6 @@ class TournamentResultDomain
     /** @var list<string> */
     private const RELATIONS = ['season', 'tournament', 'player'];
 
-    /**
-     * @param SeasonDomain|null $season
-     * @param int|null $seasonId
-     * @param TournamentDomain|null $tournament
-     * @param int|null $tournamentId
-     * @param PlayerDomain|null $player
-     * @param int|null $playerId
-     * @param int $points
-     * @param int|null $place
-     * @param GameStage|null $eliminationStage
-     */
     public function __construct(
         public readonly ?SeasonDomain $season,
         public readonly ?int $seasonId,
@@ -36,15 +25,8 @@ class TournamentResultDomain
         public readonly ?int $points,
         public readonly ?int $place,
         public readonly ?GameStage $eliminationStage,
-    )
-    {
-    }
+    ) {}
 
-    /**
-     * @param TournamentResult $result
-     * @param array $with
-     * @return TournamentResultDomain
-     */
     public static function fromEloquent(TournamentResult $result, array $with = []): self
     {
         self::assertRelationsLoaded($result, $with, self::RELATIONS);
@@ -68,4 +50,3 @@ class TournamentResultDomain
         );
     }
 }
-

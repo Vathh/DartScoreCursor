@@ -13,6 +13,5 @@ readonly class LeagueDivisionSnapshot
         public int $promotePlayoff,
         /** @var list<int> */
         public array $playerIds,
-    ) {
-    }
+    ) {}
 }

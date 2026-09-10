@@ -19,8 +19,7 @@ class QuickGameFfaStateUpdated implements ShouldBroadcastNow
     public function __construct(
         public int $lobbyId,
         public array $state,
-    ) {
-    }
+    ) {}
 
     /**
      * @return array<int, \Illuminate\Broadcasting\Channel>

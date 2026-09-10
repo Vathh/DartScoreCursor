@@ -12,8 +12,7 @@ class UserCompetitionsService
 {
     public function __construct(
         private UserCompetitionsRepository $userCompetitionsRepository,
-    ) {
-    }
+    ) {}
 
     /**
      * @return array{

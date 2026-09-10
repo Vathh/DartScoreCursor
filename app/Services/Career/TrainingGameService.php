@@ -24,8 +24,7 @@ class TrainingGameService
     public function __construct(
         private TrainingGameRepository $trainingGameRepository,
         private PlayerCareerSnapshotService $snapshotService,
-    ) {
-    }
+    ) {}
 
     /**
      * @param  array<string, mixed>  $payload

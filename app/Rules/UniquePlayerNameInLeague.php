@@ -9,9 +9,7 @@ use Illuminate\Translation\PotentiallyTranslatedString;
 
 class UniquePlayerNameInLeague implements ValidationRule
 {
-    public function __construct(private int $leagueId)
-    {
-    }
+    public function __construct(private int $leagueId) {}
 
     /**
      * @param  \Closure(string, ?string=): PotentiallyTranslatedString  $fail

@@ -9,6 +9,5 @@ readonly class LeaguePlayoffPairing
         public int $lowerDivisionId,
         public int $higherPlayerId,
         public int $lowerPlayerId,
-    ) {
-    }
+    ) {}
 }

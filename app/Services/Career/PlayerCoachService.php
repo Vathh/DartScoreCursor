@@ -23,8 +23,7 @@ class PlayerCoachService
 {
     public function __construct(
         private PlayerGameSnapshotRepository $snapshotRepository,
-    ) {
-    }
+    ) {}
 
     /**
      * Zawsze pełne źródła łącznie z treningiem — tylko właściciel kariery.

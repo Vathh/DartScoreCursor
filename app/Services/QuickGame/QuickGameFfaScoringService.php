@@ -2,11 +2,19 @@
 
 namespace App\Services\QuickGame;
 
-use App\DTO\QuickGame\PlayerResultDTO;
-use App\DTO\QuickGameFfa\RecordFfaVisitDTO;
+use App\Domain\GameScoring\MatchFormat;
+use App\Domain\GameScoring\MatchFormatScoring;
+use App\Domain\GameScoring\VisitRecorder;
+use App\Domain\QuickGame\AroundTheClockRules;
+use App\Domain\QuickGame\Bob27Rules;
+use App\Domain\QuickGame\Catch40Rules;
+use App\Domain\QuickGame\Cricket56Rules;
+use App\Domain\QuickGame\CricketRules;
 use App\Domain\QuickGame\FfaLegCycle;
 use App\Domain\QuickGame\FfaSessionRulesDomain;
 use App\Domain\QuickGame\FfaTurnRotationDomain;
+use App\DTO\QuickGame\PlayerResultDTO;
+use App\DTO\QuickGameFfa\RecordFfaVisitDTO;
 use App\Models\QuickGame\QuickGameFfaPresence;
 use App\Models\QuickGame\QuickGameFfaSession;
 use App\Models\QuickGame\QuickGameLobby;
@@ -17,14 +25,6 @@ use App\Repositories\QuickGame\QuickGameFfaVisitRepository;
 use App\Support\QuickGameFfa\FfaStateBroadcaster;
 use App\Support\QuickGameFfa\FfaTurnNormalize;
 use App\Support\QuickGameFfa\QuickGameFfaStateBuilder;
-use App\Domain\GameScoring\MatchFormat;
-use App\Domain\QuickGame\AroundTheClockRules;
-use App\Domain\QuickGame\Bob27Rules;
-use App\Domain\QuickGame\Catch40Rules;
-use App\Domain\QuickGame\Cricket56Rules;
-use App\Domain\QuickGame\CricketRules;
-use App\Domain\GameScoring\MatchFormatScoring;
-use App\Domain\GameScoring\VisitRecorder;
 use App\Support\QuickGameLobbyPlayerOrder;
 use DomainException;
 use Illuminate\Support\Facades\DB;
@@ -44,8 +44,7 @@ class QuickGameFfaScoringService
         private QuickGameFfaCatch40ScoringService $catch40ScoringService,
         private QuickGameFfaCricket56ScoringService $cricket56ScoringService,
         private FfaSubmitGuard $submitGuard,
-    ) {
-    }
+    ) {}
 
     /**
      * @param  array<int, int>  $lobbyPlayerOrderIds  lobby_player.id w kolejności
@@ -282,6 +281,7 @@ class QuickGameFfaScoringService
             ],
             'players' => [],
         ];
+
         return FfaStateBroadcaster::emit($lobbyId, $state);
     }
 

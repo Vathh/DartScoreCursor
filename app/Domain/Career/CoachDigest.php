@@ -45,8 +45,7 @@ final class CoachDigest
         public readonly ?float $weakestDoublePct,
         public readonly array $focusHints,
         public readonly array $modes,
-    ) {
-    }
+    ) {}
 
     /**
      * @return array<string, mixed>

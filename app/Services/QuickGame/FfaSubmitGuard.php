@@ -16,8 +16,7 @@ final class FfaSubmitGuard
     public function __construct(
         private PlayerRepository $playerRepository,
         private QuickGameFfaPresenceRepository $presenceRepository,
-    ) {
-    }
+    ) {}
 
     public function assert(QuickGameFfaSession $session, int $userId, ?int $targetPlayerId): void
     {

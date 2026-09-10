@@ -14,8 +14,7 @@ class TournamentJoinLandingController
 {
     public function __construct(
         private TournamentJoinRequestService $joinRequestService,
-    ) {
-    }
+    ) {}
 
     public function show(Request $request, string $code): Factory|View
     {

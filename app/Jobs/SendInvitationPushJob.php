@@ -21,8 +21,7 @@ class SendInvitationPushJob implements ShouldQueue
         public string $type,
         public int $invitationId,
         public array $context = [],
-    ) {
-    }
+    ) {}
 
     public function handle(
         UserPushTokenRepository $tokenRepository,

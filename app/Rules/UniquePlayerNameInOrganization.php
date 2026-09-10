@@ -3,7 +3,6 @@
 namespace App\Rules;
 
 use App\Models\Organization\Organization;
-use App\Models\Player\Player;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Translation\PotentiallyTranslatedString;
@@ -35,7 +34,7 @@ class UniquePlayerNameInOrganization implements ValidationRule
         // Zbierz wszystkich graczy związanych z organizacją
         $allPlayers = collect()
             // Zarejestrowani gracze z organizacji
-            ->merge($organization->relatedUsers->map(fn($user) => $user->player)->filter())
+            ->merge($organization->relatedUsers->map(fn ($user) => $user->player)->filter())
             // Goście z organizacji
             ->merge($organization->guests)
             ->unique('id');
@@ -48,4 +47,3 @@ class UniquePlayerNameInOrganization implements ValidationRule
         }
     }
 }
-

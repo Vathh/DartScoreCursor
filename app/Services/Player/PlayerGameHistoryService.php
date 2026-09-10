@@ -8,8 +8,7 @@ class PlayerGameHistoryService
 {
     public function __construct(
         private PlayerGameHistoryRepository $playerGameHistoryRepository
-    ) {
-    }
+    ) {}
 
     /**
      * Zwraca stronę historii meczów gracza (5 na stronę).
@@ -21,15 +20,3 @@ class PlayerGameHistoryService
         return $this->playerGameHistoryRepository->getHistoryPage($playerId, max(1, $page), $includeTraining);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-

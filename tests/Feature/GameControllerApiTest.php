@@ -26,16 +26,23 @@ use Tests\TestCase;
 
 class GameControllerApiTest extends TestCase
 {
-    use RefreshDatabase;
     use ActsAsTournamentTablet;
+    use RefreshDatabase;
 
     private User $user;
+
     private Organization $organization;
+
     private Season $season;
+
     private Tournament $tournament;
+
     private Player $player1;
+
     private Player $player2;
+
     private Player $player3;
+
     private Player $player4;
 
     protected function setUp(): void
@@ -274,7 +281,7 @@ class GameControllerApiTest extends TestCase
         ]);
 
         $response->assertStatus(200)
-                 ->assertJson(['success' => true]);
+            ->assertJson(['success' => true]);
 
         $this->assertDatabaseHas('games', [
             'id' => $game->id,
@@ -288,7 +295,7 @@ class GameControllerApiTest extends TestCase
     public function test_user_can_update_playoff_game_result(): void
     {
         $this->markTestSkipped('Test nie przechodzi - funkcjonalność działa manualnie, wymaga dalszej analizy');
-        
+
         Sanctum::actingAs($this->user);
 
         $playoffGame = PlayoffGame::create([
@@ -328,7 +335,7 @@ class GameControllerApiTest extends TestCase
         ]);
 
         $response->assertStatus(200)
-                 ->assertJson(['success' => true]);
+            ->assertJson(['success' => true]);
 
         $this->assertDatabaseHas('playoff_games', [
             'id' => $playoffGame->id,
@@ -371,9 +378,9 @@ class GameControllerApiTest extends TestCase
         $response = $this->getJson("/api/game/active?tournamentId={$this->tournament->id}");
 
         $response->assertStatus(200)
-                 ->assertJsonStructure([
-                     '*' => ['id', 'type', 'player1', 'player2']
-                 ]);
+            ->assertJsonStructure([
+                '*' => ['id', 'type', 'player1', 'player2'],
+            ]);
 
         $games = $response->json();
         $gameIds = collect($games)->pluck('id')->toArray();
@@ -469,13 +476,13 @@ class GameControllerApiTest extends TestCase
                     'tournamentId' => $this->tournament->id,
                     'type' => 'one_seventy',
                     'value' => 170,
-                ]
+                ],
             ],
             'legs' => [],
         ]);
 
         $response->assertStatus(200)
-                 ->assertJson(['success' => true]);
+            ->assertJson(['success' => true]);
 
         $this->assertDatabaseHas('achievements', [
             'player_id' => $this->player1->id,
@@ -552,7 +559,7 @@ class GameControllerApiTest extends TestCase
         ]);
 
         $response->assertStatus(200)
-                 ->assertJson(['success' => true]);
+            ->assertJson(['success' => true]);
 
         $this->assertDatabaseHas('game_legs', [
             'game_id' => $game->id,
@@ -608,7 +615,6 @@ class GameControllerApiTest extends TestCase
         ]);
 
         $response->assertStatus(200)
-                 ->assertJson(['success' => false]);
+            ->assertJson(['success' => false]);
     }
 }
-

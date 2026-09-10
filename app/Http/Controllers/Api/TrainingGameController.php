@@ -11,8 +11,7 @@ class TrainingGameController
 {
     public function __construct(
         private TrainingGameService $trainingGameService,
-    ) {
-    }
+    ) {}
 
     public function store(Request $request): JsonResponse
     {

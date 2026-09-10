@@ -3,11 +3,17 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\FriendshipController;
 use App\Http\Controllers\Api\GameController;
+use App\Http\Controllers\Api\GameScoring\GroupGameScoringController;
+use App\Http\Controllers\Api\GameScoring\LeagueGameScoringController;
+use App\Http\Controllers\Api\GameScoring\PlayoffGameScoringController;
+use App\Http\Controllers\Api\LeagueCatalogController;
+use App\Http\Controllers\Api\LeagueGamePlayController;
+use App\Http\Controllers\Api\LeagueSeasonCatalogController;
+use App\Http\Controllers\Api\MyCompetitionsController;
 use App\Http\Controllers\Api\OrganizationController;
 use App\Http\Controllers\Api\OrganizationInvitationController;
 use App\Http\Controllers\Api\PlayerCareerController;
 use App\Http\Controllers\Api\PlayerProfileController;
-use App\Http\Controllers\Api\TrainingGameController;
 use App\Http\Controllers\Api\PushTokenController;
 use App\Http\Controllers\Api\QuickGameController;
 use App\Http\Controllers\Api\QuickGameFfaController;
@@ -16,13 +22,7 @@ use App\Http\Controllers\Api\SeasonController;
 use App\Http\Controllers\Api\TournamentCatalogController;
 use App\Http\Controllers\Api\TournamentInvitationController;
 use App\Http\Controllers\Api\TournamentJoinController;
-use App\Http\Controllers\Api\GameScoring\GroupGameScoringController;
-use App\Http\Controllers\Api\GameScoring\LeagueGameScoringController;
-use App\Http\Controllers\Api\GameScoring\PlayoffGameScoringController;
-use App\Http\Controllers\Api\LeagueCatalogController;
-use App\Http\Controllers\Api\LeagueSeasonCatalogController;
-use App\Http\Controllers\Api\LeagueGamePlayController;
-use App\Http\Controllers\Api\MyCompetitionsController;
+use App\Http\Controllers\Api\TrainingGameController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthController::class, 'tournamentLogin'])
@@ -180,4 +180,3 @@ Route::middleware(['auth:sanctum', 'not.banned'])->group(function () {
     });
 
 });
-

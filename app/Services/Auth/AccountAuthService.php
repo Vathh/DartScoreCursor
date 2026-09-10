@@ -15,8 +15,7 @@ class AccountAuthService
         private UserRepository $userRepository,
         private MobileAppTokenService $mobileAppTokenService,
         private LoginCodeService $loginCodeService,
-    ) {
-    }
+    ) {}
 
     /**
      * @throws ValidationException

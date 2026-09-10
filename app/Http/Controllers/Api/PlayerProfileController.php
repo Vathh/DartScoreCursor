@@ -11,8 +11,7 @@ class PlayerProfileController
 {
     public function __construct(
         private PlayerProfileService $playerProfileService,
-    ) {
-    }
+    ) {}
 
     /**
      * GET /api/players/{player}

@@ -15,7 +15,7 @@ class TournamentStartValidatorTest extends TestCase
     {
         parent::setUp();
 
-        $this->validator = new TournamentStartValidator();
+        $this->validator = new TournamentStartValidator;
     }
 
     public function test_accepts_valid_eight_player_two_group_configuration(): void

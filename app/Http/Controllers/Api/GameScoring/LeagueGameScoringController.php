@@ -15,8 +15,7 @@ class LeagueGameScoringController extends Controller
     public function __construct(
         private GameScoringService $gameScoringService,
         private LeagueGamePlayService $leagueGamePlayService,
-    ) {
-    }
+    ) {}
 
     public function state(Request $request, int $leagueGame): JsonResponse
     {

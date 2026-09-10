@@ -27,8 +27,7 @@ class LeagueService
         private PlayerService $playerService,
         private PlayerRepository $playerRepository,
         private UserService $userService,
-    ) {
-    }
+    ) {}
 
     /**
      * @return Collection<int, League>

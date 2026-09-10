@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Enums\GameType;
-use App\Http\Requests\LockGameRequest;
 use App\Http\Requests\GameResultRequest;
+use App\Http\Requests\LockGameRequest;
 use App\Services\Game\GameService;
 use App\Services\GameScoring\GameAuthorizationService;
 use Illuminate\Http\JsonResponse;
@@ -15,9 +15,7 @@ class GameController
     public function __construct(
         private GameService $gameService,
         private GameAuthorizationService $gameAuthorizationService,
-    )
-    {
-    }
+    ) {}
 
     public function setStatusInProgress(LockGameRequest $request): JsonResponse
     {

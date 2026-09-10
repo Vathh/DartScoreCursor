@@ -9,26 +9,18 @@ use App\Repositories\PointScheme\PointSchemeRuleRepository;
 use App\Repositories\Tournament\TournamentRepository;
 use App\Repositories\Tournament\TournamentResultRepository;
 use App\Services\GroupStanding\GroupStandingService;
-use Illuminate\Support\Collection;
 
 class TournamentResultService
 {
-
     public function __construct(
-        private GroupStandingService       $groupStandingService,
-        private TournamentResultsFactory   $factory,
-        private TournamentRepository       $tournamentRepository,
+        private GroupStandingService $groupStandingService,
+        private TournamentResultsFactory $factory,
+        private TournamentRepository $tournamentRepository,
         private TournamentResultRepository $resultRepository,
-        private PointSchemeRuleRepository  $pointSchemeRuleRepository,
+        private PointSchemeRuleRepository $pointSchemeRuleRepository,
         private TournamentOverallPlaceService $overallPlaceService,
-    )
-    {
-    }
+    ) {}
 
-    /**
-     * @param int $tournamentId
-     * @return void
-     */
     public function createForGroupLosers(int $tournamentId): void
     {
         $tournament = $this->tournamentRepository->findWithSeasonAndPointSchemeRules($tournamentId);
@@ -47,13 +39,6 @@ class TournamentResultService
         $this->overallPlaceService->recalculateOverallPlaces($tournamentId);
     }
 
-    /**
-     * @param int $tournamentId
-     * @param int $playerId
-     * @param GameStage $stage
-     * @param int|null $place
-     * @return void
-     */
     public function createForPlayoff(int $tournamentId, int $playerId, GameStage $stage, ?int $place): void
     {
         $tournament = $this->tournamentRepository->findWithSeasonAndPointScheme($tournamentId);

@@ -10,7 +10,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 class LoginCode extends Model implements AuthenticatableContract
 {
-    use HasApiTokens, Authenticatable;
+    use Authenticatable, HasApiTokens;
 
     public const CODE_LENGTH = 8;
 

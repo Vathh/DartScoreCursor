@@ -11,8 +11,8 @@ use App\Models\Career\PlayerGameSnapshot;
 use App\Models\Game\Game;
 use App\Models\League\LeagueGame;
 use App\Models\League\LeagueSeason;
-use App\Models\PlayoffGame\PlayoffGame;
 use App\Models\Player\PlayerOverviewStat;
+use App\Models\PlayoffGame\PlayoffGame;
 use App\Models\QuickGame\QuickGame;
 use App\Models\QuickGame\QuickGameResult;
 use App\Models\Tournament\TournamentResult;
@@ -25,8 +25,7 @@ class PlayerOverviewStatRepository
 {
     public function __construct(
         private PlayerRepository $playerRepository,
-    ) {
-    }
+    ) {}
 
     public function findForPlayer(int $playerId): ?PlayerOverviewStat
     {

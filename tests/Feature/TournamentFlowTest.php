@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Domain\Tournament\TournamentGroupDistribution;
 use App\DTO\GameResultDTO;
 use App\DTO\UpdateGameDTO;
 use App\Enums\GameStage;
@@ -22,7 +23,6 @@ use App\Models\Users\User;
 use App\Services\Game\GameService;
 use App\Services\Player\PlayerService;
 use App\Support\Tournament\PlayoffFirstRoundPairing;
-use App\Domain\Tournament\TournamentGroupDistribution;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Support\SeedsTournamentParticipants;
 use Tests\TestCase;
@@ -33,13 +33,21 @@ class TournamentFlowTest extends TestCase
     use SeedsTournamentParticipants;
 
     private User $adminUser;
+
     private Organization $organization;
+
     private Season $season;
+
     private Player $player1;
+
     private Player $player2;
+
     private Player $player3;
+
     private Player $player4;
+
     private Player $player5;
+
     private Player $player6;
 
     protected function setUp(): void

@@ -12,8 +12,7 @@ class LoginCodeService
 {
     public function __construct(
         private LoginCodeRepository $loginCodeRepository
-    ) {
-    }
+    ) {}
 
     /**
      * Jeden wspólny kod sędziowski na turniej (wszystkie tablety).

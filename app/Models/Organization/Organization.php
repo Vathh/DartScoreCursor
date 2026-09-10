@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Organization extends Model
 {
     public $timestamps = true;
+
     protected $fillable = ['name', 'description', 'match_format_presets'];
 
     protected function casts(): array
@@ -52,5 +53,3 @@ class Organization extends Model
         return $this->hasMany(Player::class);
     }
 }
-
-

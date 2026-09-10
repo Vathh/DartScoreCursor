@@ -17,8 +17,7 @@ readonly class LeagueStandingRow
         public int $place,
         public bool $needsTiebreak = false,
         public ?string $tieGroupKey = null,
-    ) {
-    }
+    ) {}
 
     public function withPlace(int $place, bool $needsTiebreak = false, ?string $tieGroupKey = null): self
     {

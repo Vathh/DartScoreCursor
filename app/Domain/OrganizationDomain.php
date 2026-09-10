@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Domain;
 
 use App\Domain\Concerns\AssertsRelationsLoaded;
@@ -14,10 +15,7 @@ class OrganizationDomain
 
     /**
      * @param  array<string, array<string, int|string>>  $matchFormatPresets
-     * @param  array  $admins
      * @param  array<SeasonDomain>  $seasons
-     * @param  array  $relatedUsers
-     * @param  array  $guests
      */
     public function __construct(
         public readonly int $id,
@@ -30,14 +28,8 @@ class OrganizationDomain
         public readonly array $relatedUsers,
         public readonly array $guests,
         public readonly array $matchFormatPresets = [],
-    )
-    {}
+    ) {}
 
-    /**
-     * @param Organization $organization
-     * @param array $with
-     * @return self
-     */
     public static function fromEloquent(Organization $organization, array $with = []): self
     {
         self::assertRelationsLoaded($organization, $with, self::RELATIONS);
@@ -51,24 +43,24 @@ class OrganizationDomain
             createdAt: $organization->created_at,
             updatedAt: $organization->updated_at,
             admins: in_array('admins', $with)
-                ? $organization->admins->map(fn($user) => [
+                ? $organization->admins->map(fn ($user) => [
                     'id' => $user->id,
                     'name' => $user->player->name,
                 ])->toArray()
                 : [],
             seasons: in_array('seasons', $with)
-                ? $organization->seasons->map(fn($season) => SeasonDomain::fromEloquent($season))->toArray()
+                ? $organization->seasons->map(fn ($season) => SeasonDomain::fromEloquent($season))->toArray()
                 : [],
             relatedUsers: in_array('relatedUsers', $with)
-                ? $organization->relatedUsers->map(fn($user) => [
+                ? $organization->relatedUsers->map(fn ($user) => [
                     'id' => $user->id,
                     'name' => $user->player->name,
                 ])->toArray()
                 : [],
             guests: in_array('guests', $with)
-                ? $organization->guests->map(fn($guest) => [
+                ? $organization->guests->map(fn ($guest) => [
                     'id' => $guest->id,
-                    'name' => $guest->name
+                    'name' => $guest->name,
                 ])->toArray()
                 : [],
             matchFormatPresets: $presets,

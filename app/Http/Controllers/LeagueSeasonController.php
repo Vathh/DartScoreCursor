@@ -19,8 +19,7 @@ class LeagueSeasonController extends Controller
     public function __construct(
         private LeagueSeasonService $leagueSeasonService,
         private LeagueService $leagueService,
-    ) {
-    }
+    ) {}
 
     public function create(League $league): Factory|View|RedirectResponse
     {

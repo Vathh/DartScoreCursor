@@ -12,6 +12,7 @@ class FriendshipInvitationDomain
 
     /** Relacje zawsze wymagane — dociągnij w Repository (np. `FriendshipInvitation::with(self::RELATIONS)`). */
     public const RELATIONS = ['sender.player', 'receiver.player'];
+
     public function __construct(
         public readonly int $id,
         public readonly int $senderId,
@@ -20,8 +21,7 @@ class FriendshipInvitationDomain
         public readonly ?PlayerDomain $receiverPlayer,
         public readonly string $status,
         public readonly ?Carbon $createdAt = null,
-    ) {
-    }
+    ) {}
 
     public static function fromEloquent(FriendshipInvitation $invitation): self
     {

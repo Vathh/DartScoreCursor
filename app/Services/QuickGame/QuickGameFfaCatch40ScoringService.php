@@ -2,13 +2,13 @@
 
 namespace App\Services\QuickGame;
 
-use App\DTO\QuickGame\PlayerResultDTO;
 use App\Domain\GameScoring\MatchFormat;
 use App\Domain\GameScoring\VisitRecorder;
 use App\Domain\QuickGame\Catch40Rules;
 use App\Domain\QuickGame\FfaLegCycle;
 use App\Domain\QuickGame\FfaMatchLog;
 use App\Domain\QuickGame\FfaTurnRotationDomain;
+use App\DTO\QuickGame\PlayerResultDTO;
 use App\Models\QuickGame\QuickGameFfaSession;
 use App\Repositories\Player\PlayerRepository;
 use App\Repositories\QuickGame\QuickGameFfaPresenceRepository;
@@ -29,8 +29,7 @@ class QuickGameFfaCatch40ScoringService
         private PlayerRepository $playerRepository,
         private FfaMatchFinishService $matchFinishService,
         private FfaSubmitGuard $submitGuard,
-    ) {
-    }
+    ) {}
 
     /**
      * @return array<string, mixed>

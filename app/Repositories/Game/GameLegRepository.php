@@ -10,11 +10,7 @@ use App\Support\GameScoring\GameScoringContext;
 class GameLegRepository
 {
     /**
-     * @param GameLegDTO[] $legs
-     * @param int|null $gameId
-     * @param int|null $playoffGameId
-     * @param int|null $quickGameId
-     * @return void
+     * @param  GameLegDTO[]  $legs
      */
     public function createMany(array $legs, ?int $gameId = null, ?int $playoffGameId = null, ?int $quickGameId = null): void
     {
@@ -39,15 +35,11 @@ class GameLegRepository
             ];
         }, $legs);
 
-        if (!empty($data)) {
+        if (! empty($data)) {
             GameLeg::insert($data);
         }
     }
 
-    /**
-     * @param int $gameId
-     * @return \Illuminate\Support\Collection
-     */
     public function getByGameId(int $gameId): \Illuminate\Support\Collection
     {
         return GameLeg::where('game_id', $gameId)
@@ -55,10 +47,6 @@ class GameLegRepository
             ->get();
     }
 
-    /**
-     * @param int $playoffGameId
-     * @return \Illuminate\Support\Collection
-     */
     public function getByPlayoffGameId(int $playoffGameId): \Illuminate\Support\Collection
     {
         return GameLeg::where('playoff_game_id', $playoffGameId)
@@ -165,15 +153,3 @@ class GameLegRepository
         $query->delete();
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-

@@ -16,7 +16,7 @@ class OrganizationRepository
      */
     public function getAll(): Collection
     {
-        return Organization::all()->map(fn($organization) => OrganizationDomain::fromEloquent($organization));
+        return Organization::all()->map(fn ($organization) => OrganizationDomain::fromEloquent($organization));
     }
 
     /**
@@ -40,22 +40,13 @@ class OrganizationRepository
         ];
     }
 
-    /**
-     * @param int|null $id
-     * @return OrganizationDomain|null
-     */
     public function findByIdWithAdmins(?int $id): ?OrganizationDomain
     {
         $organization = Organization::with('admins')->findOrFail($id);
+
         return $organization ? OrganizationDomain::fromEloquent($organization, ['admins']) : null;
     }
 
-    /**
-     * @param string $name
-     * @param string $description
-     * @param int $userId
-     * @return OrganizationDomain
-     */
     public function create(string $name, string $description, int $userId): OrganizationDomain
     {
         $organization = Organization::create([
@@ -63,7 +54,7 @@ class OrganizationRepository
             'description' => $description,
         ]);
 
-        if(!empty($userId)) {
+        if (! empty($userId)) {
             $organization->admins()->attach($userId);
         }
 
@@ -120,13 +111,10 @@ class OrganizationRepository
         $organization->save();
     }
 
-    /**
-     * @param int $organizationId
-     * @return OrganizationDomain
-     */
     public function findByIdWithGuests(int $organizationId): OrganizationDomain
     {
         $organization = Organization::with('guests')->findOrFail($organizationId);
+
         return OrganizationDomain::fromEloquent($organization, ['guests']);
     }
 
@@ -140,15 +128,3 @@ class OrganizationRepository
         return Organization::with($relations)->findOrFail($organizationId);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-

@@ -12,8 +12,7 @@ class PlayerCareerController
 {
     public function __construct(
         private PlayerCareerStatsService $playerCareerStatsService,
-    ) {
-    }
+    ) {}
 
     public function show(Request $request, Player $player): JsonResponse
     {

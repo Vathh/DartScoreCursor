@@ -14,8 +14,7 @@ class QuickGameFfaStateBuilder
 {
     public function __construct(
         private PlayerRepository $playerRepository,
-    ) {
-    }
+    ) {}
 
     /**
      * Pełny stan FFA — ten sam kształt na GET i na WS (`ffa.state.updated`).

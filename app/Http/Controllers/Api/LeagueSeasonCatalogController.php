@@ -10,8 +10,7 @@ class LeagueSeasonCatalogController
 {
     public function __construct(
         private LeagueSeasonService $leagueSeasonService,
-    ) {
-    }
+    ) {}
 
     /**
      * GET /api/league-seasons/{leagueSeason}

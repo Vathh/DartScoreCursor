@@ -14,6 +14,7 @@ class TournamentInvitationDomain
 
     /** Relacje zawsze wymagane — dociągnij w Repository (np. `TournamentInvitation::with(self::RELATIONS)`). */
     public const RELATIONS = ['user.player', 'tournament'];
+
     public function __construct(
         public readonly int $id,
         public readonly int $tournamentId,
@@ -24,8 +25,7 @@ class TournamentInvitationDomain
         public readonly TournamentInvitationStatus $status,
         public readonly ?Carbon $respondedAt,
         public readonly Carbon $createdAt,
-    ) {
-    }
+    ) {}
 
     public static function fromEloquent(TournamentInvitation $invitation): self
     {

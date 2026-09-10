@@ -2,7 +2,6 @@
 
 namespace App\Repositories\Achievements;
 
-use App\DTO\GameAchievementDTO;
 use App\Models\Achievements\Achievement;
 
 class AchievementsRepository
@@ -38,15 +37,3 @@ class AchievementsRepository
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-

@@ -2,10 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Enums\TournamentStatus;
 use App\Models\Tournament\LoginCode;
 use App\Models\Tournament\Tournament;
 use App\Models\Users\User;
-use App\Enums\TournamentStatus;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;

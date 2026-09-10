@@ -23,7 +23,6 @@ final class VisitDartPayload
     }
 
     /**
-     * @param  mixed  $raw
      * @return list<array{sector: int, points: int, label: string|null, remainingBefore: int|null, bust: bool}>|null
      */
     public static function normalize(mixed $raw): ?array
