@@ -80,7 +80,11 @@ class LoginCodeService
             );
         }
 
-        $token = $loginCode->createToken('counter')->plainTextToken;
+        $token = $loginCode->createToken(
+            'counter',
+            ['*'],
+            now()->addDays(30),
+        )->plainTextToken;
 
         return [
             'token' => $token,

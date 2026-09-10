@@ -2,13 +2,15 @@
 
 namespace App\Models\Tournament;
 
+use Illuminate\Auth\Authenticatable;
+use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Laravel\Sanctum\HasApiTokens;
 
-class LoginCode extends Model
+class LoginCode extends Model implements AuthenticatableContract
 {
-    use HasApiTokens;
+    use HasApiTokens, Authenticatable;
 
     public const CODE_LENGTH = 8;
 

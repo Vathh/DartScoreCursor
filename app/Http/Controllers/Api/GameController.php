@@ -6,6 +6,7 @@ use App\Enums\GameType;
 use App\Http\Requests\LockGameRequest;
 use App\Http\Requests\GameResultRequest;
 use App\Services\Game\GameService;
+use App\Services\GameScoring\GameAuthorizationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -13,6 +14,7 @@ class GameController
 {
     public function __construct(
         private GameService $gameService,
+        private GameAuthorizationService $gameAuthorizationService,
     )
     {
     }
@@ -20,11 +22,15 @@ class GameController
     public function setStatusInProgress(LockGameRequest $request): JsonResponse
     {
         $validated = $request->validated();
+        $gameId = (int) $validated['gameId'];
+        $type = GameType::from($validated['type']);
 
-        $this->gameService->lockGame(
-            (int) $validated['gameId'],
-            GameType::from($validated['type']),
+        $this->gameAuthorizationService->assertLiveTournamentScoring(
+            $request->user(),
+            $this->gameService->tournamentIdForGame($gameId, $type),
         );
+
+        $this->gameService->lockGame($gameId, $type);
 
         return response()->json(['success' => true]);
     }
@@ -32,11 +38,15 @@ class GameController
     public function releaseLock(LockGameRequest $request): JsonResponse
     {
         $validated = $request->validated();
+        $gameId = (int) $validated['gameId'];
+        $type = GameType::from($validated['type']);
 
-        $this->gameService->releaseGameLock(
-            (int) $validated['gameId'],
-            GameType::from($validated['type']),
+        $this->gameAuthorizationService->assertLiveTournamentScoring(
+            $request->user(),
+            $this->gameService->tournamentIdForGame($gameId, $type),
         );
+
+        $this->gameService->releaseGameLock($gameId, $type);
 
         return response()->json(['success' => true]);
     }
@@ -51,6 +61,14 @@ class GameController
     public function update(GameResultRequest $request): JsonResponse
     {
         $dto = $request->toDTO();
+
+        $this->gameAuthorizationService->assertLiveTournamentScoring(
+            $request->user(),
+            $this->gameService->tournamentIdForGame(
+                $dto->gameResultDTO->gameId,
+                $dto->gameResultDTO->type,
+            ),
+        );
 
         $success = $this->gameService->update($dto);
 

@@ -221,6 +221,20 @@ class VisitRecorderTest extends TestCase
         $this->assertSame(501, VisitRecorder::remainingFromLegVisits([], 501));
     }
 
+    public function test_assert_remaining_before_matches_server(): void
+    {
+        VisitRecorder::assertRemainingBeforeMatchesServer(441, 441);
+        $this->addToAssertionCount(1);
+    }
+
+    public function test_assert_remaining_before_rejects_spoofed_checkout(): void
+    {
+        $this->expectException(DomainException::class);
+        $this->expectExceptionMessage('Nieprawidłowy wynik przed wizytą.');
+
+        VisitRecorder::assertRemainingBeforeMatchesServer(40, 501);
+    }
+
     public function test_leg_winner_and_legs_won(): void
     {
         $visits = [

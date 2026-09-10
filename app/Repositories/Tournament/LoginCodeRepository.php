@@ -3,7 +3,6 @@
 namespace App\Repositories\Tournament;
 
 use App\Models\Tournament\LoginCode;
-use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
 class LoginCodeRepository
@@ -34,7 +33,7 @@ class LoginCodeRepository
         foreach ($codes as $code) {
             $codesToInsert[] = [
                 'code' => $code,
-                'expires_at' => Carbon::create(2026, 1, 1, 1, 1, 1),
+                'expires_at' => null,
                 'tournament_id' => $tournamentId
             ];
         }

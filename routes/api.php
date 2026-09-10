@@ -25,8 +25,10 @@ use App\Http\Controllers\Api\LeagueGamePlayController;
 use App\Http\Controllers\Api\MyCompetitionsController;
 use Illuminate\Support\Facades\Route;
 
-Route::post('/login', [AuthController::class, 'tournamentLogin']); // kod turnieju – do sędziowania
-Route::post('/account/login', [AuthController::class, 'login']);   // email + hasło – konto gracza
+Route::post('/login', [AuthController::class, 'tournamentLogin'])
+    ->middleware('throttle:tablet-login'); // kod turnieju – do sędziowania
+Route::post('/account/login', [AuthController::class, 'login'])
+    ->middleware('throttle:account-login');   // email + hasło – konto gracza
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/email/verification-notification', [AuthController::class, 'resendVerificationEmail'])
     ->middleware('throttle:6,1');

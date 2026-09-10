@@ -24,11 +24,13 @@ use App\Services\Player\PlayerService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
+use Tests\Concerns\ActsAsTournamentTablet;
 use Tests\TestCase;
 
 class TournamentGameScoringFinalizeTest extends TestCase
 {
     use RefreshDatabase;
+    use ActsAsTournamentTablet;
 
     private User $user;
 
@@ -98,7 +100,7 @@ class TournamentGameScoringFinalizeTest extends TestCase
             'organization_id' => $organization->id,
         ]);
 
-        Sanctum::actingAs($this->user);
+        $this->actAsTournamentTablet($this->tournament);
     }
 
     public function test_group_scoring_close_second_leg_updates_standings(): void
@@ -337,7 +339,7 @@ class TournamentGameScoringFinalizeTest extends TestCase
 
     public function test_rejects_bulk_update_on_already_finished_game(): void
     {
-        Sanctum::actingAs($this->user);
+        $this->actAsTournamentTablet($this->tournament);
 
         $game = Game::create([
             'tournament_id' => $this->tournament->id,
@@ -425,7 +427,7 @@ class TournamentGameScoringFinalizeTest extends TestCase
 
     public function test_group_scoring_upserts_visit_by_client_visit_id(): void
     {
-        Sanctum::actingAs($this->user);
+        $this->actAsTournamentTablet($this->tournament);
 
         $game = Game::create([
             'tournament_id' => $this->tournament->id,

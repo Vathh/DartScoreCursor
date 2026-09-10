@@ -167,6 +167,19 @@ class GameScoringService
             if ((int) $existing->game_leg_id !== (int) $leg->id) {
                 throw new DomainException('Nieprawidłowa wizyta.');
             }
+        }
+
+        $legVisits = $this->gameVisitRepository->getActiveForLeg($leg->id)
+            ->where('player_id', $dto->playerId);
+        if ($existing !== null) {
+            $legVisits = $legVisits->reject(fn ($visit) => (int) $visit->id === (int) $existing->id);
+        }
+        VisitRecorder::assertRemainingBeforeMatchesServer(
+            $dto->remainingBefore,
+            VisitRecorder::remainingFromLegVisits($legVisits, $context->startingScore()),
+        );
+
+        if ($existing !== null) {
             $this->gameVisitRepository->updateFromDto($existing, $dto);
 
             return $this->broadcastState($context, $game);

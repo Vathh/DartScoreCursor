@@ -70,6 +70,15 @@ class GameService
         $this->gameLockService->release($gameId, $type);
     }
 
+    public function tournamentIdForGame(int $gameId, GameType $type): ?int
+    {
+        return match ($type) {
+            GameType::GROUP => (int) $this->gameRepository->findModel($gameId)->tournament_id,
+            GameType::PLAYOFF => (int) $this->playoffGameRepository->findModel($gameId)->tournament_id,
+            GameType::QUICK_MATCH => null,
+        };
+    }
+
     /**
      * Aktualizacja meczu turniejowego.
      *

@@ -235,6 +235,16 @@ final class VisitRecorder
     }
 
     /**
+     * @throws DomainException
+     */
+    public static function assertRemainingBeforeMatchesServer(int $clientRemainingBefore, int $serverRemaining): void
+    {
+        if ($clientRemainingBefore !== $serverRemaining) {
+            throw new DomainException('Nieprawidłowy wynik przed wizytą.');
+        }
+    }
+
+    /**
      * @param  iterable<int, array<string, mixed>|object>  $legVisits
      */
     public static function legWinnerPlayerId(iterable $legVisits): ?int

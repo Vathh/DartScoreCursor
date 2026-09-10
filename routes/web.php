@@ -79,7 +79,9 @@ Route::post('/email/verification-notification', [EmailVerificationController::cl
     ->name('verification.send');
 
 Route::get('/login', [PagesController::class, 'showLoginPage'])->name('pages.loginPanel');
-Route::post('/login', [AuthController::class, 'login'])->name('login');
+Route::post('/login', [AuthController::class, 'login'])
+    ->middleware('throttle:account-login')
+    ->name('login');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::middleware(['auth', 'platform.admin'])->prefix('admin')->name('admin.')->group(function () {

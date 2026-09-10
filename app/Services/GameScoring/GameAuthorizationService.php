@@ -3,6 +3,8 @@
 namespace App\Services\GameScoring;
 
 use App\Enums\GameKind;
+use App\Enums\TournamentStatus;
+use App\Models\Tournament\LoginCode;
 use App\Models\Tournament\Tournament;
 use App\Repositories\Tournament\TournamentRepository;
 use Illuminate\Support\Facades\Auth;
@@ -47,6 +49,30 @@ class GameAuthorizationService
         }
 
         return false;
+    }
+
+    /**
+     * Live scoring / lock tabletem: kod sędziowski tego turnieju, turniej nie zakończony.
+     * Konto gracza (User) nie sędziuje turnieju.
+     */
+    public function assertLiveTournamentScoring(mixed $actor, ?int $tournamentId): void
+    {
+        if ($tournamentId === null || $tournamentId < 1) {
+            abort(403, 'Brak uprawnień do sędziowania tego meczu.');
+        }
+
+        if (! $actor instanceof LoginCode) {
+            abort(403, 'Sędziowanie turnieju wymaga kodu tabletu.');
+        }
+
+        if ((int) $actor->tournament_id !== (int) $tournamentId) {
+            abort(403, 'Ten kod nie należy do tego turnieju.');
+        }
+
+        $tournament = $this->tournamentRepository->findModelOrNull($tournamentId);
+        if ($tournament === null || $tournament->status === TournamentStatus::FINISHED) {
+            abort(403, 'Turniej zakończony — sędziowanie jest już nieważne.');
+        }
     }
 
     public function authorizeTournamentGame(?int $tournamentId, GameKind $kind): void

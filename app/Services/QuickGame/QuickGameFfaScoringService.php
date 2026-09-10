@@ -368,6 +368,17 @@ class QuickGameFfaScoringService
 
             VisitRecorder::validateDto($dto, (int) $session->starting_score);
 
+            $legVisits = $this->visitRepository
+                ->getActiveForLeg($session, (int) $session->current_leg_number)
+                ->where('player_id', $dto->playerId);
+            if ($existing !== null) {
+                $legVisits = $legVisits->reject(fn ($visit) => (int) $visit->id === (int) $existing->id);
+            }
+            VisitRecorder::assertRemainingBeforeMatchesServer(
+                (int) $dto->remainingBefore,
+                VisitRecorder::remainingFromLegVisits($legVisits, (int) $session->starting_score),
+            );
+
             if ($existing !== null) {
                 $this->visitRepository->updateFromDto($existing, $dto);
                 if (VisitRecorder::isVisitComplete($dto->bust, $dto->closedLeg, $dto->dartsInVisit)) {

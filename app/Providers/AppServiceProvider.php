@@ -9,11 +9,14 @@ use App\Models\PlayoffGame\PlayoffGame;
 use App\Models\QuickGame\QuickGame;
 use App\Services\Friends\FriendshipService;
 use Illuminate\Auth\Middleware\Authenticate;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Broadcast;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -41,6 +44,16 @@ class AppServiceProvider extends ServiceProvider
             'league_game' => LeagueGame::class,
             'training_game' => TrainingGame::class,
         ]);
+
+        RateLimiter::for('account-login', function (Request $request) {
+            $email = strtolower((string) $request->input('email'));
+
+            return Limit::perMinute(5)->by($email.'|'.$request->ip());
+        });
+
+        RateLimiter::for('tablet-login', function (Request $request) {
+            return Limit::perMinute(60)->by((string) $request->ip());
+        });
 
         // Tylko Sanctum (Bearer z telefonu), bez `web`/sesji. Musi być jedyne wywołanie Broadcast::routes —
         // patrz bootstrap/app.php (brak `channels:` w withRouting).

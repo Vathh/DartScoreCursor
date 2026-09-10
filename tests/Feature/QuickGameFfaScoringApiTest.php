@@ -116,6 +116,41 @@ class QuickGameFfaScoringApiTest extends TestCase
         $this->assertDatabaseCount('quick_game_ffa_visits', 1);
     }
 
+    public function test_ffa_visit_rejects_spoofed_remaining_before(): void
+    {
+        $lobbyId = $this->startTwoPlayerLobby();
+
+        $this->postJson("/api/quick-game/lobby/{$lobbyId}/ffa/visits", [
+            'playerId' => $this->hostPlayer->id,
+            'score' => 60,
+            'remainingBefore' => 501,
+            'remainingAfter' => 441,
+            'dartsInVisit' => 3,
+            'closedLeg' => false,
+            'bust' => false,
+            'clientVisitId' => (string) Str::uuid(),
+        ])->assertOk();
+
+        Sanctum::actingAs($this->friend);
+        $this->postJson("/api/quick-game/lobby/{$lobbyId}/ffa/visits", [
+            'playerId' => $this->friendPlayer->id,
+            'score' => 40,
+            'remainingBefore' => 40,
+            'remainingAfter' => 0,
+            'dartsInVisit' => 1,
+            'closedLeg' => true,
+            'bust' => false,
+            'clientVisitId' => (string) Str::uuid(),
+        ])->assertStatus(422)
+            ->assertJsonPath('message', 'Nieprawidłowy wynik przed wizytą.');
+
+        $this->assertDatabaseCount('quick_game_ffa_visits', 1);
+        $this->getJson("/api/quick-game/lobby/{$lobbyId}/ffa/state")
+            ->assertOk()
+            ->assertJsonPath('players.0.remaining', 441)
+            ->assertJsonPath('players.1.remaining', 501);
+    }
+
     public function test_ffa_finish_creates_quick_game_result(): void
     {
         $lobbyId = $this->postJson('/api/quick-game/lobby/create')->json('id');

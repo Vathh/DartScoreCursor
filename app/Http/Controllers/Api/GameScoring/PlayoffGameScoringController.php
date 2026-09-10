@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\GameScoring;
 use App\DTO\GameScoring\CloseLegPlayerStatsDTO;
 use App\DTO\GameScoring\RecordVisitDTO;
 use App\Http\Controllers\Controller;
+use App\Services\GameScoring\GameAuthorizationService;
 use App\Services\GameScoring\GameScoringService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -13,6 +14,7 @@ class PlayoffGameScoringController extends Controller
 {
     public function __construct(
         private GameScoringService $gameScoringService,
+        private GameAuthorizationService $gameAuthorizationService,
     ) {
     }
 
@@ -31,6 +33,7 @@ class PlayoffGameScoringController extends Controller
         ]);
 
         [$context, $game] = $this->gameScoringService->resolvePlayoffGame($playoffGameId);
+        $this->gameAuthorizationService->assertLiveTournamentScoring($request->user(), $context->tournamentId);
 
         return response()->json(
             $this->gameScoringService->startLeg(
@@ -47,6 +50,7 @@ class PlayoffGameScoringController extends Controller
         $validated = $request->validate(RecordVisitDTO::validationRules());
 
         [$context, $game] = $this->gameScoringService->resolvePlayoffGame($playoffGameId);
+        $this->gameAuthorizationService->assertLiveTournamentScoring($request->user(), $context->tournamentId);
 
         return response()->json(
             $this->gameScoringService->recordVisit(
@@ -58,9 +62,10 @@ class PlayoffGameScoringController extends Controller
         );
     }
 
-    public function undoVisit(int $playoffGameId, int $legId): JsonResponse
+    public function undoVisit(Request $request, int $playoffGameId, int $legId): JsonResponse
     {
         [$context, $game] = $this->gameScoringService->resolvePlayoffGame($playoffGameId);
+        $this->gameAuthorizationService->assertLiveTournamentScoring($request->user(), $context->tournamentId);
 
         return response()->json(
             $this->gameScoringService->undoLastVisit($context, $game, $legId)
@@ -85,6 +90,7 @@ class PlayoffGameScoringController extends Controller
         ]);
 
         [$context, $game] = $this->gameScoringService->resolvePlayoffGame($playoffGameId);
+        $this->gameAuthorizationService->assertLiveTournamentScoring($request->user(), $context->tournamentId);
         $playerStats = array_map(
             fn (array $row) => CloseLegPlayerStatsDTO::fromArray($row),
             $validated['players'],

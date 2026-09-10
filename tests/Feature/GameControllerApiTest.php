@@ -21,11 +21,13 @@ use App\Models\Users\User;
 use App\Services\Player\PlayerService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
+use Tests\Concerns\ActsAsTournamentTablet;
 use Tests\TestCase;
 
 class GameControllerApiTest extends TestCase
 {
     use RefreshDatabase;
+    use ActsAsTournamentTablet;
 
     private User $user;
     private Organization $organization;
@@ -100,7 +102,7 @@ class GameControllerApiTest extends TestCase
 
     public function test_user_can_set_group_game_status_in_progress(): void
     {
-        Sanctum::actingAs($this->user);
+        $this->actAsTournamentTablet($this->tournament);
 
         $game = Game::create([
             'tournament_id' => $this->tournament->id,
@@ -126,7 +128,7 @@ class GameControllerApiTest extends TestCase
 
     public function test_lock_succeeds_when_game_already_in_progress(): void
     {
-        Sanctum::actingAs($this->user);
+        $this->actAsTournamentTablet($this->tournament);
 
         $game = Game::create([
             'tournament_id' => $this->tournament->id,
@@ -147,7 +149,7 @@ class GameControllerApiTest extends TestCase
 
     public function test_user_can_release_group_game_lock_without_scoring(): void
     {
-        Sanctum::actingAs($this->user);
+        $this->actAsTournamentTablet($this->tournament);
 
         $game = Game::create([
             'tournament_id' => $this->tournament->id,
@@ -173,7 +175,7 @@ class GameControllerApiTest extends TestCase
 
     public function test_released_group_game_appears_in_active_list(): void
     {
-        Sanctum::actingAs($this->user);
+        $this->actAsTournamentTablet($this->tournament);
 
         $game = Game::create([
             'tournament_id' => $this->tournament->id,
@@ -197,7 +199,7 @@ class GameControllerApiTest extends TestCase
 
     public function test_user_can_lock_playoff_game(): void
     {
-        Sanctum::actingAs($this->user);
+        $this->actAsTournamentTablet($this->tournament);
 
         $playoffGame = PlayoffGame::create([
             'tournament_id' => $this->tournament->id,
@@ -224,7 +226,7 @@ class GameControllerApiTest extends TestCase
 
     public function test_user_can_update_group_game_result(): void
     {
-        Sanctum::actingAs($this->user);
+        $this->actAsTournamentTablet($this->tournament);
 
         // Utwórz group standings dla graczy
         GroupStanding::create([
@@ -418,7 +420,7 @@ class GameControllerApiTest extends TestCase
 
     public function test_user_can_update_game_with_achievements(): void
     {
-        Sanctum::actingAs($this->user);
+        $this->actAsTournamentTablet($this->tournament);
 
         // Utwórz group standings dla graczy
         GroupStanding::create([
@@ -485,7 +487,7 @@ class GameControllerApiTest extends TestCase
 
     public function test_user_can_update_game_with_legs(): void
     {
-        Sanctum::actingAs($this->user);
+        $this->actAsTournamentTablet($this->tournament);
 
         // Utwórz group standings dla graczy
         GroupStanding::create([
@@ -567,7 +569,7 @@ class GameControllerApiTest extends TestCase
 
     public function test_user_cannot_update_game_with_wrong_players(): void
     {
-        Sanctum::actingAs($this->user);
+        $this->actAsTournamentTablet($this->tournament);
 
         // Utwórz group standings dla graczy
         GroupStanding::create([
