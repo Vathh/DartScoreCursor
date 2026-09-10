@@ -4,6 +4,7 @@ namespace App\Services\QuickGame;
 
 use App\DTO\QuickGame\PlayerResultDTO;
 use App\DTO\QuickGameFfa\RecordFfaVisitDTO;
+use App\Domain\QuickGame\FfaLegCycle;
 use App\Domain\QuickGame\FfaSessionRulesDomain;
 use App\Domain\QuickGame\FfaTurnRotationDomain;
 use App\Models\QuickGame\QuickGameFfaPresence;
@@ -13,8 +14,6 @@ use App\Repositories\Player\PlayerRepository;
 use App\Repositories\QuickGame\QuickGameFfaPresenceRepository;
 use App\Repositories\QuickGame\QuickGameFfaSessionRepository;
 use App\Repositories\QuickGame\QuickGameFfaVisitRepository;
-use App\Repositories\QuickGame\QuickGameLobbyRepository;
-use App\Repositories\QuickGame\QuickGameRepository;
 use App\Support\QuickGameFfa\FfaStateBroadcaster;
 use App\Support\QuickGameFfa\FfaTurnNormalize;
 use App\Support\QuickGameFfa\QuickGameFfaStateBuilder;
@@ -27,7 +26,6 @@ use App\Domain\QuickGame\CricketRules;
 use App\Domain\GameScoring\MatchFormatScoring;
 use App\Domain\GameScoring\VisitRecorder;
 use App\Support\QuickGameLobbyPlayerOrder;
-use App\Services\Career\PlayerCareerSnapshotService;
 use DomainException;
 use Illuminate\Support\Facades\DB;
 
@@ -39,14 +37,12 @@ class QuickGameFfaScoringService
         private QuickGameFfaPresenceRepository $presenceRepository,
         private QuickGameFfaStateBuilder $stateBuilder,
         private PlayerRepository $playerRepository,
-        private QuickGameRepository $quickGameRepository,
-        private QuickGameLobbyRepository $lobbyRepository,
+        private FfaMatchFinishService $matchFinishService,
         private QuickGameFfaCricketScoringService $cricketScoringService,
         private QuickGameFfaBob27ScoringService $bob27ScoringService,
         private QuickGameFfaAtcScoringService $atcScoringService,
         private QuickGameFfaCatch40ScoringService $catch40ScoringService,
         private QuickGameFfaCricket56ScoringService $cricket56ScoringService,
-        private PlayerCareerSnapshotService $careerSnapshotService,
         private FfaSubmitGuard $submitGuard,
     ) {
     }
@@ -513,13 +509,7 @@ class QuickGameFfaScoringService
             return;
         }
 
-        $session->leg_opener_index = FfaTurnRotationDomain::nextIndexAfter(
-            (int) $session->leg_opener_index,
-            $playerIds,
-            $leftIds,
-        );
-        $session->current_player_index = (int) $session->leg_opener_index;
-        $session->current_leg_number = (int) $session->current_leg_number + 1;
+        FfaLegCycle::startNextLeg($session, $playerIds, $leftIds);
     }
 
     /**
@@ -533,10 +523,10 @@ class QuickGameFfaScoringService
         $playerIds = $session->player_order ?? [];
         $visits = $this->visitRepository->getActiveForSession($session);
 
-        $ranked = collect($playerIds)
-            ->map(fn ($pid) => ['playerId' => (int) $pid, 'score' => (int) ($legsWon[$pid] ?? 0)])
-            ->sortByDesc('score')
-            ->values();
+        $ranked = $this->matchFinishService->rankedByLegsWon(
+            array_map('intval', $playerIds),
+            $legsWon,
+        );
 
         $results = [];
         foreach ($ranked as $i => $row) {
@@ -556,34 +546,7 @@ class QuickGameFfaScoringService
             );
         }
 
-        $quickGameId = $this->quickGameRepository->createWithResults($playerIds, $session->lobby_id);
-        $this->quickGameRepository->saveResults($quickGameId, $results);
-
-        $winnerId = $ranked->first()['playerId'] ?? null;
-        $p1 = $playerIds[0] ?? null;
-        $p2 = $playerIds[1] ?? null;
-
-        $this->quickGameRepository->updateResultFields($quickGameId, array_merge(
-            [
-                'player1_score' => (int) ($legsWon[$p1] ?? 0),
-                'player2_score' => (int) ($legsWon[$p2] ?? 0),
-                'winner_id' => $winnerId,
-                'status' => \App\Enums\GameStatus::FINISHED,
-            ],
-            $format->toDatabaseColumns(),
-        ));
-
-        $session->status = \App\Models\QuickGame\QuickGameFfaSession::STATUS_FINISHED;
-        $session->quick_game_id = $quickGameId;
-        $session->finished_at = now();
-
-        $session->loadMissing('lobby');
-        $lobby = $session->lobby;
-        if ($lobby !== null) {
-            $this->lobbyRepository->markFinished($lobby->id, $quickGameId);
-        }
-
-        $this->careerSnapshotService->recordFinishedQuickGame($quickGameId, $session);
+        $this->matchFinishService->persist($session, $format, $results, $legsWon);
     }
 
     private function recomputeIndicesFromVisits(\App\Models\QuickGame\QuickGameFfaSession $session): void

@@ -3,16 +3,14 @@
 namespace App\Services\QuickGame;
 
 use App\DTO\QuickGame\PlayerResultDTO;
+use App\Domain\QuickGame\FfaLegCycle;
 use App\Domain\QuickGame\FfaTurnRotationDomain;
 use App\Models\QuickGame\QuickGameFfaSession;
 use App\Repositories\Player\PlayerRepository;
 use App\Repositories\QuickGame\QuickGameFfaPresenceRepository;
 use App\Repositories\QuickGame\QuickGameFfaSessionRepository;
-use App\Repositories\QuickGame\QuickGameLobbyRepository;
-use App\Repositories\QuickGame\QuickGameRepository;
 use App\Support\QuickGameFfa\FfaStateBroadcaster;
 use App\Support\QuickGameFfa\FfaTurnNormalize;
-use App\Services\Career\PlayerCareerSnapshotService;
 use App\Domain\QuickGame\CricketRules;
 use App\Domain\GameScoring\MatchFormat;
 use App\Domain\QuickGame\FfaMatchLog;
@@ -28,9 +26,7 @@ class QuickGameFfaCricketScoringService
         private QuickGameFfaSessionRepository $sessionRepository,
         private QuickGameFfaPresenceRepository $presenceRepository,
         private PlayerRepository $playerRepository,
-        private QuickGameRepository $quickGameRepository,
-        private QuickGameLobbyRepository $lobbyRepository,
-        private PlayerCareerSnapshotService $careerSnapshotService,
+        private FfaMatchFinishService $matchFinishService,
         private FfaSubmitGuard $submitGuard,
     ) {
     }
@@ -234,13 +230,7 @@ class QuickGameFfaCricketScoringService
             $state['boards'] = CricketRules::initialState($playerIds)['boards'];
             $state['dartsInVisit'] = 0;
             FfaMatchLog::archive($state);
-            $session->leg_opener_index = FfaTurnRotationDomain::nextIndexAfter(
-                (int) $session->leg_opener_index,
-                $playerIds,
-                $leftIds,
-            );
-            $session->current_player_index = (int) $session->leg_opener_index;
-            $session->current_leg_number = (int) $session->current_leg_number + 1;
+            FfaLegCycle::startNextLeg($session, $playerIds, $leftIds);
 
             return;
         }
@@ -269,10 +259,7 @@ class QuickGameFfaCricketScoringService
         array $state,
     ): void {
         $playerIds = array_map('intval', $session->player_order ?? []);
-        $ranked = collect($playerIds)
-            ->map(fn ($pid) => ['playerId' => (int) $pid, 'score' => (int) ($legsWon[$pid] ?? 0)])
-            ->sortByDesc('score')
-            ->values();
+        $ranked = $this->matchFinishService->rankedByLegsWon($playerIds, $legsWon);
 
         $dartCounts = [];
         $pointsTotals = [];
@@ -311,34 +298,7 @@ class QuickGameFfaCricketScoringService
             );
         }
 
-        $quickGameId = $this->quickGameRepository->createWithResults($playerIds, $session->lobby_id);
-        $this->quickGameRepository->saveResults($quickGameId, $results);
-
-        $winnerId = $ranked->first()['playerId'] ?? null;
-        $p1 = $playerIds[0] ?? null;
-        $p2 = $playerIds[1] ?? null;
-
-        $this->quickGameRepository->updateResultFields($quickGameId, array_merge(
-            [
-                'player1_score' => (int) ($legsWon[$p1] ?? 0),
-                'player2_score' => (int) ($legsWon[$p2] ?? 0),
-                'winner_id' => $winnerId,
-                'status' => \App\Enums\GameStatus::FINISHED,
-            ],
-            $format->toDatabaseColumns(),
-        ));
-
-        $session->status = QuickGameFfaSession::STATUS_FINISHED;
-        $session->quick_game_id = $quickGameId;
-        $session->finished_at = now();
-
-        $session->loadMissing('lobby');
-        $lobby = $session->lobby;
-        if ($lobby !== null) {
-            $this->lobbyRepository->markFinished($lobby->id, $quickGameId);
-        }
-
-        $this->careerSnapshotService->recordFinishedQuickGame($quickGameId, $session, $state);
+        $this->matchFinishService->persist($session, $format, $results, $legsWon, $state);
     }
 
     /**
@@ -377,27 +337,9 @@ class QuickGameFfaCricketScoringService
             ];
         }
 
-        $myPlayerIndex = null;
-        $canInput = false;
-        if ($userId !== null) {
-            $lobby = $session->lobby;
-            if ($session->scoring_mode === 'one_device') {
-                $canInput = $lobby !== null && (int) $lobby->host_id === $userId;
-                if ($canInput) {
-                    $myPlayerIndex = (int) $session->current_player_index;
-                }
-            } else {
-                $me = $this->playerRepository->findByUserId($userId);
-                if ($me !== null) {
-                    $idx = array_search((int) $me->id, $playerIds, true);
-                    if ($idx !== false) {
-                        $myPlayerIndex = (int) $idx;
-                        $canInput = $myPlayerIndex === (int) $session->current_player_index
-                            && $session->isInProgress();
-                    }
-                }
-            }
-        }
+        $view = $this->submitGuard->viewerInput($session, $userId);
+        $myPlayerIndex = $view['myPlayerIndex'];
+        $canInput = $view['canInput'];
 
         return [
             'format' => 'ffa_cricket',
