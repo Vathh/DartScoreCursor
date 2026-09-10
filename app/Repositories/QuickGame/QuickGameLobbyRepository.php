@@ -254,6 +254,13 @@ class QuickGameLobbyRepository
             ->get();
     }
 
+    public function expirePendingInvitations(int $lobbyId): void
+    {
+        QuickGameLobbyInvitation::where('lobby_id', $lobbyId)
+            ->where('status', 'pending')
+            ->update(['status' => 'rejected']);
+    }
+
     public function markInvitationAccepted(int $lobbyId, int $playerId): void
     {
         QuickGameLobbyInvitation::where('lobby_id', $lobbyId)
@@ -285,6 +292,7 @@ class QuickGameLobbyRepository
             'quick_game_id' => $quickGameId,
             'updated_at' => now(),
         ]);
+        $this->expirePendingInvitations($lobbyId);
     }
 
     public function setRematchLobbyId(int $sourceLobbyId, int $rematchLobbyId): void

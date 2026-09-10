@@ -103,6 +103,28 @@ class QuickGameLobbyRematchTest extends TestCase
         Event::assertDispatched(\App\Events\QuickGameRematchCreated::class);
     }
 
+    public function test_host_rematch_invites_registered_players_without_intent(): void
+    {
+        Sanctum::actingAs($this->host);
+        $response = $this->postJson("/api/quick-game/lobby/{$this->finishedLobbyId}/rematch");
+
+        $response->assertOk()
+            ->assertJsonCount(1, 'lobby.players')
+            ->assertJsonPath('lobby.pendingInvites.0.id', $this->friendPlayer->id);
+
+        $rematchId = $response->json('lobby.id');
+        $this->assertDatabaseHas('quick_game_lobby_invitations', [
+            'lobby_id' => $rematchId,
+            'invited_player_id' => $this->friendPlayer->id,
+            'status' => 'pending',
+        ]);
+
+        Sanctum::actingAs($this->friend);
+        $this->getJson('/api/quick-game/lobby/invitations')
+            ->assertOk()
+            ->assertJsonPath('invitations.0.lobbyId', $rematchId);
+    }
+
     public function test_host_rematch_recreates_guests(): void
     {
         Sanctum::actingAs($this->host);

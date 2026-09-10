@@ -289,6 +289,7 @@ class QuickGameLobbyService
         }
 
         $lobby = $this->lobbyRepository->startGame($lobbyId, $matchFormat, $mode);
+        $this->lobbyRepository->expirePendingInvitations($lobbyId);
 
         $ffaSessionId = $this->ffaScoringService->createSessionForLobby(
             $lobby,
@@ -392,8 +393,9 @@ class QuickGameLobbyService
     }
 
     /**
-     * Host tworzy nowe lobby rematch z ustawieniami źródła i auto-dodaje
-     * graczy z intentami (+ gości z poprzedniego meczu).
+     * Host tworzy nowe lobby rematch z ustawieniami źródła: auto-dodaje
+     * graczy z intentami i gości, a pozostałych zarejestrowanych z tamtej
+     * gry zaprasza (push + pending), żeby mogli dołączyć.
      *
      * @return array<string, mixed>
      */
@@ -475,6 +477,9 @@ class QuickGameLobbyService
 
             return $this->lobbyRepository->find($rematch->id);
         });
+
+        $this->inviteRegisteredOpponentsToRematch($source, $rematch, $hostUserId);
+        $rematch = $this->lobbyRepository->find($rematch->id);
 
         $this->broadcastLobbyUpdated($rematch);
         broadcast(new QuickGameRematchCreated($source->id, $rematch));
@@ -564,6 +569,37 @@ class QuickGameLobbyService
         $this->lobbyRepository->addPlayerReady($rematch->id, $player->id, null, true, true);
         $fresh = $this->lobbyRepository->find($rematch->id);
         $this->broadcastLobbyUpdated($fresh);
+    }
+
+    /**
+     * Zarejestrowani z poprzedniej gry, którzy nie trafili do rematchu
+     * (brak intentu / wyszli w trakcie), dostają zwykłe zaproszenie.
+     */
+    private function inviteRegisteredOpponentsToRematch(
+        QuickGameLobby $source,
+        QuickGameLobby $rematch,
+        int $hostUserId,
+    ): void {
+        $alreadyIn = $rematch->players
+            ->pluck('player_id')
+            ->filter()
+            ->map(fn ($id) => (int) $id)
+            ->all();
+
+        foreach ($source->players as $lp) {
+            if (! $lp->is_registered || $lp->player_id === null) {
+                continue;
+            }
+            $playerId = (int) $lp->player_id;
+            if (in_array($playerId, $alreadyIn, true)) {
+                continue;
+            }
+            try {
+                $this->invite($rematch->id, $hostUserId, $playerId);
+            } catch (\RuntimeException) {
+                // np. już nie znajomi / lobby pełne
+            }
+        }
     }
 
     /**

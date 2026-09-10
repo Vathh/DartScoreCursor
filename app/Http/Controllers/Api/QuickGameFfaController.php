@@ -135,6 +135,45 @@ class QuickGameFfaController
         );
     }
 
+    public function recordCricketVisit(Request $request, string $lobbyId): JsonResponse
+    {
+        $validated = $request->validate([
+            'playerId' => 'required|integer|exists:players,id',
+            'clientVisitId' => 'required|uuid',
+            'darts' => 'required|array|min:1|max:3',
+            'darts.*.kind' => 'required|string|in:hit,miss',
+            'darts.*.segment' => 'nullable',
+            'darts.*.multiplier' => 'integer|min:1|max:3',
+            'darts.*.clientDartId' => 'nullable|uuid',
+        ]);
+
+        $this->assertLobbyParticipant((int) $lobbyId, $request->user()->id);
+
+        $darts = [];
+        foreach ($validated['darts'] as $dart) {
+            $segment = $dart['segment'] ?? null;
+            if ($segment !== null && $segment !== 'bull') {
+                $segment = (string) $segment;
+            }
+            $darts[] = [
+                'kind' => $dart['kind'],
+                'segment' => $segment,
+                'multiplier' => (int) ($dart['multiplier'] ?? 1),
+                'clientDartId' => $dart['clientDartId'] ?? $validated['clientVisitId'],
+            ];
+        }
+
+        return response()->json(
+            $this->cricketScoringService->recordVisit(
+                (int) $lobbyId,
+                $request->user()->id,
+                (int) $validated['playerId'],
+                $darts,
+                $validated['clientVisitId'],
+            )
+        );
+    }
+
     public function undoCricketDart(Request $request, string $lobbyId): JsonResponse
     {
         $this->assertLobbyParticipant((int) $lobbyId, $request->user()->id);

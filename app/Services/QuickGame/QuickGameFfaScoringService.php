@@ -300,7 +300,7 @@ class QuickGameFfaScoringService
 
             $gameType = strtolower((string) $session->game_type);
             if ($gameType === MatchFormat::GAME_TYPE_CRICKET) {
-                throw new DomainException('Sesja cricket — użyj endpointu /ffa/cricket/darts.');
+                throw new DomainException('Sesja cricket — użyj endpointu /ffa/cricket/visits.');
             }
             if ($gameType === MatchFormat::GAME_TYPE_BOB27) {
                 throw new DomainException('Sesja Bob\'s 27 — użyj endpointu /ffa/bob27/darts.');

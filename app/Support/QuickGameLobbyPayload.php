@@ -12,7 +12,7 @@ class QuickGameLobbyPayload
      */
     public static function fromLobby(QuickGameLobby $lobby, ?int $currentUserId = null): array
     {
-        $lobby->loadMissing(['host.player', 'players.player', 'ffaSession']);
+        $lobby->loadMissing(['host.player', 'players.player', 'ffaSession', 'invitations.invitedPlayer']);
 
         $orderIds = is_array($lobby->player_order) ? $lobby->player_order : null;
         $lobbyPlayers = QuickGameLobbyPlayerOrder::sort($lobby->players, $orderIds);
@@ -42,6 +42,15 @@ class QuickGameLobbyPayload
             'gameType' => MatchFormat::normalizeGameType($lobby->game_type ?? 'x01'),
             'scoringMode' => $lobby->scoring_mode ?? 'each_own',
             'players' => $players,
+            'pendingInvites' => $lobby->invitations
+                ->where('status', 'pending')
+                ->map(fn ($inv) => [
+                    'id' => (int) $inv->invited_player_id,
+                    'name' => $inv->invitedPlayer?->name ?? 'Gracz',
+                    'status' => 'sent',
+                ])
+                ->values()
+                ->all(),
             'matchInProgress' => $lobby->status === 'started'
                 && $lobby->ffaSession?->isInProgress() === true,
         ];

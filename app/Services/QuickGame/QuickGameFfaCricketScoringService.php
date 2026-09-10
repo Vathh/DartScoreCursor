@@ -43,6 +43,71 @@ class QuickGameFfaCricketScoringService
     }
 
     /**
+     * Wizyta krykieta: 3 lotki albo wcześniejsze zamknięcie lega. Jeden zapis, jeden event WS.
+     *
+     * @param  list<array{kind: string, segment?: string|null, multiplier?: int, clientDartId?: string|null}>  $darts
+     * @return array<string, mixed>
+     */
+    public function recordVisit(
+        int $lobbyId,
+        int $userId,
+        int $playerId,
+        array $darts,
+        string $clientVisitId,
+    ): array {
+        return DB::transaction(function () use ($lobbyId, $userId, $playerId, $darts, $clientVisitId) {
+            [$session, $playerIds, $leftIds, $state, $playerIndex] = $this->beginCricketWrite(
+                $lobbyId,
+                $userId,
+                $playerId,
+            );
+
+            foreach ($state['dartLog'] as $entry) {
+                if (($entry['clientVisitId'] ?? null) === $clientVisitId) {
+                    return $this->broadcastState($session->fresh(), $userId);
+                }
+            }
+
+            if ($darts === [] || count($darts) > 3) {
+                throw new DomainException('Wizyta krykieta musi mieć od 1 do 3 rzutów.');
+            }
+
+            foreach ($darts as $dart) {
+                if (! $session->isInProgress()) {
+                    break;
+                }
+                $kind = (string) ($dart['kind'] ?? '');
+                $this->applyDartToState(
+                    $session,
+                    $state,
+                    $playerIds,
+                    $leftIds,
+                    $playerId,
+                    $playerIndex,
+                    $kind,
+                    $dart['segment'] ?? null,
+                    (int) ($dart['multiplier'] ?? 1),
+                    (string) ($dart['clientDartId'] ?? $clientVisitId),
+                    $clientVisitId,
+                );
+                if ((int) ($state['dartsInVisit'] ?? 0) === 0) {
+                    break;
+                }
+            }
+
+            if ($session->isInProgress() && (int) ($state['dartsInVisit'] ?? 0) !== 0) {
+                throw new DomainException('Wizyta krykieta musi mieć 3 rzuty albo zakończyć lega.');
+            }
+
+            $session->cricket_state = $state;
+            $this->sessionRepository->incrementVersion($session);
+            $this->sessionRepository->save($session);
+
+            return $this->broadcastState($session->fresh(), $userId);
+        });
+    }
+
+    /**
      * @return array<string, mixed>
      */
     public function recordDart(
@@ -55,99 +120,31 @@ class QuickGameFfaCricketScoringService
         string $clientDartId,
     ): array {
         return DB::transaction(function () use ($lobbyId, $userId, $playerId, $kind, $segment, $multiplier, $clientDartId) {
-            $session = $this->sessionRepository->findOrFailForLobby($lobbyId);
-            $session->loadMissing('lobby');
-            $this->assertCricketSession($session);
+            [$session, $playerIds, $leftIds, $state, $playerIndex] = $this->beginCricketWrite(
+                $lobbyId,
+                $userId,
+                $playerId,
+            );
 
-            if (! $session->isInProgress()) {
-                throw new DomainException('Mecz jest już zakończony.');
-            }
-
-            $playerIds = array_map('intval', $session->player_order ?? []);
-            $leftIds = $this->presenceRepository->getLeftPlayerIds($session);
-
-            if (! in_array($playerId, $playerIds, true)) {
-                throw new DomainException('Gracz nie należy do tego meczu.');
-            }
-            $this->submitGuard->assert($session, $userId, $playerId);
-
-            $this->normalizeTurnIndices($session, $playerIds, $leftIds);
-
-            $currentPlayerId = (int) $playerIds[(int) $session->current_player_index];
-            if ($playerId !== $currentPlayerId) {
-                throw new DomainException('Teraz rzuca inny gracz.');
-            }
-
-            $state = $this->normalizeCricketState($session, $playerIds);
             foreach ($state['dartLog'] as $entry) {
                 if (($entry['clientDartId'] ?? null) === $clientDartId) {
                     return $this->broadcastState($session->fresh(), $userId);
                 }
             }
 
-            $playerIndex = array_search($playerId, $playerIds, true);
-            if ($playerIndex === false) {
-                throw new DomainException('Nieprawidłowy gracz.');
-            }
-            $playerIndex = (int) $playerIndex;
-
-            if ($kind === 'miss') {
-                $state['dartLog'][] = [
-                    'playerId' => $playerId,
-                    'kind' => 'miss',
-                    'dartsInVisitBefore' => (int) $state['dartsInVisit'],
-                    'clientDartId' => $clientDartId,
-                    'legNumber' => (int) $session->current_leg_number,
-                    'legOpenerIndex' => (int) $session->leg_opener_index,
-                    'currentPlayerIndex' => (int) $session->current_player_index,
-                    'boardsSnapshot' => $state['boards'],
-                    'legsWonSnapshot' => $session->legs_won_in_set,
-                ];
-                $this->advanceAfterDart($session, $state, $playerIds, $leftIds, null);
-            } else {
-                if ($segment === null || ! CricketRules::isValidSegment($segment)) {
-                    throw new DomainException('Nieprawidłowy segment.');
-                }
-                $mult = max(1, min(3, $multiplier));
-                if (CricketRules::segmentKey($segment) === 'bull' && $mult > 2) {
-                    throw new DomainException('Bull nie ma triple.');
-                }
-
-                $hitsList = [];
-                foreach ($playerIds as $i => $pid) {
-                    $hitsList[$i] = $state['boards'][(string) $pid]['hits'] ?? CricketRules::emptyHits();
-                }
-
-                $applied = CricketRules::applyDart($hitsList, $playerIndex, $segment, $mult);
-                $pidKey = (string) $playerId;
-                $pointsBefore = (int) ($state['boards'][$pidKey]['points'] ?? 0);
-
-                $state['dartLog'][] = [
-                    'playerId' => $playerId,
-                    'kind' => 'hit',
-                    'segment' => CricketRules::segmentKey($segment),
-                    'multiplier' => $mult,
-                    'pointsScored' => $applied['pointsScored'],
-                    'hitsBefore' => $state['boards'][$pidKey]['hits'],
-                    'pointsBefore' => $pointsBefore,
-                    'dartsInVisitBefore' => (int) $state['dartsInVisit'],
-                    'clientDartId' => $clientDartId,
-                    'legNumber' => (int) $session->current_leg_number,
-                    'legOpenerIndex' => (int) $session->leg_opener_index,
-                    'currentPlayerIndex' => (int) $session->current_player_index,
-                    'boardsSnapshot' => $state['boards'],
-                    'legsWonSnapshot' => $session->legs_won_in_set,
-                ];
-
-                $state['boards'][$pidKey] = [
-                    'hits' => $applied['hits'],
-                    'points' => $pointsBefore + $applied['pointsScored'],
-                ];
-
-                $boardsForWin = $this->boardsList($state, $playerIds);
-                $winnerIdx = CricketRules::findLegWinnerIndex($boardsForWin);
-                $this->advanceAfterDart($session, $state, $playerIds, $leftIds, $winnerIdx);
-            }
+            $this->applyDartToState(
+                $session,
+                $state,
+                $playerIds,
+                $leftIds,
+                $playerId,
+                $playerIndex,
+                $kind,
+                $segment,
+                $multiplier,
+                $clientDartId,
+                $clientDartId,
+            );
 
             $session->cricket_state = $state;
             $this->sessionRepository->incrementVersion($session);
@@ -158,6 +155,8 @@ class QuickGameFfaCricketScoringService
     }
 
     /**
+     * Cofa ostatnią wizytę (wszystkie lotki z tym samym clientVisitId) albo pojedynczy rzut legacy.
+     *
      * @return array<string, mixed>
      */
     public function undoLastDart(int $lobbyId, int $userId): array
@@ -179,13 +178,27 @@ class QuickGameFfaCricketScoringService
                 throw new DomainException('Brak rzutu do cofnięcia.');
             }
 
-            $last = array_pop($state['dartLog']);
-            $state['boards'] = $last['boardsSnapshot'] ?? $state['boards'];
-            $state['dartsInVisit'] = (int) ($last['dartsInVisitBefore'] ?? 0);
-            $session->legs_won_in_set = $last['legsWonSnapshot'] ?? $session->legs_won_in_set;
-            $session->current_leg_number = (int) ($last['legNumber'] ?? $session->current_leg_number);
-            $session->leg_opener_index = (int) ($last['legOpenerIndex'] ?? $session->leg_opener_index);
-            $session->current_player_index = (int) ($last['currentPlayerIndex'] ?? $session->current_player_index);
+            $last = $state['dartLog'][count($state['dartLog']) - 1];
+            $visitId = $last['clientVisitId'] ?? null;
+            $restore = $last;
+            if (is_string($visitId) && $visitId !== '') {
+                while ($state['dartLog'] !== []) {
+                    $peek = $state['dartLog'][count($state['dartLog']) - 1];
+                    if (($peek['clientVisitId'] ?? null) !== $visitId) {
+                        break;
+                    }
+                    $restore = array_pop($state['dartLog']);
+                }
+            } else {
+                $restore = array_pop($state['dartLog']);
+            }
+
+            $state['boards'] = $restore['boardsSnapshot'] ?? $state['boards'];
+            $state['dartsInVisit'] = (int) ($restore['dartsInVisitBefore'] ?? 0);
+            $session->legs_won_in_set = $restore['legsWonSnapshot'] ?? $session->legs_won_in_set;
+            $session->current_leg_number = (int) ($restore['legNumber'] ?? $session->current_leg_number);
+            $session->leg_opener_index = (int) ($restore['legOpenerIndex'] ?? $session->leg_opener_index);
+            $session->current_player_index = (int) ($restore['currentPlayerIndex'] ?? $session->current_player_index);
             $session->cricket_state = $state;
 
             $this->sessionRepository->incrementVersion($session);
@@ -381,6 +394,128 @@ class QuickGameFfaCricketScoringService
                     : 'in_progress',
             ],
         ];
+    }
+
+    /**
+     * @return array{0: QuickGameFfaSession, 1: list<int>, 2: list<int>, 3: array<string, mixed>, 4: int}
+     */
+    private function beginCricketWrite(int $lobbyId, int $userId, int $playerId): array
+    {
+        $session = $this->sessionRepository->findOrFailForLobby($lobbyId);
+        $session->loadMissing('lobby');
+        $this->assertCricketSession($session);
+
+        if (! $session->isInProgress()) {
+            throw new DomainException('Mecz jest już zakończony.');
+        }
+
+        $playerIds = array_map('intval', $session->player_order ?? []);
+        $leftIds = $this->presenceRepository->getLeftPlayerIds($session);
+
+        if (! in_array($playerId, $playerIds, true)) {
+            throw new DomainException('Gracz nie należy do tego meczu.');
+        }
+        $this->submitGuard->assert($session, $userId, $playerId);
+        $this->normalizeTurnIndices($session, $playerIds, $leftIds);
+
+        $currentPlayerId = (int) $playerIds[(int) $session->current_player_index];
+        if ($playerId !== $currentPlayerId) {
+            throw new DomainException('Teraz rzuca inny gracz.');
+        }
+
+        $playerIndex = array_search($playerId, $playerIds, true);
+        if ($playerIndex === false) {
+            throw new DomainException('Nieprawidłowy gracz.');
+        }
+
+        return [
+            $session,
+            $playerIds,
+            $leftIds,
+            $this->normalizeCricketState($session, $playerIds),
+            (int) $playerIndex,
+        ];
+    }
+
+    /**
+     * @param  list<int>  $playerIds
+     * @param  list<int>  $leftIds
+     * @param  array<string, mixed>  $state
+     */
+    private function applyDartToState(
+        QuickGameFfaSession $session,
+        array &$state,
+        array $playerIds,
+        array $leftIds,
+        int $playerId,
+        int $playerIndex,
+        string $kind,
+        mixed $segment,
+        int $multiplier,
+        string $clientDartId,
+        string $clientVisitId,
+    ): void {
+        if ($kind === 'miss') {
+            $state['dartLog'][] = [
+                'playerId' => $playerId,
+                'kind' => 'miss',
+                'dartsInVisitBefore' => (int) $state['dartsInVisit'],
+                'clientDartId' => $clientDartId,
+                'clientVisitId' => $clientVisitId,
+                'legNumber' => (int) $session->current_leg_number,
+                'legOpenerIndex' => (int) $session->leg_opener_index,
+                'currentPlayerIndex' => (int) $session->current_player_index,
+                'boardsSnapshot' => $state['boards'],
+                'legsWonSnapshot' => $session->legs_won_in_set,
+            ];
+            $this->advanceAfterDart($session, $state, $playerIds, $leftIds, null);
+
+            return;
+        }
+
+        if ($segment === null || ! CricketRules::isValidSegment($segment)) {
+            throw new DomainException('Nieprawidłowy segment.');
+        }
+        $mult = max(1, min(3, $multiplier));
+        if (CricketRules::segmentKey($segment) === 'bull' && $mult > 2) {
+            throw new DomainException('Bull nie ma triple.');
+        }
+
+        $hitsList = [];
+        foreach ($playerIds as $i => $pid) {
+            $hitsList[$i] = $state['boards'][(string) $pid]['hits'] ?? CricketRules::emptyHits();
+        }
+
+        $applied = CricketRules::applyDart($hitsList, $playerIndex, $segment, $mult);
+        $pidKey = (string) $playerId;
+        $pointsBefore = (int) ($state['boards'][$pidKey]['points'] ?? 0);
+
+        $state['dartLog'][] = [
+            'playerId' => $playerId,
+            'kind' => 'hit',
+            'segment' => CricketRules::segmentKey($segment),
+            'multiplier' => $mult,
+            'pointsScored' => $applied['pointsScored'],
+            'hitsBefore' => $state['boards'][$pidKey]['hits'],
+            'pointsBefore' => $pointsBefore,
+            'dartsInVisitBefore' => (int) $state['dartsInVisit'],
+            'clientDartId' => $clientDartId,
+            'clientVisitId' => $clientVisitId,
+            'legNumber' => (int) $session->current_leg_number,
+            'legOpenerIndex' => (int) $session->leg_opener_index,
+            'currentPlayerIndex' => (int) $session->current_player_index,
+            'boardsSnapshot' => $state['boards'],
+            'legsWonSnapshot' => $session->legs_won_in_set,
+        ];
+
+        $state['boards'][$pidKey] = [
+            'hits' => $applied['hits'],
+            'points' => $pointsBefore + $applied['pointsScored'],
+        ];
+
+        $boardsForWin = $this->boardsList($state, $playerIds);
+        $winnerIdx = CricketRules::findLegWinnerIndex($boardsForWin);
+        $this->advanceAfterDart($session, $state, $playerIds, $leftIds, $winnerIdx);
     }
 
     private function assertCricketSession(QuickGameFfaSession $session): void

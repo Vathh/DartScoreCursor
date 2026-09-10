@@ -42,7 +42,7 @@ class QuickGameFfaCricketApiTest extends TestCase
         $this->postJson('/api/friends/add', ['friendId' => $this->friend->id])->assertCreated();
     }
 
-    public function test_cricket_start_and_dart_sync(): void
+    public function test_cricket_start_and_visit_sync(): void
     {
         $lobbyId = $this->startCricketLobby('each_own');
 
@@ -57,40 +57,99 @@ class QuickGameFfaCricketApiTest extends TestCase
             ->assertJsonPath('turn.dartsInVisit', 0);
 
         Sanctum::actingAs($this->host);
-        $this->postJson("/api/quick-game/lobby/{$lobbyId}/ffa/cricket/darts", [
+        $this->postJson("/api/quick-game/lobby/{$lobbyId}/ffa/cricket/visits", [
             'playerId' => $this->hostPlayer->id,
-            'kind' => 'hit',
-            'segment' => '20',
-            'multiplier' => 3,
-            'clientDartId' => (string) Str::uuid(),
+            'clientVisitId' => (string) Str::uuid(),
+            'darts' => [
+                [
+                    'kind' => 'hit',
+                    'segment' => '20',
+                    'multiplier' => 3,
+                    'clientDartId' => (string) Str::uuid(),
+                ],
+                ['kind' => 'miss', 'clientDartId' => (string) Str::uuid()],
+                ['kind' => 'miss', 'clientDartId' => (string) Str::uuid()],
+            ],
         ])
             ->assertOk()
             ->assertJsonPath('players.0.hits.20', 3)
-            ->assertJsonPath('turn.dartsInVisit', 1);
+            ->assertJsonPath('turn.dartsInVisit', 0)
+            ->assertJsonPath('session.currentPlayerIndex', 1);
 
-        $this->postJson("/api/quick-game/lobby/{$lobbyId}/ffa/cricket/darts/undo")
+        Sanctum::actingAs($this->friend);
+        $this->getJson("/api/quick-game/lobby/{$lobbyId}/ffa/state")
+            ->assertOk()
+            ->assertJsonPath('you.canInput', true)
+            ->assertJsonPath('you.myPlayerIndex', 1)
+            ->assertJsonPath('session.currentPlayerIndex', 1);
+
+        Sanctum::actingAs($this->host);
+        $this->postJson("/api/quick-game/lobby/{$lobbyId}/ffa/cricket/visits/undo")
             ->assertOk()
             ->assertJsonPath('players.0.hits.20', 0)
-            ->assertJsonPath('turn.dartsInVisit', 0);
+            ->assertJsonPath('turn.dartsInVisit', 0)
+            ->assertJsonPath('session.currentPlayerIndex', 0);
     }
 
-    public function test_cricket_miss_rotates_after_three_darts(): void
+    public function test_cricket_miss_visit_rotates_after_three_darts(): void
     {
         $lobbyId = $this->startCricketLobby('each_own');
 
-        for ($i = 0; $i < 3; $i++) {
-            Sanctum::actingAs($this->host);
-            $this->postJson("/api/quick-game/lobby/{$lobbyId}/ffa/cricket/darts", [
-                'playerId' => $this->hostPlayer->id,
-                'kind' => 'miss',
-                'clientDartId' => (string) Str::uuid(),
-            ])->assertOk();
-        }
+        Sanctum::actingAs($this->host);
+        $this->postJson("/api/quick-game/lobby/{$lobbyId}/ffa/cricket/visits", [
+            'playerId' => $this->hostPlayer->id,
+            'clientVisitId' => (string) Str::uuid(),
+            'darts' => [
+                ['kind' => 'miss', 'clientDartId' => (string) Str::uuid()],
+                ['kind' => 'miss', 'clientDartId' => (string) Str::uuid()],
+                ['kind' => 'miss', 'clientDartId' => (string) Str::uuid()],
+            ],
+        ])->assertOk();
 
         $this->getJson("/api/quick-game/lobby/{$lobbyId}/ffa/state")
             ->assertOk()
             ->assertJsonPath('session.currentPlayerIndex', 1)
             ->assertJsonPath('turn.dartsInVisit', 0);
+    }
+
+    public function test_incomplete_cricket_visit_rejected(): void
+    {
+        $lobbyId = $this->startCricketLobby('each_own');
+
+        Sanctum::actingAs($this->host);
+        $this->postJson("/api/quick-game/lobby/{$lobbyId}/ffa/cricket/visits", [
+            'playerId' => $this->hostPlayer->id,
+            'clientVisitId' => (string) Str::uuid(),
+            'darts' => [
+                ['kind' => 'miss', 'clientDartId' => (string) Str::uuid()],
+            ],
+        ])
+            ->assertStatus(422)
+            ->assertJsonPath('message', 'Wizyta krykieta musi mieć 3 rzuty albo zakończyć lega.');
+    }
+
+    public function test_cricket_broadcast_omits_viewer_you(): void
+    {
+        \Illuminate\Support\Facades\Event::fake([\App\Events\QuickGameFfaStateUpdated::class]);
+
+        $lobbyId = $this->startCricketLobby('each_own');
+
+        Sanctum::actingAs($this->host);
+        $this->postJson("/api/quick-game/lobby/{$lobbyId}/ffa/cricket/visits", [
+            'playerId' => $this->hostPlayer->id,
+            'clientVisitId' => (string) Str::uuid(),
+            'darts' => [
+                ['kind' => 'miss', 'clientDartId' => (string) Str::uuid()],
+                ['kind' => 'miss', 'clientDartId' => (string) Str::uuid()],
+                ['kind' => 'miss', 'clientDartId' => (string) Str::uuid()],
+            ],
+        ])->assertOk();
+
+        \Illuminate\Support\Facades\Event::assertDispatched(
+            \App\Events\QuickGameFfaStateUpdated::class,
+            fn ($event) => ! array_key_exists('you', $event->state)
+                && ($event->state['session']['currentPlayerIndex'] ?? null) === 1,
+        );
     }
 
     public function test_cricket_x01_visits_rejected(): void
@@ -133,12 +192,17 @@ class QuickGameFfaCricketApiTest extends TestCase
         $session->save();
 
         // Rzut po stanie wygrywającym — serwer wykrywa koniec lega/meczu.
-        $this->postJson("/api/quick-game/lobby/{$lobbyId}/ffa/cricket/darts", [
+        $this->postJson("/api/quick-game/lobby/{$lobbyId}/ffa/cricket/visits", [
             'playerId' => $this->hostPlayer->id,
-            'kind' => 'hit',
-            'segment' => '20',
-            'multiplier' => 1,
-            'clientDartId' => (string) Str::uuid(),
+            'clientVisitId' => (string) Str::uuid(),
+            'darts' => [
+                [
+                    'kind' => 'hit',
+                    'segment' => '20',
+                    'multiplier' => 1,
+                    'clientDartId' => (string) Str::uuid(),
+                ],
+            ],
         ])
             ->assertOk()
             ->assertJsonPath('game.status', 'finished')

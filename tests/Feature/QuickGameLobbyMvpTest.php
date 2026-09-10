@@ -192,11 +192,17 @@ class QuickGameLobbyMvpTest extends TestCase
             'playerId' => $this->friendPlayer->id,
         ])->assertOk();
 
+        $this->getJson("/api/quick-game/lobby/{$lobbyId}")
+            ->assertOk()
+            ->assertJsonCount(1, 'pendingInvites')
+            ->assertJsonPath('pendingInvites.0.id', $this->friendPlayer->id);
+
         Sanctum::actingAs($this->friend);
         $join = $this->postJson("/api/quick-game/lobby/{$lobbyId}/join");
 
         $join->assertOk()
-            ->assertJsonCount(2, 'players');
+            ->assertJsonCount(2, 'players')
+            ->assertJsonCount(0, 'pendingInvites');
     }
 
     public function test_can_reinvite_after_rejection(): void
